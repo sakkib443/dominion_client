@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { ReduxProvider } from "@/redux";
+import FloatingContact from "@/components/shared/FloatingContact";
 
 export const metadata: Metadata = {
   title: "Mega Ecommerce - Best Online Shopping Experience",
@@ -26,6 +27,7 @@ export default function RootLayout({
         <ReduxProvider>
           <Toaster position="top-center" reverseOrder={false} />
           {children}
+          <FloatingContact />
         </ReduxProvider>
       </body>
     </html>

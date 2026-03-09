@@ -249,6 +249,10 @@ h6 {
   animation: bounce 1s infinite;
 }
 
+.animate-bounce-slow {
+  animation: bounce 3s ease-in-out infinite;
+}
+
 /* ===== Marquee Animation ===== */
 @keyframes marquee {
   0% {
