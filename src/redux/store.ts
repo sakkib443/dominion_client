@@ -7,6 +7,7 @@ import {
     productReducer,
     uiReducer
 } from './slices';
+import imageSearchReducer from './slices/imageSearchSlice';
 
 import { baseApi } from './api/baseApi';
 
@@ -18,6 +19,7 @@ const rootReducer = combineReducers({
     theme: themeReducer,
     products: productReducer,
     ui: uiReducer,
+    imageSearch: imageSearchReducer,
 });
 
 export const store = configureStore({

@@ -64,6 +64,13 @@ export const productApi = baseApi.injectEndpoints({
             }),
             invalidatesTags: ['Products'],
         }),
+        imageSearch: builder.mutation({
+            query: (data: { labels: string[]; colors: string[]; colorHexes?: string[]; keywords?: string[] }) => ({
+                url: '/search/image',
+                method: 'POST',
+                body: data,
+            }),
+        }),
     }),
 });
 
@@ -77,4 +84,5 @@ export const {
     useUpdateStockMutation,
     useBulkUpdateStatusMutation,
     useBulkDeleteMutation,
+    useImageSearchMutation,
 } = productApi;

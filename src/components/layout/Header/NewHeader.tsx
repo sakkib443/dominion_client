@@ -3,9 +3,11 @@
 import React, { useState, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { FiShoppingCart, FiCamera, FiChevronDown, FiSearch, FiMenu, FiX, FiUpload } from 'react-icons/fi';
-import { useAppSelector } from '@/redux';
+import { useAppSelector, useAppDispatch } from '@/redux';
 import { useGetCategoriesQuery } from '@/redux/api/categoryApi';
+import { setImageSearching, setImageSearchResults, clearImageSearch } from '@/redux/slices/imageSearchSlice';
 
 interface Category {
     _id: string;
@@ -27,6 +29,8 @@ const NewHeader: React.FC = () => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const dropZoneRef = useRef<HTMLDivElement>(null);
     const cartItems = useAppSelector((state) => state.cart.items);
+    const dispatch = useAppDispatch();
+    const router = useRouter();
 
     const { data: categoriesData } = useGetCategoriesQuery({});
     const categories: Category[] = categoriesData?.data || [];
@@ -43,13 +47,56 @@ const NewHeader: React.FC = () => {
         }, 150);
     };
 
-    const handleImageUpload = useCallback((file: File) => {
+    const handleImageUpload = useCallback(async (file: File) => {
         const imageUrl = URL.createObjectURL(file);
         setSelectedImage(imageUrl);
         setIsImageSearchOpen(false);
         setIsSearching(true);
-        setTimeout(() => setIsSearching(false), 1500);
-    }, []);
+        dispatch(setImageSearching(true));
+
+        try {
+            // Step 1: Analyze image in browser using TensorFlow.js MobileNet + Color extraction
+            const { analyzeImage } = await import('@/utils/imageSearch');
+            const analysis = await analyzeImage(file);
+
+            // Step 2: Send analyzed data to backend for product matching
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/search/image`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    labels: analysis.labels,
+                    colors: analysis.colors.map(c => c.name),
+                    colorHexes: analysis.colors.map(c => c.hex),
+                    keywords: analysis.keywords,
+                }),
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Dispatch results to Redux — homepage will display them
+                dispatch(setImageSearchResults({
+                    products: data.data.products,
+                    searchMeta: {
+                        ...data.data.searchMeta,
+                        colors: analysis.colors,
+                    },
+                    previewImage: imageUrl,
+                }));
+
+                // Navigate to homepage if not already there
+                router.push('/');
+            } else {
+                console.error('Image search failed:', data.message);
+                dispatch(setImageSearching(false));
+            }
+        } catch (error) {
+            console.error('Image search error:', error);
+            dispatch(setImageSearching(false));
+        } finally {
+            setIsSearching(false);
+        }
+    }, [dispatch, router]);
 
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
