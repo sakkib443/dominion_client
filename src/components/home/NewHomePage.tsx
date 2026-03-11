@@ -6,7 +6,7 @@ import NewProductCard from '@/components/shared/NewProductCard';
 import { useGetProductsQuery } from '@/redux/api/productApi';
 import { useGetCategoriesQuery } from '@/redux/api/categoryApi';
 import { useAppSelector, useAppDispatch } from '@/redux';
-import { clearImageSearch } from '@/redux/slices/imageSearchSlice';
+import { clearImageSearch, loadSearchHistoryFromStorage } from '@/redux/slices/imageSearchSlice';
 import { FiX, FiCamera, FiSearch } from 'react-icons/fi';
 
 const LIMIT = 20;
@@ -22,6 +22,11 @@ const NewHomePage: React.FC = () => {
 
     // Image search state from Redux
     const imageSearch = useAppSelector((state) => state.imageSearch);
+
+    // Load search history from localStorage on mount
+    useEffect(() => {
+        dispatch(loadSearchHistoryFromStorage());
+    }, [dispatch]);
 
     useEffect(() => {
         const cat = searchParams.get('category') || '';
@@ -80,13 +85,71 @@ const NewHomePage: React.FC = () => {
         }
     };
 
+    // ── Personalized sorting: boost products matching search history ──
+    const sortByRelevance = (products: any[]) => {
+        const history = imageSearch.lastSearchHistory;
+        if (!history || (history.labels.length === 0 && history.colors.length === 0)) {
+            return products;
+        }
+
+        return [...products].sort((a, b) => {
+            const scoreA = getRelevanceScore(a, history);
+            const scoreB = getRelevanceScore(b, history);
+            // Higher relevance first, then keep original order
+            return scoreB - scoreA;
+        });
+    };
+
+    // Calculate how relevant a product is to the search history
+    const getRelevanceScore = (product: any, history: { labels: string[]; colors: string[]; category: string | null; brand: string | null }) => {
+        let score = 0;
+        const productTags = (product.tags || []).map((t: string) => t.toLowerCase());
+        const productColors = (product.colors || []).map((c: string) => c.toLowerCase());
+        const productAiLabels = (product.aiLabels || []).map((l: string) => l.toLowerCase());
+        const productName = (product.name || '').toLowerCase();
+        const productBrand = (product.brand || '').toLowerCase();
+        const productCategoryName = (product.category?.name || '').toLowerCase();
+
+        // Match labels against tags & aiLabels
+        for (const label of history.labels) {
+            const lowerLabel = label.toLowerCase();
+            if (productTags.some((t: string) => t.includes(lowerLabel) || lowerLabel.includes(t))) score += 10;
+            if (productAiLabels.some((l: string) => l.includes(lowerLabel) || lowerLabel.includes(l))) score += 8;
+            if (productName.includes(lowerLabel)) score += 5;
+        }
+
+        // Match colors
+        for (const color of history.colors) {
+            const lowerColor = color.toLowerCase();
+            if (productColors.some((c: string) => c.includes(lowerColor) || lowerColor.includes(c))) score += 7;
+        }
+
+        // Match category
+        if (history.category && productCategoryName.includes(history.category.toLowerCase())) {
+            score += 15;
+        }
+
+        // Match brand
+        if (history.brand && productBrand.includes(history.brand.toLowerCase())) {
+            score += 12;
+        }
+
+        return score;
+    };
+
     // ── Determine which products to display ─────────────────────────
     const displayProducts = useMemo(() => {
         if (imageSearch.isActive && imageSearch.products.length > 0) {
             return imageSearch.products;
         }
-        return accumulatedProducts;
-    }, [imageSearch.isActive, imageSearch.products, accumulatedProducts]);
+        // Apply personalized sorting based on search history
+        return sortByRelevance(accumulatedProducts);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [imageSearch.isActive, imageSearch.products, accumulatedProducts, imageSearch.lastSearchHistory]);
+
+    // Check if personalized ordering is active
+    const hasSearchHistory = imageSearch.lastSearchHistory &&
+        (imageSearch.lastSearchHistory.labels.length > 0 || imageSearch.lastSearchHistory.colors.length > 0);
 
     // Get the selected category name
     const selectedCategoryName = useMemo(() => {
@@ -175,6 +238,26 @@ const NewHomePage: React.FC = () => {
                         <div className="w-12 h-12 border-4 border-[#0B4222]/20 border-t-[#0B4222] rounded-full animate-spin mx-auto mb-4" />
                         <h3 className="text-lg font-bold text-gray-800 mb-1">Analyzing your image...</h3>
                         <p className="text-sm text-gray-500">Using AI to identify products and colors</p>
+                    </div>
+                )}
+
+                {/* ── Personalized Banner (shown when search history is active but not in image search mode) ── */}
+                {!imageSearch.isActive && hasSearchHistory && !selectedCategory && (
+                    <div className="mb-4 bg-gradient-to-r from-[#0B4222]/5 to-[#0B4222]/10 border border-[#0B4222]/15 rounded-xl px-5 py-3 flex items-center justify-between animate-fadeIn">
+                        <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-lg bg-[#0B4222]/10 flex items-center justify-center">
+                                <FiSearch size={14} className="text-[#0B4222]" />
+                            </div>
+                            <div>
+                                <p className="text-sm font-medium text-gray-700">
+                                    Showing related products first based on your recent search
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                    {imageSearch.lastSearchHistory?.labels?.slice(0, 4).join(', ')}
+                                    {imageSearch.lastSearchHistory?.colors?.length ? ` • ${imageSearch.lastSearchHistory.colors.slice(0, 3).join(', ')}` : ''}
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 )}
 
