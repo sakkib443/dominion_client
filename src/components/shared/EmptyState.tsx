@@ -16,7 +16,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
     title,
     description,
     buttonText = 'Continue Shopping',
-    buttonLink = '/shop',
+    buttonLink = '/',
     icon = <FiShoppingBag size={48} />
 }) => {
     return (

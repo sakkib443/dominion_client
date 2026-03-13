@@ -19,7 +19,7 @@ const SuccessPage = () => {
 
                 <div className="space-y-4">
                     <Link
-                        href="/shop"
+                        href="/"
                         className="w-full flex items-center justify-center gap-3 py-4 bg-gray-900 text-white rounded-md font-bold text-sm tracking-widest hover:bg-[var(--color-primary)] transition-all shadow-xl shadow-gray-200 hover:shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] group"
                     >
                         Continue Shopping

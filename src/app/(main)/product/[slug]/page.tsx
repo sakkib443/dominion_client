@@ -3,14 +3,14 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { FiHeart, FiShoppingCart, FiMinus, FiPlus, FiCheckCircle, FiStar, FiPackage, FiTruck, FiShield, FiX, FiZoomIn } from 'react-icons/fi';
-import { FaFacebookF, FaTwitter, FaPinterestP, FaWhatsapp } from 'react-icons/fa';
-import { useGetProductByIdQuery } from '@/redux/api/productApi';
+import { FiHeart, FiShoppingCart, FiMinus, FiPlus, FiCheckCircle, FiStar, FiPackage, FiTruck, FiShield, FiX, FiZoomIn, FiCopy, FiShare2, FiDownload, FiThumbsUp } from 'react-icons/fi';
+import { FaFacebookF, FaTwitter, FaPinterestP, FaWhatsapp, FaTiktok, FaInstagram } from 'react-icons/fa';
+import { useGetProductBySlugQuery } from '@/redux/api/productApi';
 import { useAppDispatch } from '@/redux';
 import { addToCart } from '@/redux/slices/cartSlice';
 
 export default function ProductDetailsPage() {
-    const { id } = useParams();
+    const { slug } = useParams();
     const dispatch = useAppDispatch();
     const [quantity, setQuantity] = useState(1);
     const [activeTab, setActiveTab] = useState('overview');
@@ -18,8 +18,14 @@ export default function ProductDetailsPage() {
     const [isWishlisted, setIsWishlisted] = useState(false);
     const [addedToCart, setAddedToCart] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
+    const [linkCopied, setLinkCopied] = useState(false);
+    const [isLiked, setIsLiked] = useState(false);
+    const [likeCount, setLikeCount] = useState(0);
+    const [selectedColor, setSelectedColor] = useState<string>('');
+    const [selectedSize, setSelectedSize] = useState<string>('');
+    const [selectedWeight, setSelectedWeight] = useState<string>('');
 
-    const { data: productData, isLoading, isError } = useGetProductByIdQuery(id as string, { skip: !id });
+    const { data: productData, isLoading, isError } = useGetProductBySlugQuery(slug as string, { skip: !slug });
     const product = productData?.data;
 
     const handleAddToCart = () => {
@@ -141,11 +147,83 @@ export default function ProductDetailsPage() {
                 </div>
             </div>
 
-            <div className="w-[96%] mx-auto py-4">
-                <div className="flex flex-col lg:flex-row gap-5 lg:h-[calc(100vh-120px)]">
+            {/* ── Product Name + Stats Bar ── */}
+            <div className="bg-white border-b border-gray-100 shadow-sm">
+                <div className="container mx-auto px-4 py-3">
+                    {/* Product Name */}
+                    <h1 className="text-xl sm:text-2xl font-bold text-gray-900 leading-tight mb-1">{product.name}</h1>
+                    {product.brand && (
+                        <p className="text-xs text-[#E4525C] font-semibold mb-3">Guarantee/Warranty/Others</p>
+                    )}
+
+                    {/* Stats + Social Row */}
+                    <div className="flex items-center justify-between flex-wrap gap-y-2">
+                        {/* Left: Stats */}
+                        <div className="flex items-center gap-4 text-xs text-gray-500">
+                            <div className="flex items-center gap-1.5 bg-gray-50 px-3 py-1.5 rounded-full">
+                                <FiShoppingCart size={12} className="text-[#0B4222]" />
+                                <span className="font-semibold text-gray-700">{product.soldCount || 0}</span>
+                                <span>Sold</span>
+                            </div>
+                            <div className="flex items-center gap-1.5 bg-gray-50 px-3 py-1.5 rounded-full">
+                                <FiStar size={12} className="text-amber-400 fill-amber-400" />
+                                <span className="font-semibold text-gray-700">{product.rating?.toFixed(1) || '0.0'}</span>
+                                <span>Ratings</span>
+                            </div>
+                            <button
+                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-colors ${isLiked ? 'bg-red-50 text-red-500' : 'bg-gray-50 hover:bg-[#0B4222]/10 text-gray-500'}`}
+                                onClick={() => {
+                                    setIsLiked(!isLiked);
+                                    setLikeCount(prev => isLiked ? prev - 1 : prev + 1);
+                                }}
+                            >
+                                <FiThumbsUp size={12} className={isLiked ? 'text-red-500 fill-red-500' : 'text-[#0B4222]'} />
+                                <span className="font-semibold">{likeCount} Like</span>
+                            </button>
+                            <button
+                                className="flex items-center gap-1.5 bg-gray-50 hover:bg-[#0B4222]/10 px-3 py-1.5 rounded-full transition-colors"
+                                onClick={() => {
+                                    navigator.clipboard.writeText(window.location.href);
+                                    setLinkCopied(true);
+                                    setTimeout(() => setLinkCopied(false), 2000);
+                                }}
+                            >
+                                <FiCopy size={12} className="text-[#0B4222]" />
+                                <span className="font-semibold">{linkCopied ? 'Copied!' : 'Copy Link'}</span>
+                            </button>
+                        </div>
+
+                        {/* Right: Social Share Icons */}
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm font-normal text-gray-500 mr-1">Share :</span>
+                            <a href={`https://www.facebook.com/sharer/sharer.php?u=${typeof window !== 'undefined' ? encodeURIComponent(window.location.href) : ''}`} target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-gray-100 hover:bg-blue-600 text-gray-500 hover:text-white flex items-center justify-center transition-all duration-300" title="Facebook">
+                                <FaFacebookF size={14} />
+                            </a>
+                            <a href={`https://api.whatsapp.com/send?text=${typeof window !== 'undefined' ? encodeURIComponent(product.name + ' - ' + window.location.href) : ''}`} target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-gray-100 hover:bg-green-500 text-gray-500 hover:text-white flex items-center justify-center transition-all duration-300" title="WhatsApp">
+                                <FaWhatsapp size={15} />
+                            </a>
+                            <a href="https://www.tiktok.com" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-900 text-gray-500 hover:text-white flex items-center justify-center transition-all duration-300" title="TikTok">
+                                <FaTiktok size={14} />
+                            </a>
+                            <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-gray-100 hover:bg-gradient-to-br hover:from-purple-600 hover:to-pink-500 text-gray-500 hover:text-white flex items-center justify-center transition-all duration-300" title="Instagram">
+                                <FaInstagram size={15} />
+                            </a>
+                            <a href={`https://twitter.com/intent/tweet?url=${typeof window !== 'undefined' ? encodeURIComponent(window.location.href) : ''}&text=${encodeURIComponent(product.name)}`} target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-900 text-gray-500 hover:text-white flex items-center justify-center transition-all duration-300" title="X">
+                                <FaTwitter size={14} />
+                            </a>
+                            <a href={allImages[0]} download className="w-9 h-9 rounded-full bg-gray-100 hover:bg-[#0B4222] text-gray-500 hover:text-white flex items-center justify-center transition-all duration-300" title="Download Image">
+                                <FiDownload size={15} />
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div className="container mx-auto px-4 py-3">
+                <div className="flex flex-col lg:flex-row gap-5 lg:h-[calc(100vh-260px)]">
 
                     {/* ═══ LEFT: Image Gallery (Square, Optimized) ═══ */}
-                    <div className="w-full lg:w-[55%] flex gap-3 lg:h-full h-[50vh] min-h-[400px]">
+                    <div className="w-full lg:w-[50%] flex gap-3 lg:h-full h-[45vh] min-h-[350px]">
                         {/* Thumbnails column */}
                         {allImages.length > 1 && (
                             <div className="flex flex-col gap-2.5 overflow-y-auto no-scrollbar h-full flex-shrink-0">
@@ -169,7 +247,7 @@ export default function ProductDetailsPage() {
                             <img
                                 src={allImages[selectedImage] || allImages[0]}
                                 alt={product.name}
-                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+                                className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-[1.02]"
                                 onError={(e) => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/600x600/f3f4f6/9ca3af?text=No+Image'; }}
                             />
 
@@ -195,7 +273,7 @@ export default function ProductDetailsPage() {
                     </div>
 
                     {/* ═══ RIGHT: Product Info + Fixed Tabs at Bottom ═══ */}
-                    <div className="w-full lg:w-[45%] lg:h-full flex flex-col bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div className="w-full lg:w-[50%] lg:h-full flex flex-col bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
 
                         {/* ── Scrollable Content Area (above tabs) ── */}
                         <div className="flex-1 overflow-y-auto custom-scrollbar p-5 sm:p-6">
@@ -209,9 +287,6 @@ export default function ProductDetailsPage() {
                                             {product.category.name}
                                         </Link>
                                     )}
-
-                                    {/* Name */}
-                                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 leading-tight">{product.name}</h1>
 
                                     {/* Rating & Stock */}
                                     <div className="flex flex-wrap items-center gap-3 text-xs bg-gray-50 px-3 py-2 rounded-lg w-max mb-5">
@@ -242,31 +317,95 @@ export default function ProductDetailsPage() {
                                         <p className="text-gray-600 text-sm leading-relaxed mb-5">{product.shortDescription}</p>
                                     )}
 
-                                    {/* Colors */}
-                                    {product.colors?.length > 0 && (
-                                        <div className="mb-4">
-                                            <span className="text-xs font-bold text-gray-900 block mb-2">Available Colors:</span>
-                                            <div className="inline-flex flex-wrap gap-1.5">
-                                                {product.colors.map((color: string, idx: number) => (
-                                                    <button key={idx} className="px-3 py-1 text-[11px] font-medium border-2 border-gray-200 rounded bg-white text-gray-700 capitalize hover:border-gray-400 transition-colors">
-                                                        {color}
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
+                                    {/* ── Product Variations ── */}
+                                    <div className="mb-5 space-y-4">
 
-                                    {/* Tags */}
-                                    {product.tags?.length > 0 && (
-                                        <div className="mb-5">
-                                            <span className="text-xs font-bold text-gray-900 block mb-2">Tags:</span>
-                                            <div className="inline-flex flex-wrap gap-1">
-                                                {product.tags.slice(0, 6).map((tag: string, idx: number) => (
-                                                    <span key={idx} className="px-2 py-0.5 text-[10px] bg-gray-100 text-gray-600 font-medium rounded">{tag}</span>
-                                                ))}
+                                        {/* Color Selector */}
+                                        {product.colors?.length > 0 && (
+                                            <div>
+                                                <div className="flex items-center gap-2 mb-2.5">
+                                                    <span className="text-xs font-bold text-gray-900 uppercase tracking-wider">Color</span>
+                                                    {selectedColor && (
+                                                        <span className="text-xs text-[#0B4222] font-medium capitalize">— {selectedColor}</span>
+                                                    )}
+                                                </div>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {product.colors.map((color: string, idx: number) => (
+                                                        <button
+                                                            key={idx}
+                                                            onClick={() => setSelectedColor(selectedColor === color ? '' : color)}
+                                                            className={`group relative px-4 py-2 text-xs font-semibold rounded-lg capitalize transition-all duration-200 ${
+                                                                selectedColor === color
+                                                                    ? 'bg-[#0B4222] text-white border-2 border-[#0B4222] shadow-md'
+                                                                    : 'bg-white text-gray-700 border-2 border-gray-200 hover:border-[#0B4222]/50 hover:shadow-sm'
+                                                            }`}
+                                                        >
+                                                            <span className="flex items-center gap-1.5">
+                                                                <span className={`w-3 h-3 rounded-full border ${
+                                                                    selectedColor === color ? 'border-white/50' : 'border-gray-300'
+                                                                }`} style={{ backgroundColor: color.toLowerCase() === 'white' ? '#f5f5f5' : color.toLowerCase() }} />
+                                                                {color}
+                                                            </span>
+                                                        </button>
+                                                    ))}
+                                                </div>
                                             </div>
-                                        </div>
-                                    )}
+                                        )}
+
+                                        {/* Size Selector */}
+                                        {product.sizes?.length > 0 && (
+                                            <div>
+                                                <div className="flex items-center gap-2 mb-2.5">
+                                                    <span className="text-xs font-bold text-gray-900 uppercase tracking-wider">Size</span>
+                                                    {selectedSize && (
+                                                        <span className="text-xs text-[#0B4222] font-medium">— {selectedSize}</span>
+                                                    )}
+                                                </div>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {product.sizes.map((size: string, idx: number) => (
+                                                        <button
+                                                            key={idx}
+                                                            onClick={() => setSelectedSize(selectedSize === size ? '' : size)}
+                                                            className={`min-w-[44px] h-10 px-3 text-xs font-bold rounded-lg uppercase transition-all duration-200 ${
+                                                                selectedSize === size
+                                                                    ? 'bg-[#0B4222] text-white border-2 border-[#0B4222] shadow-md'
+                                                                    : 'bg-white text-gray-700 border-2 border-gray-200 hover:border-[#0B4222]/50 hover:shadow-sm'
+                                                            }`}
+                                                        >
+                                                            {size}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Weight Selector */}
+                                        {product.weights?.length > 0 && (
+                                            <div>
+                                                <div className="flex items-center gap-2 mb-2.5">
+                                                    <span className="text-xs font-bold text-gray-900 uppercase tracking-wider">Weight</span>
+                                                    {selectedWeight && (
+                                                        <span className="text-xs text-[#0B4222] font-medium">— {selectedWeight}</span>
+                                                    )}
+                                                </div>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {product.weights.map((weight: string, idx: number) => (
+                                                        <button
+                                                            key={idx}
+                                                            onClick={() => setSelectedWeight(selectedWeight === weight ? '' : weight)}
+                                                            className={`px-4 py-2 text-xs font-semibold rounded-lg transition-all duration-200 ${
+                                                                selectedWeight === weight
+                                                                    ? 'bg-[#0B4222] text-white border-2 border-[#0B4222] shadow-md'
+                                                                    : 'bg-white text-gray-700 border-2 border-gray-200 hover:border-[#0B4222]/50 hover:shadow-sm'
+                                                            }`}
+                                                        >
+                                                            {weight}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
 
                                     {/* Action buttons */}
                                     <div className="bg-gray-50 p-4 rounded-xl mb-5 border border-gray-100">
@@ -309,22 +448,7 @@ export default function ProductDetailsPage() {
                                         </div>
                                     </div>
 
-                                    {/* Share */}
-                                    <div className="mt-6 pt-4 border-t border-gray-100 flex items-center justify-between">
-                                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Share</span>
-                                        <div className="flex items-center gap-1.5">
-                                            {[
-                                                { Icon: FaFacebookF, color: 'hover:bg-blue-600 hover:text-white text-gray-400 bg-gray-100' },
-                                                { Icon: FaTwitter, color: 'hover:bg-sky-500 hover:text-white text-gray-400 bg-gray-100' },
-                                                { Icon: FaWhatsapp, color: 'hover:bg-green-500 hover:text-white text-gray-400 bg-gray-100' },
-                                                { Icon: FaPinterestP, color: 'hover:bg-red-600 hover:text-white text-gray-400 bg-gray-100' },
-                                            ].map(({ Icon, color }, i) => (
-                                                <button key={i} className={`w-8 h-8 rounded-full ${color} flex items-center justify-center transition-all duration-300`}>
-                                                    <Icon size={12} />
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
+
                                 </div>
                             )}
 

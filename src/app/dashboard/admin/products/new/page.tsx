@@ -47,13 +47,13 @@ const ProductFormInner = () => {
         description: '',
         shortDescription: '',
         price: 0,
-        comparePrice: 0,
+        originalPrice: 0,
         costPrice: 0,
         sku: '',
-        quantity: 0,
+        stock: 0,
         lowStockThreshold: 5,
         category: '',
-        subCategory: '',
+        subcategory: '',
         brand: '',
         status: 'active',
         visibility: 'visible',
@@ -65,18 +65,16 @@ const ProductFormInner = () => {
         tags: [],
         highlights: [],
         specifications: [],
-        seo: {
-            metaTitle: '',
-            metaDescription: '',
-            metaKeywords: []
-        },
+        metaTitle: '',
+        metaDescription: '',
+        metaKeywords: [],
         warranty: {
             hasWarranty: false,
             duration: 0,
             durationUnit: 'months',
             type: 'manufacturer'
         },
-        shipping: {
+        shippingConfig: {
             freeShipping: false,
             shippingCost: 0,
             estimatedDays: 3
@@ -91,10 +89,12 @@ const ProductFormInner = () => {
                 ...formData,
                 ...prod,
                 category: prod.category?._id || prod.category,
-                subCategory: prod.subCategory?._id || prod.subCategory,
-                seo: prod.seo || formData.seo,
+                subcategory: prod.subcategory?._id || prod.subcategory,
+                metaTitle: prod.metaTitle || '',
+                metaDescription: prod.metaDescription || '',
+                metaKeywords: prod.metaKeywords || [],
                 warranty: prod.warranty || formData.warranty,
-                shipping: prod.shipping || formData.shipping,
+                shippingConfig: prod.shippingConfig || formData.shippingConfig,
                 specifications: prod.specifications || []
             });
         }
@@ -263,12 +263,12 @@ const ProductFormInner = () => {
                                 <label className="text-sm font-semibold text-gray-700">Sale Price (Optional)</label>
                                 <div className="relative">
                                     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">৳</span>
-                                    <input type="number" name="comparePrice" placeholder="0.00" className="w-full pl-9 pr-4 py-2.5 bg-white border border-gray-200 rounded-md outline-none focus:border-[#4F46E5] transition-all text-base font-bold text-red-600" value={formData.comparePrice} onChange={handleChange} />
+                                    <input type="number" name="originalPrice" placeholder="0.00" className="w-full pl-9 pr-4 py-2.5 bg-white border border-gray-200 rounded-md outline-none focus:border-[#4F46E5] transition-all text-base font-bold text-red-600" value={formData.originalPrice} onChange={handleChange} />
                                 </div>
                             </div>
                             <div className="space-y-2">
                                 <label className="text-sm font-semibold text-gray-700">Current Stock</label>
-                                <input type="number" name="quantity" placeholder="0" className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-md outline-none focus:border-[#4F46E5] transition-all text-base font-bold text-[#4F46E5]" value={formData.quantity} onChange={handleChange} />
+                                <input type="number" name="stock" placeholder="0" className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-md outline-none focus:border-[#4F46E5] transition-all text-base font-bold text-[#4F46E5]" value={formData.stock} onChange={handleChange} />
                             </div>
                         </div>
 
@@ -340,11 +340,11 @@ const ProductFormInner = () => {
                         <div className="space-y-6">
                             <div className="space-y-2">
                                 <label className="text-sm font-semibold text-gray-700">Meta Title</label>
-                                <input type="text" name="seo.metaTitle" placeholder="SEO optimized title for search engines" className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-md outline-none focus:border-orange-500 transition-all text-sm" value={formData.seo.metaTitle} onChange={handleChange} />
+                                <input type="text" name="metaTitle" placeholder="SEO optimized title for search engines" className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-md outline-none focus:border-orange-500 transition-all text-sm" value={formData.metaTitle} onChange={handleChange} />
                             </div>
                             <div className="space-y-2">
                                 <label className="text-sm font-semibold text-gray-700">Meta Description</label>
-                                <textarea name="seo.metaDescription" rows={4} placeholder="Detailed SEO description to improve search rank..." className="w-full px-4 py-3 bg-white border border-gray-200 rounded-md outline-none focus:border-orange-500 transition-all text-sm leading-normal" value={formData.seo.metaDescription} onChange={handleChange}></textarea>
+                                <textarea name="metaDescription" rows={4} placeholder="Detailed SEO description to improve search rank..." className="w-full px-4 py-3 bg-white border border-gray-200 rounded-md outline-none focus:border-orange-500 transition-all text-sm leading-normal" value={formData.metaDescription} onChange={handleChange}></textarea>
                             </div>
                         </div>
                     </div>
@@ -440,13 +440,13 @@ const ProductFormInner = () => {
                         <div className="space-y-4">
                             <div className="space-y-3 p-4 bg-gray-50/50 rounded-md border border-gray-100">
                                 <label className="flex items-center gap-3 cursor-pointer">
-                                    <input type="checkbox" name="shipping.freeShipping" className="w-5 h-5 accent-emerald-500" checked={formData.shipping.freeShipping} onChange={handleChange} />
+                                    <input type="checkbox" name="shippingConfig.freeShipping" className="w-5 h-5 accent-emerald-500" checked={formData.shippingConfig.freeShipping} onChange={handleChange} />
                                     <span className="text-sm font-bold text-gray-700">Free Shipping</span>
                                 </label>
-                                {!formData.shipping.freeShipping && (
+                                {!formData.shippingConfig.freeShipping && (
                                     <div className="pt-2">
                                         <label className="text-[10px] font-bold text-gray-400 uppercase pl-1">Shipping Cost (৳)</label>
-                                        <input type="number" name="shipping.shippingCost" placeholder="0" className="w-full px-3 py-2 bg-white border border-gray-200 rounded-md text-sm mt-1 outline-none focus:border-emerald-300" value={formData.shipping.shippingCost} onChange={handleChange} />
+                                        <input type="number" name="shippingConfig.shippingCost" placeholder="0" className="w-full px-3 py-2 bg-white border border-gray-200 rounded-md text-sm mt-1 outline-none focus:border-emerald-300" value={formData.shippingConfig.shippingCost} onChange={handleChange} />
                                     </div>
                                 )}
                             </div>

@@ -18,17 +18,17 @@ import {
 } from 'react-icons/md';
 
 const categories = [
-    { name: 'Fashion', icon: MdOutlineCheckroom, href: '/shop?category=fashion' },
-    { name: 'Home & Garden', icon: MdOutlineHome, href: '/shop?category=home' },
-    { name: 'Electronics', icon: MdOutlineDevices, href: '/shop?category=electronics' },
-    { name: 'Furniture', icon: MdOutlineChair, href: '/shop?category=furniture' },
-    { name: 'Healthy & Beauty', icon: MdOutlineFace, href: '/shop?category=beauty' },
-    { name: 'Gift Ideas', icon: MdOutlineCardGiftcard, href: '/shop?category=gifts' },
-    { name: 'Toy & Games', icon: MdOutlineSportsEsports, href: '/shop?category=toys' },
-    { name: 'Cooking', icon: MdOutlineRestaurant, href: '/shop?category=cooking' },
-    { name: 'Smart Phones', icon: MdOutlinePhoneIphone, href: '/shop?category=phones' },
-    { name: 'Cameras & Photo', icon: MdOutlineCameraAlt, href: '/shop?category=cameras' },
-    { name: 'Accessories', icon: MdOutlineHeadphones, href: '/shop?category=accessories' },
+    { name: 'Fashion', icon: MdOutlineCheckroom, href: '/?category=fashion' },
+    { name: 'Home & Garden', icon: MdOutlineHome, href: '/?category=home' },
+    { name: 'Electronics', icon: MdOutlineDevices, href: '/?category=electronics' },
+    { name: 'Furniture', icon: MdOutlineChair, href: '/?category=furniture' },
+    { name: 'Healthy & Beauty', icon: MdOutlineFace, href: '/?category=beauty' },
+    { name: 'Gift Ideas', icon: MdOutlineCardGiftcard, href: '/?category=gifts' },
+    { name: 'Toy & Games', icon: MdOutlineSportsEsports, href: '/?category=toys' },
+    { name: 'Cooking', icon: MdOutlineRestaurant, href: '/?category=cooking' },
+    { name: 'Smart Phones', icon: MdOutlinePhoneIphone, href: '/?category=phones' },
+    { name: 'Cameras & Photo', icon: MdOutlineCameraAlt, href: '/?category=cameras' },
+    { name: 'Accessories', icon: MdOutlineHeadphones, href: '/?category=accessories' },
 ];
 
 const Hero: React.FC = () => {
@@ -85,7 +85,7 @@ const Hero: React.FC = () => {
                                     <span className="text-3xl md:text-4xl font-black text-gray-800 uppercase">-skate</span>
                                 </div>
                                 <Link
-                                    href="/shop"
+                                    href="/"
                                     className='inline-flex items-center gap-3 bg-gray-900 text-white px-10 py-4 font-bold text-sm hover:bg-[var(--color-primary)] transition-all rounded-md w-fit shadow-xl group-hover:scale-105 duration-300 uppercase tracking-wider'
                                 >
                                     Shop Now

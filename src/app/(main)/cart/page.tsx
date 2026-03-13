@@ -48,7 +48,7 @@ const CartPage = () => {
         <div className="bg-gray-50/50 min-h-screen pb-20">
             <div className="container mx-auto px-4 sm:px-8 md:px-12 lg:px-16 pt-8">
                 {/* Breadcrumb / Back button */}
-                <Link href="/shop" className="inline-flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-[var(--color-primary)] mb-8 transition-colors group">
+                <Link href="/" className="inline-flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-[var(--color-primary)] mb-8 transition-colors group">
                     <FiChevronLeft className="group-hover:-translate-x-1 transition-transform" />
                     Back to Shopping
                 </Link>

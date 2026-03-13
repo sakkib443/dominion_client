@@ -57,10 +57,6 @@ const Navbar: React.FC = () => {
 
     const navLinks = [
         { label: 'Home', href: '/' },
-        { label: 'Shop Now', href: '/shop' },
-        { label: 'Special Offers', href: '/offers' },
-        { label: 'Our Blog', href: '/blog' },
-        { label: 'Contact Us', href: '/contact' },
     ];
 
     return (

@@ -37,7 +37,7 @@ const Collection: React.FC = () => {
                         <h3 className='text-end text-white text-2xl sm:text-3xl md:text-4xl font-semibold'>
                             {collection.title} <br />{collection.subtitle}
                         </h3>
-                        <Link href="/shop">
+                        <Link href="/">
                             <button className='btn shadow-none bg-[var(--color-primary)] mt-4 text-white border-none'>
                                 Shop Now
                             </button>

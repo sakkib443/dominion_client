@@ -26,13 +26,11 @@ const Footer: React.FC = () => {
         "Toys & Hobbies",
     ];
     const quickLinks = [
-        { label: "About Us", href: "/about" },
-        { label: "Contact Us", href: "/contact" },
-        { label: "Blog", href: "/blog" },
-        { label: "Privacy Policy", href: "/privacy" },
-        { label: "Terms & Conditions", href: "/terms" },
-        { label: "Order Tracking", href: "/track-order" },
-        { label: "FAQs", href: "/faqs" },
+        { label: "Home", href: "/" },
+        { label: "My Account", href: "/dashboard/user" },
+        { label: "Cart", href: "/cart" },
+        { label: "Checkout", href: "/checkout" },
+        { label: "Image Search", href: "/search/image" },
     ];
 
     return (
@@ -86,7 +84,7 @@ const Footer: React.FC = () => {
                         <ul className="space-y-4">
                             {categories.map((item, i) => (
                                 <li key={i}>
-                                    <Link href="/shop" className="hover:text-[var(--color-primary)] hover:translate-x-1 inline-block transition-all duration-300">
+                                    <Link href="/" className="hover:text-[var(--color-primary)] hover:translate-x-1 inline-block transition-all duration-300">
                                         {item}
                                     </Link>
                                 </li>

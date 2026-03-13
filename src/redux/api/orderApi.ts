@@ -2,6 +2,8 @@ import { baseApi } from "./baseApi";
 
 export const orderApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({
+        // ===== Admin endpoints =====
+        // Admin: get all orders — Backend route: GET /api/orders/admin/all
         getAdminOrders: builder.query({
             query: (params) => ({
                 url: '/orders/admin/all',
@@ -10,6 +12,7 @@ export const orderApi = baseApi.injectEndpoints({
             }),
             providesTags: ['Orders'],
         }),
+        // Admin: get order stats — Backend route: GET /api/orders/admin/stats
         getOrderStats: builder.query({
             query: () => ({
                 url: '/orders/admin/stats',
@@ -17,6 +20,7 @@ export const orderApi = baseApi.injectEndpoints({
             }),
             providesTags: ['Orders'],
         }),
+        // Admin: get order by id — Backend route: GET /api/orders/admin/:id
         getAdminOrderById: builder.query({
             query: (id) => ({
                 url: `/orders/admin/${id}`,
@@ -24,6 +28,7 @@ export const orderApi = baseApi.injectEndpoints({
             }),
             providesTags: ['Orders'],
         }),
+        // Admin: update order status — Backend route: PATCH /api/orders/admin/:id/status
         updateOrderStatus: builder.mutation({
             query: ({ id, ...data }) => ({
                 url: `/orders/admin/${id}/status`,
@@ -32,6 +37,7 @@ export const orderApi = baseApi.injectEndpoints({
             }),
             invalidatesTags: ['Orders'],
         }),
+        // Admin: update payment status — Backend route: PATCH /api/orders/admin/:id/payment
         updatePaymentStatus: builder.mutation({
             query: ({ id, ...data }) => ({
                 url: `/orders/admin/${id}/payment`,
@@ -40,6 +46,7 @@ export const orderApi = baseApi.injectEndpoints({
             }),
             invalidatesTags: ['Orders'],
         }),
+        // Admin: add note — Backend route: PATCH /api/orders/admin/:id/note
         addAdminNote: builder.mutation({
             query: ({ id, note }) => ({
                 url: `/orders/admin/${id}/note`,
@@ -48,6 +55,9 @@ export const orderApi = baseApi.injectEndpoints({
             }),
             invalidatesTags: ['Orders'],
         }),
+
+        // ===== User endpoints =====
+        // User: create order — Backend route: POST /api/orders/
         createOrder: builder.mutation({
             query: (data) => ({
                 url: '/orders',
@@ -56,6 +66,7 @@ export const orderApi = baseApi.injectEndpoints({
             }),
             invalidatesTags: ['Orders'],
         }),
+        // User: get my orders — Backend route: GET /api/orders/my
         getMyOrders: builder.query({
             query: (params) => ({
                 url: '/orders/my',
@@ -64,16 +75,36 @@ export const orderApi = baseApi.injectEndpoints({
             }),
             providesTags: ['Orders'],
         }),
+        // User: cancel order — Backend route: PATCH /api/orders/:id/cancel
+        cancelOrder: builder.mutation({
+            query: (id) => ({
+                url: `/orders/${id}/cancel`,
+                method: 'PATCH',
+            }),
+            invalidatesTags: ['Orders'],
+        }),
+        // General: get order by id — Backend route: GET /api/orders/:id
+        getOrderById: builder.query({
+            query: (id) => ({
+                url: `/orders/${id}`,
+                method: 'GET',
+            }),
+            providesTags: (result, error, id) => [{ type: 'Orders', id }],
+        }),
     }),
 });
 
 export const {
+    // Admin hooks
     useGetAdminOrdersQuery,
     useGetOrderStatsQuery,
     useGetAdminOrderByIdQuery,
     useUpdateOrderStatusMutation,
     useUpdatePaymentStatusMutation,
     useAddAdminNoteMutation,
+    // User hooks
     useCreateOrderMutation,
     useGetMyOrdersQuery,
+    useCancelOrderMutation,
+    useGetOrderByIdQuery,
 } = orderApi;

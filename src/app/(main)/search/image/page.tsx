@@ -7,6 +7,7 @@ import { FiArrowLeft, FiSearch, FiTag, FiDroplet } from 'react-icons/fi';
 
 interface Product {
     _id: string;
+    slug: string;
     name: string;
     price: number;
     discount: number;
@@ -172,7 +173,7 @@ export default function ImageSearchPage() {
                         {products.map((product) => (
                             <Link
                                 key={product._id}
-                                href={`/product/${product._id}`}
+                                href={`/product/${product.slug || product._id}`}
                                 className="group bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-lg hover:border-gray-200 transition-all duration-300"
                             >
                                 {/* Image */}

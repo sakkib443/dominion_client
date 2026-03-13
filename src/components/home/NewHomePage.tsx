@@ -7,7 +7,8 @@ import { useGetProductsQuery } from '@/redux/api/productApi';
 import { useGetCategoriesQuery } from '@/redux/api/categoryApi';
 import { useAppSelector, useAppDispatch } from '@/redux';
 import { clearImageSearch, loadSearchHistoryFromStorage } from '@/redux/slices/imageSearchSlice';
-import { FiX, FiCamera, FiSearch } from 'react-icons/fi';
+import { FiX, FiCamera } from 'react-icons/fi';
+import { FiSearch } from 'react-icons/fi';
 
 const LIMIT = 20;
 
@@ -66,15 +67,35 @@ const NewHomePage: React.FC = () => {
         }
     }, [products, isFetching, page]);
 
+    // ── Handle clearing image search — reset to normal product listing ──
+    const handleClearImageSearch = () => {
+        dispatch(clearImageSearch());
+        setPage(1);
+        // Use already-fetched products from RTK Query cache instead of empty array
+        // (setting [] won't re-trigger the useEffect since the query is cached)
+        if (products.length > 0) {
+            setAccumulatedProducts(products);
+        } else {
+            setAccumulatedProducts([]);
+        }
+    };
+
     // ── Handle category change ──────────────────────────────────────
     const handleCategoryChange = (categoryId: string) => {
+        dispatch(clearImageSearch());
+        // If same category (e.g. clicking "View All" when already on all), restore from cache
+        if (categoryId === selectedCategory) {
+            if (products.length > 0) {
+                setAccumulatedProducts(products);
+            }
+            return;
+        }
         const params = new URLSearchParams();
         if (categoryId) params.set('category', categoryId);
         window.history.pushState({}, '', `/?${params.toString()}`);
         setSelectedCategory(categoryId);
         setPage(1);
         setAccumulatedProducts([]);
-        dispatch(clearImageSearch());
     };
 
     // ── Handle load more ────────────────────────────────────────────
@@ -142,14 +163,12 @@ const NewHomePage: React.FC = () => {
         if (imageSearch.isActive && imageSearch.products.length > 0) {
             return imageSearch.products;
         }
-        // Apply personalized sorting based on search history
-        return sortByRelevance(accumulatedProducts);
+        // Use accumulated products, or fall back to current API products if accumulated is empty
+        const productsToShow = accumulatedProducts.length > 0 ? accumulatedProducts : products;
+        // Apply silent personalized sorting based on search history
+        return sortByRelevance(productsToShow);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [imageSearch.isActive, imageSearch.products, accumulatedProducts, imageSearch.lastSearchHistory]);
-
-    // Check if personalized ordering is active
-    const hasSearchHistory = imageSearch.lastSearchHistory &&
-        (imageSearch.lastSearchHistory.labels.length > 0 || imageSearch.lastSearchHistory.colors.length > 0);
+    }, [imageSearch.isActive, imageSearch.products, accumulatedProducts, products, imageSearch.lastSearchHistory]);
 
     // Get the selected category name
     const selectedCategoryName = useMemo(() => {
@@ -201,14 +220,14 @@ const NewHomePage: React.FC = () => {
                                     </div>
                                     <p className="text-sm text-gray-500">
                                         Found <span className="font-bold text-[#0B4222]">{imageSearch.products.length}</span> matching products
-                                        {imageSearch.searchMeta?.labels?.length > 0 && (
-                                            <span> — detected: <span className="font-medium">{imageSearch.searchMeta.labels.slice(0, 5).join(', ')}</span></span>
+                                        {(imageSearch.searchMeta?.labels?.length ?? 0) > 0 && (
+                                            <span> — detected: <span className="font-medium">{imageSearch.searchMeta!.labels.slice(0, 5).join(', ')}</span></span>
                                         )}
                                     </p>
                                 </div>
                             </div>
                             <button
-                                onClick={() => dispatch(clearImageSearch())}
+                                onClick={handleClearImageSearch}
                                 className="flex items-center gap-1.5 px-4 py-2 bg-gray-100 hover:bg-red-50 text-gray-500 hover:text-red-500 rounded-full text-sm font-semibold transition-colors"
                             >
                                 <FiX size={14} />
@@ -217,10 +236,10 @@ const NewHomePage: React.FC = () => {
                         </div>
 
                         {/* Color chips */}
-                        {imageSearch.searchMeta?.colors?.length > 0 && (
+                        {(imageSearch.searchMeta?.colors?.length ?? 0) > 0 && (
                             <div className="flex items-center gap-2 flex-wrap">
                                 <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Colors:</span>
-                                {imageSearch.searchMeta.colors.map((color: any, idx: number) => (
+                                {imageSearch.searchMeta!.colors.map((color: any, idx: number) => (
                                     <div key={idx} className="flex items-center gap-1.5 bg-gray-50 border border-gray-200 rounded-full px-3 py-1">
                                         <div className="w-3 h-3 rounded-full border border-gray-300" style={{ backgroundColor: color.hex }} />
                                         <span className="text-xs text-gray-600 font-medium capitalize">{color.name}</span>
@@ -241,25 +260,7 @@ const NewHomePage: React.FC = () => {
                     </div>
                 )}
 
-                {/* ── Personalized Banner (shown when search history is active but not in image search mode) ── */}
-                {!imageSearch.isActive && hasSearchHistory && !selectedCategory && (
-                    <div className="mb-4 bg-gradient-to-r from-[#0B4222]/5 to-[#0B4222]/10 border border-[#0B4222]/15 rounded-xl px-5 py-3 flex items-center justify-between animate-fadeIn">
-                        <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-lg bg-[#0B4222]/10 flex items-center justify-center">
-                                <FiSearch size={14} className="text-[#0B4222]" />
-                            </div>
-                            <div>
-                                <p className="text-sm font-medium text-gray-700">
-                                    Showing related products first based on your recent search
-                                </p>
-                                <p className="text-xs text-gray-500">
-                                    {imageSearch.lastSearchHistory?.labels?.slice(0, 4).join(', ')}
-                                    {imageSearch.lastSearchHistory?.colors?.length ? ` • ${imageSearch.lastSearchHistory.colors.slice(0, 3).join(', ')}` : ''}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                )}
+
 
                 {/* ── Selected Category Title ── */}
                 {selectedCategory && (
@@ -284,6 +285,7 @@ const NewHomePage: React.FC = () => {
                             key={product._id}
                             product={{
                                 id: product._id,
+                                slug: product.slug,
                                 name: product.name,
                                 image: product.thumbnail || product.images?.[0] || '',
                                 price: product.price,

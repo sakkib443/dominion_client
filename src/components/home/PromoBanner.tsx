@@ -37,7 +37,7 @@ const PromoBanner: React.FC = () => {
 
                     {/* Right - Shop Now Button */}
                     <Link
-                        href="/shop?discount=25"
+                        href="/?discount=25"
                         className='flex items-center gap-2 border border-white text-white px-6 py-2.5 font-medium text-sm hover:bg-white hover:text-gray-800 transition-all rounded-md whitespace-nowrap'
                     >
                         SHOP NOW

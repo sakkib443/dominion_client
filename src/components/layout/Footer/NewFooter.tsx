@@ -11,18 +11,14 @@ const NewFooter: React.FC = () => {
                     {/* Navigation Links */}
                     <div className="flex items-center gap-6">
                         <Link href="/" className="hover:text-[#0B4222] transition-colors font-medium">
-                            Navigation
+                            Home
                         </Link>
                         <span className="text-gray-300">-</span>
-                        <Link href="/contact" className="hover:text-[#0B4222] transition-colors font-medium">
-                            Contact
+                        <Link href="/cart" className="hover:text-[#0B4222] transition-colors font-medium">
+                            Cart
                         </Link>
                         <span className="text-gray-300">-</span>
-                        <Link href="/shop" className="hover:text-[#0B4222] transition-colors font-medium">
-                            Navbar
-                        </Link>
-                        <span className="text-gray-300">-</span>
-                        <span className="font-bold text-[#0B4222]">NT</span>
+                        <span className="font-bold text-[#0B4222]">MegaShop</span>
                     </div>
                 </div>
                 

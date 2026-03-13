@@ -46,7 +46,7 @@ export default function ProductDetailsPage() {
                 <div className="container mx-auto px-4 sm:px-8 md:px-12 lg:px-16 flex items-center gap-2 text-[13px] text-gray-400 font-medium">
                     <a href="/" className="hover:text-[var(--color-primary)]">Home</a>
                     <span>/</span>
-                    <a href="/shop" className="hover:text-[var(--color-primary)]">Shop</a>
+                    <a href="/" className="hover:text-[var(--color-primary)]">Shop</a>
                     <span>/</span>
                     <span className="text-gray-900">{product.name}</span>
                 </div>

@@ -129,10 +129,10 @@ const CategoriesPage = () => {
                                             </span>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${cat.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${cat.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
                                                 }`}>
-                                                <span className={`w-1.5 h-1.5 rounded-full ${cat.status === 'active' ? 'bg-green-600' : 'bg-red-600'}`}></span>
-                                                {cat.status === 'active' ? 'Active' : 'Inactive'}
+                                                <span className={`w-1.5 h-1.5 rounded-full ${cat.isActive ? 'bg-green-600' : 'bg-red-600'}`}></span>
+                                                {cat.isActive ? 'Active' : 'Inactive'}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 text-sm font-semibold text-gray-600">

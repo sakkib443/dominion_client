@@ -35,8 +35,8 @@ const CategoryFormInner = () => {
         name: '',
         slug: '',
         description: '',
-        parentCategory: '',
-        status: 'active',
+        parent: '',
+        isActive: true,
         isFeatured: false,
         showInMenu: true,
         showInHome: true,
@@ -56,11 +56,11 @@ const CategoryFormInner = () => {
                 name: cat.name || '',
                 slug: cat.slug || '',
                 description: cat.description || '',
-                parentCategory: cat.parentCategory?._id || cat.parentCategory || '',
-                status: cat.status || 'active',
+                parent: cat.parent?._id || cat.parent || '',
+                isActive: cat.isActive !== false,
                 isFeatured: !!cat.isFeatured,
-                showInMenu: !!cat.showInMenu,
-                showInHome: !!cat.showInHome,
+                showInMenu: cat.showInMenu !== false,
+                showInHome: cat.showInHome !== false,
                 order: cat.order || 0,
                 image: cat.image || '',
                 icon: cat.icon || '',
@@ -181,9 +181,9 @@ const CategoryFormInner = () => {
                         <div className="space-y-2">
                             <label className="text-sm font-semibold text-gray-700">Parent Category</label>
                             <select
-                                name="parentCategory"
+                                name="parent"
                                 className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-md outline-none focus:border-[#0B4222] transition-all text-sm"
-                                value={formData.parentCategory}
+                                value={formData.parent}
                                 onChange={handleChange}
                             >
                                 <option value="">Root Category (None)</option>
@@ -312,15 +312,22 @@ const CategoryFormInner = () => {
 
                         <div className="space-y-2">
                             <label className="text-sm font-semibold text-gray-700">Status</label>
-                            <select
-                                name="status"
-                                className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-md outline-none focus:border-[#0B4222] transition-all text-sm"
-                                value={formData.status}
-                                onChange={handleChange}
-                            >
-                                <option value="active">Active</option>
-                                <option value="inactive">Inactive</option>
-                            </select>
+                            <div className="flex gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => setFormData(prev => ({ ...prev, isActive: true }))}
+                                    className={`flex-1 py-2.5 rounded-md text-sm font-bold transition-all ${formData.isActive ? 'bg-[#0B4222] text-white shadow-md' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}
+                                >
+                                    Active
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setFormData(prev => ({ ...prev, isActive: false }))}
+                                    className={`flex-1 py-2.5 rounded-md text-sm font-bold transition-all ${!formData.isActive ? 'bg-red-500 text-white shadow-md' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'}`}
+                                >
+                                    Inactive
+                                </button>
+                            </div>
                         </div>
 
                         <div className="space-y-4 pt-2">

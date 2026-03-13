@@ -1,7 +1,9 @@
+import UserLayout from '@/components/user/UserLayout';
+
 export default function UserDashboardLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
-    return <>{children}</>;
+    return <UserLayout>{children}</UserLayout>;
 }

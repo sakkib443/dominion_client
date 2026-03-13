@@ -10,6 +10,7 @@ import { addToWishlist } from '@/redux/slices/wishlistSlice';
 
 interface Product {
     id: number;
+    slug?: string;
     name: string;
     image: string;
     price: number;
@@ -58,7 +59,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     const discountText = product.discount || (oldPrice ? `${Math.round(((oldPrice - currentPrice) / oldPrice) * 100)}%` : null);
 
     return (
-        <Link href={`/product/${product.id}`}>
+        <Link href={`/product/${product.slug || product.id}`}>
             <div className='group bg-white border border-gray-100 rounded-md overflow-hidden hover:shadow-2xl hover:shadow-gray-200/50 transition-all duration-500 relative flex flex-col h-full'>
                 {/* Image Container */}
                 <div className='relative aspect-[4/3] bg-gray-50/50 overflow-hidden'>

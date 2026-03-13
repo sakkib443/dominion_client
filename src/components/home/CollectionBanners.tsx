@@ -20,7 +20,7 @@ const CollectionBanners: React.FC = () => {
                                 Discover the latest trends in winter fashion with up to 50% off
                             </p>
                             <Link
-                                href="/shop?collection=winter"
+                                href="/?collection=winter"
                                 className="inline-flex items-center gap-2 bg-white text-[var(--color-primary)] px-6 py-3 rounded-md font-medium w-fit group-hover:shadow-lg transition-all"
                             >
                                 Shop Now <FiArrowRight className="group-hover:translate-x-1 transition-transform" />
@@ -41,7 +41,7 @@ const CollectionBanners: React.FC = () => {
                                     Electronics Sale
                                 </h3>
                                 <Link
-                                    href="/shop?category=electronics"
+                                    href="/?category=electronics"
                                     className="inline-flex items-center gap-2 text-white font-medium hover:underline"
                                 >
                                     Explore <FiArrowRight />
@@ -60,7 +60,7 @@ const CollectionBanners: React.FC = () => {
                                     Sports & Fitness
                                 </h3>
                                 <Link
-                                    href="/shop?category=sports"
+                                    href="/?category=sports"
                                     className="inline-flex items-center gap-2 text-white font-medium hover:underline"
                                 >
                                     Shop Now <FiArrowRight />

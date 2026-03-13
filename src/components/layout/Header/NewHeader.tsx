@@ -132,6 +132,11 @@ const NewHeader: React.FC = () => {
 
     const clearImage = () => { setSelectedImage(null); setIsSearching(false); };
 
+    // Clear image search state when navigating to home
+    const handleGoHome = () => {
+        dispatch(clearImageSearch());
+    };
+
     return (
         <>
             <header className="sticky top-0 z-50">
@@ -181,6 +186,7 @@ const NewHeader: React.FC = () => {
                                     <Link
                                         href="/"
                                         className="flex items-center gap-3 px-4 py-3 text-sm text-gray-600 hover:bg-[#0B4222] hover:text-white transition-colors border-b border-gray-50 font-medium"
+                                        onClick={() => { setIsCategoryHovered(false); handleGoHome(); }}
                                     >
                                         <span className="text-base">🛒</span>
                                         All Products
@@ -204,7 +210,7 @@ const NewHeader: React.FC = () => {
                             </div>
 
                             {/* Company Logo */}
-                            <Link href="/" className="flex items-center gap-2 shrink-0">
+                            <Link href="/" className="flex items-center gap-2 shrink-0" onClick={handleGoHome}>
                                 <Image src="/logo.svg" alt="Logo" width={180} height={50} style={{ width: '180px', height: 'auto' }} />
                             </Link>
 
@@ -325,7 +331,7 @@ const NewHeader: React.FC = () => {
                                     </button>
                                     {isMobileCategoryOpen && (
                                         <div className="pl-2 space-y-1">
-                                            <Link href="/" className="block px-4 py-2 text-white/70 hover:text-white text-sm" onClick={() => setIsMobileMenuOpen(false)}>
+                                            <Link href="/" className="block px-4 py-2 text-white/70 hover:text-white text-sm" onClick={() => { setIsMobileMenuOpen(false); handleGoHome(); }}>
                                                 All Products
                                             </Link>
                                             {categories.map((cat) => (

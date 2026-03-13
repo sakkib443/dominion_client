@@ -2,37 +2,34 @@ import { baseApi } from "./baseApi";
 
 export const reviewApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({
+        // Admin: get all reviews — Backend route: GET /api/reviews/
         getAllReviews: builder.query({
             query: (params) => ({
-                url: '/reviews/admin/all',
+                url: '/reviews',
                 method: 'GET',
                 params
             }),
             providesTags: ['Reviews']
         }),
-        getReviewStats: builder.query({
-            query: () => ({
-                url: '/reviews/admin/stats',
-                method: 'GET'
-            }),
-            providesTags: ['Reviews']
-        }),
-        updateReviewStatus: builder.mutation({
-            query: ({ id, status }) => ({
-                url: `/reviews/admin/${id}/status`,
-                method: 'PATCH',
-                body: { status }
-            }),
-            invalidatesTags: ['Reviews']
-        }),
-        addAdminReply: builder.mutation({
-            query: ({ id, reply }) => ({
-                url: `/reviews/admin/${id}/reply`,
+        // User: create review — Backend route: POST /api/reviews/
+        createReview: builder.mutation({
+            query: (data) => ({
+                url: '/reviews',
                 method: 'POST',
-                body: { reply }
+                body: data
             }),
             invalidatesTags: ['Reviews']
         }),
+        // User: update review — Backend route: PATCH /api/reviews/:id
+        updateReview: builder.mutation({
+            query: ({ id, ...data }) => ({
+                url: `/reviews/${id}`,
+                method: 'PATCH',
+                body: data
+            }),
+            invalidatesTags: ['Reviews']
+        }),
+        // Delete review — Backend route: DELETE /api/reviews/:id
         deleteReview: builder.mutation({
             query: (id) => ({
                 url: `/reviews/${id}`,
@@ -40,7 +37,7 @@ export const reviewApi = baseApi.injectEndpoints({
             }),
             invalidatesTags: ['Reviews']
         }),
-        // For product page
+        // Public: get product reviews — Backend route: GET /api/reviews/product/:productId
         getProductReviews: builder.query({
             query: ({ productId, ...params }) => ({
                 url: `/reviews/product/${productId}`,
@@ -54,9 +51,8 @@ export const reviewApi = baseApi.injectEndpoints({
 
 export const {
     useGetAllReviewsQuery,
-    useGetReviewStatsQuery,
-    useUpdateReviewStatusMutation,
-    useAddAdminReplyMutation,
+    useCreateReviewMutation,
+    useUpdateReviewMutation,
     useDeleteReviewMutation,
     useGetProductReviewsQuery
 } = reviewApi;

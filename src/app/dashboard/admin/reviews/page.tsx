@@ -22,9 +22,7 @@ import {
 } from 'react-icons/fi';
 import {
     useGetAllReviewsQuery,
-    useGetReviewStatsQuery,
-    useUpdateReviewStatusMutation,
-    useAddAdminReplyMutation,
+    useUpdateReviewMutation,
     useDeleteReviewMutation,
 } from '@/redux/api/reviewApi';
 import toast from 'react-hot-toast';
@@ -89,15 +87,13 @@ export default function ReviewsPage() {
     const [selectedReview, setSelectedReview] = useState<any>(null);
 
     const { data: reviewsData, isLoading, refetch } = useGetAllReviewsQuery({ page, limit: 10, status: statusFilter });
-    const { data: statsData, isLoading: isStatsLoading } = useGetReviewStatsQuery(undefined);
 
-    const [updateStatus] = useUpdateReviewStatusMutation();
-    const [addReply] = useAddAdminReplyMutation();
+    const [updateReview] = useUpdateReviewMutation();
     const [deleteReview] = useDeleteReviewMutation();
 
     const handleUpdateStatus = async (id: string, status: 'approved' | 'rejected') => {
         try {
-            await updateStatus({ id, status }).unwrap();
+            await updateReview({ id, status }).unwrap();
             toast.success(`Review ${status}`);
         } catch (err: any) {
             toast.error(err.data?.message || 'Update failed');
@@ -107,7 +103,7 @@ export default function ReviewsPage() {
     const handleReplySubmit = async (reply: string) => {
         if (!reply.trim()) return toast.error('Reply cannot be empty');
         try {
-            await addReply({ id: selectedReview._id, reply }).unwrap();
+            await updateReview({ id: selectedReview._id, adminReply: reply }).unwrap();
             toast.success('Reply added');
             setIsReplyModalOpen(false);
         } catch (err: any) {
@@ -125,16 +121,8 @@ export default function ReviewsPage() {
         }
     };
 
-    const stats = statsData?.data || { total: 0, pending: 0, approved: 0, averageRating: 0 };
     const reviews = reviewsData?.data || [];
     const meta = reviewsData?.meta || { total: 0, totalPages: 1 };
-
-    const statCards = [
-        { label: 'Total Reviews', value: stats.total, icon: FiMessageSquare, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-100' },
-        { label: 'Avg. Rating', value: stats.averageRating, icon: FiStar, color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-100' },
-        { label: 'Approved', value: stats.approved, icon: FiCheckCircle, color: 'text-emerald-600', bg: 'bg-emerald-50', border: 'border-emerald-100' },
-        { label: 'Pending', value: stats.pending, icon: FiClock, color: 'text-purple-600', bg: 'bg-purple-50', border: 'border-purple-100' },
-    ];
 
     return (
         <div className="space-y-6">
@@ -152,23 +140,17 @@ export default function ReviewsPage() {
                 </button>
             </div>
 
-            {/* Stats */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                {statCards.map((stat, i) => (
-                    <div key={i} className={`${stat.bg} ${stat.border} border rounded-md p-5 shadow-sm`}>
-                        <div className="flex items-center gap-4">
-                            <div className={`p-3 rounded-md bg-white shadow-sm ${stat.color}`}>
-                                <stat.icon size={22} />
-                            </div>
-                            <div>
-                                <p className={`text-2xl font-bold ${stat.color} leading-none`}>
-                                    {isStatsLoading ? '...' : stat.value}
-                                </p>
-                                <p className="text-xs font-semibold text-gray-500 mt-1 uppercase tracking-wider">{stat.label}</p>
-                            </div>
-                        </div>
+            {/* Summary */}
+            <div className="bg-blue-50 border border-blue-100 rounded-md p-5 shadow-sm">
+                <div className="flex items-center gap-4">
+                    <div className="p-3 rounded-md bg-white shadow-sm text-blue-600">
+                        <FiMessageSquare size={22} />
                     </div>
-                ))}
+                    <div>
+                        <p className="text-2xl font-bold text-blue-600 leading-none">{meta.total}</p>
+                        <p className="text-xs font-semibold text-gray-500 mt-1 uppercase tracking-wider">Total Reviews</p>
+                    </div>
+                </div>
             </div>
 
             {/* Content Table */}

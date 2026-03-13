@@ -105,7 +105,7 @@ export default function AnalyticsPage() {
     const fetchAnalytics = async () => {
         setLoading(true);
         try {
-            const res = await fetch(`${API_URL}/analytics/overview?range=${dateRange}`, {
+            const res = await fetch(`${API_URL}/analytics/dashboard?range=${dateRange}`, {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`,
                 },

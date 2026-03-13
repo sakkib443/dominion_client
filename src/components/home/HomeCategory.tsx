@@ -39,7 +39,7 @@ const HomeCategory: React.FC = () => {
                     <p className='text-gray-500 font-medium'>Find what you're looking for from our curated collection</p>
                 </div>
                 <Link
-                    href="/shop"
+                    href="/"
                     className='text-[var(--color-primary)] font-bold text-sm flex items-center gap-2 hover:opacity-80 transition-all border-b-2 border-transparent hover:border-[var(--color-primary)] pb-1 w-fit'
                 >
                     View All Categories <HiArrowNarrowRight size={18} />
@@ -49,7 +49,7 @@ const HomeCategory: React.FC = () => {
             {/* Categories Grid */}
             <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6'>
                 {categories.map(category => (
-                    <Link href={`/shop?category=${category.id}`} key={category.id} className="block">
+                    <Link href={`/?category=${category.id}`} key={category.id} className="block">
                         <div className='group relative bg-white border border-gray-100 rounded-md p-5 flex items-center gap-5 hover:shadow-2xl hover:shadow-[var(--color-primary)]/5 hover:border-[var(--color-primary)]/20 transition-all duration-300 cursor-pointer overflow-hidden'>
                             {/* Decorative Background Blur */}
                             <div

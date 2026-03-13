@@ -7,6 +7,7 @@ import { addToCart } from '@/redux/slices/cartSlice';
 
 interface Product {
     id: number | string;
+    slug?: string;
     name: string;
     image: string;
     price: number;
@@ -60,7 +61,7 @@ const NewProductCard: React.FC<NewProductCardProps> = ({ product }) => {
 
     return (
         <>
-            <Link href={`/product/${product.id}`}>
+            <Link href={`/product/${product.slug || product.id}`}>
                 <div className='bg-white border border-gray-200 rounded-md overflow-hidden hover:shadow-lg transition-all duration-300 group'>
                     {/* Product Image */}
                     <div className='aspect-square bg-gray-100 overflow-hidden relative'>
@@ -225,7 +226,7 @@ const NewProductCard: React.FC<NewProductCardProps> = ({ product }) => {
 
                                 {/* View Full Details Link */}
                                 <Link
-                                    href={`/product/${product.id}`}
+                                    href={`/product/${product.slug || product.id}`}
                                     className='block text-center text-[#0B4222] hover:underline font-medium'
                                 >
                                     View Full Details →

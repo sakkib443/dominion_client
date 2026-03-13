@@ -2,6 +2,7 @@ import { baseApi } from "./baseApi";
 
 export const couponApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({
+        // Admin: get all coupons — Backend route: GET /api/coupons/
         getCoupons: builder.query({
             query: () => ({
                 url: '/coupons',
@@ -9,13 +10,7 @@ export const couponApi = baseApi.injectEndpoints({
             }),
             providesTags: ['Coupons']
         }),
-        getCouponById: builder.query({
-            query: (id) => ({
-                url: `/coupons/${id}`,
-                method: 'GET'
-            }),
-            providesTags: (result, error, id) => [{ type: 'Coupons', id }]
-        }),
+        // Admin: create coupon — Backend route: POST /api/coupons/
         createCoupon: builder.mutation({
             query: (data) => ({
                 url: '/coupons',
@@ -24,6 +19,7 @@ export const couponApi = baseApi.injectEndpoints({
             }),
             invalidatesTags: ['Coupons']
         }),
+        // Admin: update coupon — Backend route: PATCH /api/coupons/:id
         updateCoupon: builder.mutation({
             query: ({ id, ...data }) => ({
                 url: `/coupons/${id}`,
@@ -32,6 +28,7 @@ export const couponApi = baseApi.injectEndpoints({
             }),
             invalidatesTags: (result, error, { id }) => ['Coupons', { type: 'Coupons', id }]
         }),
+        // Admin: delete coupon — Backend route: DELETE /api/coupons/:id
         deleteCoupon: builder.mutation({
             query: (id) => ({
                 url: `/coupons/${id}`,
@@ -39,9 +36,10 @@ export const couponApi = baseApi.injectEndpoints({
             }),
             invalidatesTags: ['Coupons']
         }),
-        applyCoupon: builder.mutation({
+        // User: validate coupon — Backend route: POST /api/coupons/validate
+        validateCoupon: builder.mutation({
             query: (data) => ({
-                url: '/coupons/apply',
+                url: '/coupons/validate',
                 method: 'POST',
                 body: data
             })
@@ -51,9 +49,8 @@ export const couponApi = baseApi.injectEndpoints({
 
 export const {
     useGetCouponsQuery,
-    useGetCouponByIdQuery,
     useCreateCouponMutation,
     useUpdateCouponMutation,
     useDeleteCouponMutation,
-    useApplyCouponMutation
+    useValidateCouponMutation,
 } = couponApi;
