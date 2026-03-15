@@ -39,7 +39,7 @@ export default function ProductDetailsPage() {
     const handleAddToCart = () => {
         if (!product) return;
         dispatch(addToCart({
-            id: typeof product._id === 'string' ? parseInt(product._id.slice(-8), 16) : Date.now(),
+            id: product._id,
             name: product.name,
             price: product.price,
             mrp: product.originalPrice || product.price,

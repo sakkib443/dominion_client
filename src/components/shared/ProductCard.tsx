@@ -9,7 +9,8 @@ import { addToCart } from '@/redux/slices/cartSlice';
 import { addToWishlist } from '@/redux/slices/wishlistSlice';
 
 interface Product {
-    id: number;
+    _id?: string;
+    id: string;
     slug?: string;
     name: string;
     image: string;

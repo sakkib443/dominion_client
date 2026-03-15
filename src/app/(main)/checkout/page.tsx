@@ -4,7 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/redux';
 import { clearCart } from '@/redux/slices/cartSlice';
-import { useCreateOrderMutation } from '@/redux/api/orderApi';
+import { loginSuccess } from '@/redux/slices/authSlice';
+import { useCreateOrderMutation, useGuestCheckoutMutation } from '@/redux/api/orderApi';
 import {
     FiMapPin,
     FiCreditCard,
@@ -12,7 +13,9 @@ import {
     FiCheckCircle,
     FiChevronLeft,
     FiShoppingBag,
-    FiLock
+    FiLock,
+    FiUser,
+    FiInfo
 } from 'react-icons/fi';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
@@ -23,29 +26,43 @@ const CheckoutPage = () => {
     const router = useRouter();
     const dispatch = useAppDispatch();
     const [createOrder, { isLoading: isPlacingOrder }] = useCreateOrderMutation();
+    const [guestCheckout, { isLoading: isGuestPlacing }] = useGuestCheckoutMutation();
 
     const [formData, setFormData] = useState({
-        fullName: user?.name || '',
-        email: user?.email || '',
-        phone: user?.phone || '',
-        street: user?.address?.street || '',
-        city: user?.address?.city || '',
-        state: user?.address?.state || '',
-        zipCode: user?.address?.zipCode || '',
-        country: user?.address?.country || 'Bangladesh',
+        fullName: '',
+        email: '',
+        phone: '',
+        address: '',
+        city: '',
+        area: '',
+        postalCode: '',
+        country: 'Bangladesh',
         paymentMethod: 'cod',
         shippingMethod: 'standard'
     });
+
+    // Pre-fill form if user is logged in
+    useEffect(() => {
+        if (isAuthenticated && user) {
+            setFormData(prev => ({
+                ...prev,
+                fullName: user.name || prev.fullName,
+                email: user.email || prev.email,
+                phone: user.phone || prev.phone,
+                address: user.address?.street || prev.address,
+                city: user.address?.city || prev.city,
+                area: user.address?.state || prev.area,
+                postalCode: user.address?.zipCode || prev.postalCode,
+                country: user.address?.country || prev.country,
+            }));
+        }
+    }, [isAuthenticated, user]);
 
     useEffect(() => {
         if (items.length === 0) {
             router.push('/cart');
         }
-        if (!isAuthenticated) {
-            toast.error('Please login to proceed with checkout');
-            router.push('/login?redirect=/checkout');
-        }
-    }, [items, isAuthenticated, router]);
+    }, [items, router]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -54,38 +71,89 @@ const CheckoutPage = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        const orderData = {
+        // Validate required fields
+        if (!formData.fullName || !formData.email || !formData.phone || !formData.address || !formData.city) {
+            toast.error('Please fill in all required fields');
+            return;
+        }
+
+        const orderPayload = {
+            items: items.map(item => ({
+                product: item.id,
+                quantity: item.quantity,
+            })),
             shippingAddress: {
                 fullName: formData.fullName,
                 phone: formData.phone,
                 email: formData.email,
-                street: formData.street,
+                address: formData.address,
+                area: formData.area,
                 city: formData.city,
-                state: formData.state,
-                zipCode: formData.zipCode,
-                country: formData.country
+                postalCode: formData.postalCode,
             },
             paymentMethod: formData.paymentMethod,
             shippingMethod: formData.shippingMethod
         };
 
         try {
-            await createOrder(orderData).unwrap();
-            dispatch(clearCart());
-            toast.success('Order placed successfully!', {
-                duration: 5000,
-                icon: '🛍️'
-            });
-            router.push('/checkout/success');
+            if (isAuthenticated) {
+                // Logged-in user: use normal createOrder
+                await createOrder(orderPayload).unwrap();
+                dispatch(clearCart());
+                toast.success('Order placed successfully!', { duration: 5000, icon: '🛍️' });
+                router.push('/checkout/success');
+            } else {
+                // Guest user: use guestCheckout (auto-creates account)
+                const result = await guestCheckout(orderPayload).unwrap();
+                dispatch(clearCart());
+
+                // Auto-login the guest user
+                if (result.data?.accessToken && result.data?.user) {
+                    const userData = result.data.user;
+                    dispatch(loginSuccess({
+                        user: {
+                            id: userData._id,
+                            name: `${userData.firstName} ${userData.lastName}`.trim(),
+                            email: userData.email,
+                            phone: userData.phone || '',
+                            role: userData.role || 'user',
+                        },
+                        token: result.data.accessToken,
+                    }));
+                }
+
+                if (result.data?.isNewUser) {
+                    toast.success(
+                        'Order placed! Account created — your phone number is your password.',
+                        { duration: 8000, icon: '🎉' }
+                    );
+                } else {
+                    toast.success('Order placed successfully!', { duration: 5000, icon: '🛍️' });
+                }
+                router.push('/checkout/success');
+            }
         } catch (err: any) {
-            toast.error(err?.data?.message || 'Failed to place order. Please try again.');
+            console.error('Order error:', err);
+            const errorData = err?.data;
+
+            // Show individual field errors if available
+            if (errorData?.errorMessages?.length > 0) {
+                errorData.errorMessages.forEach((e: any) => {
+                    const fieldName = e.path ? `${e.path}: ` : '';
+                    toast.error(`${fieldName}${e.message}`, { duration: 6000 });
+                });
+            } else {
+                const errorMsg = errorData?.message || err?.message || 'Failed to place order. Please try again.';
+                toast.error(errorMsg, { duration: 6000 });
+            }
         }
     };
 
     const shippingCost = formData.shippingMethod === 'express' ? 150 : (totalPrice >= 5000 ? 0 : 60);
     const grandTotal = totalPrice + shippingCost;
+    const isSubmitting = isPlacingOrder || isGuestPlacing;
 
-    if (items.length === 0 || !isAuthenticated) return null;
+    if (items.length === 0) return null;
 
     return (
         <div className="bg-gray-50/50 min-h-screen pb-20">
@@ -97,6 +165,27 @@ const CheckoutPage = () => {
 
                 <h1 className="text-3xl font-black text-gray-900 mb-10 tracking-tight">Checkout</h1>
 
+                {/* Guest Info Banner */}
+                {!isAuthenticated && (
+                    <div className="mb-8 bg-blue-50 border border-blue-200 rounded-xl p-5 flex items-start gap-4 animate-fadeIn">
+                        <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <FiInfo size={20} />
+                        </div>
+                        <div>
+                            <h3 className="text-sm font-bold text-blue-800 mb-1">
+                                No account? No problem!
+                            </h3>
+                            <p className="text-sm text-blue-600 leading-relaxed">
+                                Fill in your details below and we'll automatically create an account for you.
+                                Your <strong>phone number</strong> will be your password. You can log in later to track your orders.
+                            </p>
+                            <p className="text-xs text-blue-500 mt-2">
+                                Already have an account? <Link href="/login?redirect=/checkout" className="font-bold underline hover:text-blue-700">Log in here</Link>
+                            </p>
+                        </div>
+                    </div>
+                )}
+
                 <form onSubmit={handleSubmit} className="flex flex-col lg:grid lg:grid-cols-12 gap-10">
                     <div className="lg:col-span-8 space-y-8">
                         {/* Shipping Information */}
@@ -105,12 +194,19 @@ const CheckoutPage = () => {
                                 <div className="w-10 h-10 rounded-md bg-blue-50 text-blue-600 flex items-center justify-center">
                                     <FiMapPin size={20} />
                                 </div>
-                                <h2 className="text-xl font-black text-gray-800">Shipping Details</h2>
+                                <div>
+                                    <h2 className="text-xl font-black text-gray-800">Shipping Details</h2>
+                                    {!isAuthenticated && (
+                                        <p className="text-xs text-gray-400 mt-0.5">This info will also be used to create your account</p>
+                                    )}
+                                </div>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="md:col-span-2">
-                                    <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 px-1">Full Name</label>
+                                    <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 px-1">
+                                        Full Name <span className="text-red-400">*</span>
+                                    </label>
                                     <input
                                         type="text"
                                         name="fullName"
@@ -122,7 +218,10 @@ const CheckoutPage = () => {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 px-1">Email Address</label>
+                                    <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 px-1">
+                                        Email Address <span className="text-red-400">*</span>
+                                        {!isAuthenticated && <span className="text-blue-400 ml-1">(will be your login ID)</span>}
+                                    </label>
                                     <input
                                         type="email"
                                         name="email"
@@ -134,7 +233,10 @@ const CheckoutPage = () => {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 px-1">Phone Number</label>
+                                    <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 px-1">
+                                        Phone Number <span className="text-red-400">*</span>
+                                        {!isAuthenticated && <span className="text-blue-400 ml-1">(will be your password)</span>}
+                                    </label>
                                     <input
                                         type="tel"
                                         name="phone"
@@ -146,19 +248,23 @@ const CheckoutPage = () => {
                                     />
                                 </div>
                                 <div className="md:col-span-2">
-                                    <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 px-1">Street Address</label>
+                                    <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 px-1">
+                                        Address <span className="text-red-400">*</span>
+                                    </label>
                                     <input
                                         type="text"
-                                        name="street"
+                                        name="address"
                                         required
-                                        value={formData.street}
+                                        value={formData.address}
                                         onChange={handleChange}
                                         className="w-full px-5 py-3.5 bg-gray-50 border border-gray-100 rounded-md outline-none focus:border-[var(--color-primary)] focus:bg-white transition-all text-sm font-medium"
                                         placeholder="House no, Street name, Area"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 px-1">City</label>
+                                    <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 px-1">
+                                        City <span className="text-red-400">*</span>
+                                    </label>
                                     <input
                                         type="text"
                                         name="city"
@@ -170,24 +276,22 @@ const CheckoutPage = () => {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 px-1">State / District</label>
+                                    <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 px-1">Area / Zone</label>
                                     <input
                                         type="text"
-                                        name="state"
-                                        required
-                                        value={formData.state}
+                                        name="area"
+                                        value={formData.area}
                                         onChange={handleChange}
                                         className="w-full px-5 py-3.5 bg-gray-50 border border-gray-100 rounded-md outline-none focus:border-[var(--color-primary)] focus:bg-white transition-all text-sm font-medium"
-                                        placeholder="Dhaka"
+                                        placeholder="Mirpur, Dhanmondi, etc."
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 px-1">Zip / Postal Code</label>
                                     <input
                                         type="text"
-                                        name="zipCode"
-                                        required
-                                        value={formData.zipCode}
+                                        name="postalCode"
+                                        value={formData.postalCode}
                                         onChange={handleChange}
                                         className="w-full px-5 py-3.5 bg-gray-50 border border-gray-100 rounded-md outline-none focus:border-[var(--color-primary)] focus:bg-white transition-all text-sm font-medium"
                                         placeholder="1200"
@@ -352,10 +456,10 @@ const CheckoutPage = () => {
 
                             <button
                                 type="submit"
-                                disabled={isPlacingOrder}
+                                disabled={isSubmitting}
                                 className="w-full flex items-center justify-center gap-3 py-5 bg-gray-900 text-white rounded-md font-bold text-sm tracking-widest hover:bg-[var(--color-primary)] transition-all shadow-xl shadow-gray-200 hover:shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] group disabled:opacity-70 disabled:cursor-not-allowed"
                             >
-                                {isPlacingOrder ? (
+                                {isSubmitting ? (
                                     <>
                                         <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
                                         PLACING ORDER...
@@ -368,7 +472,13 @@ const CheckoutPage = () => {
                                 )}
                             </button>
 
-                            <p className="text-[10px] text-gray-400 text-center mt-6 font-bold uppercase tracking-widest leading-relaxed">
+                            {!isAuthenticated && (
+                                <p className="text-[10px] text-blue-500 text-center mt-4 font-bold leading-relaxed">
+                                    🔐 An account will be created automatically with your email &amp; phone number
+                                </p>
+                            )}
+
+                            <p className="text-[10px] text-gray-400 text-center mt-4 font-bold uppercase tracking-widest leading-relaxed">
                                 By placing order, you agree to our <br />Terms & Conditions
                             </p>
                         </div>

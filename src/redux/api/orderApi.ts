@@ -66,6 +66,15 @@ export const orderApi = baseApi.injectEndpoints({
             }),
             invalidatesTags: ['Orders'],
         }),
+        // Guest checkout (no auth required) — Backend route: POST /api/orders/guest-checkout
+        guestCheckout: builder.mutation({
+            query: (data) => ({
+                url: '/orders/guest-checkout',
+                method: 'POST',
+                body: data,
+            }),
+            invalidatesTags: ['Orders'],
+        }),
         // User: get my orders — Backend route: GET /api/orders/my
         getMyOrders: builder.query({
             query: (params) => ({
@@ -104,6 +113,7 @@ export const {
     useAddAdminNoteMutation,
     // User hooks
     useCreateOrderMutation,
+    useGuestCheckoutMutation,
     useGetMyOrdersQuery,
     useCancelOrderMutation,
     useGetOrderByIdQuery,
