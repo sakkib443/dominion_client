@@ -74,7 +74,7 @@ export default function SettingsPage() {
 
     const [settings, setSettings] = useState({
         // General
-        siteName: 'MegaShop',
+        siteName: 'Dominion',
         tagline: 'Your One-Stop E-Commerce Store',
         siteUrl: 'https://megashop.com',
         logo: '',

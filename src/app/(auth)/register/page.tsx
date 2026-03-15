@@ -83,7 +83,7 @@ const RegisterPage = () => {
         <div className="bg-white p-8 rounded-md shadow-2xl shadow-gray-200 border border-gray-100 max-w-lg mx-auto">
             <div className="text-center mb-8">
                 <h1 className="text-3xl font-black text-gray-900 mb-2">Create Account</h1>
-                <p className="text-gray-500 font-medium">Join MegaShop for a better shopping experience</p>
+                <p className="text-gray-500 font-medium">Join Dominion for a better shopping experience</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">

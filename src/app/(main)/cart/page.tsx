@@ -31,7 +31,7 @@ const CartPage = () => {
                     title="Your cart is empty"
                     description="Looks like you haven't added anything to your cart yet."
                     buttonText="Start Shopping"
-                    buttonLink="/shop"
+                    buttonLink="/"
                 />
             </div>
         );

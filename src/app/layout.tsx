@@ -5,9 +5,9 @@ import FloatingContact from "@/components/shared/FloatingContact";
 import Preloader from "@/components/shared/Preloader";
 
 export const metadata: Metadata = {
-  title: "Mega Ecommerce - Best Online Shopping Experience",
-  description: "Shop the latest products with amazing deals. Premium quality products at best prices.",
-  keywords: "ecommerce, online shopping, best deals, products, shop",
+  title: "Dominion - Premium Online Shopping Experience",
+  description: "Shop the latest products with amazing deals at Dominion. Premium quality products at best prices.",
+  keywords: "dominion, ecommerce, online shopping, best deals, products, shop",
 };
 
 import { Toaster } from 'react-hot-toast';

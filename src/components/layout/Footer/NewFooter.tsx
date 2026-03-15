@@ -18,14 +18,14 @@ const NewFooter: React.FC = () => {
                             Cart
                         </Link>
                         <span className="text-gray-300">-</span>
-                        <span className="font-bold text-[#0B4222]">MegaShop</span>
+                        <span className="font-bold text-[#0B4222]">Dominion</span>
                     </div>
                 </div>
                 
                 {/* Copyright */}
                 <div className="text-center mt-4 pt-4 border-t border-gray-100">
                     <p className="text-sm text-gray-500">
-                        © {new Date().getFullYear()} MegaShop. All rights reserved.
+                        © {new Date().getFullYear()} Dominion. All rights reserved.
                     </p>
                 </div>
             </div>

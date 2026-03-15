@@ -79,7 +79,7 @@ const UserLayout = ({ children }: { children: React.ReactNode }) => {
                                     M
                                 </div>
                                 <span className="hidden sm:block text-lg font-bold text-gray-800 group-hover:text-[#0B4222] transition-colors">
-                                    MegaShop
+                                    Dominion
                                 </span>
                             </Link>
                         </div>
