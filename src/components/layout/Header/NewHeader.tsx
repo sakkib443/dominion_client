@@ -132,8 +132,17 @@ const NewHeader: React.FC = () => {
 
     const clearImage = () => { setSelectedImage(null); setIsSearching(false); };
 
+    // Handle text search
+    const handleSearch = () => {
+        const trimmed = searchQuery.trim();
+        if (!trimmed) return;
+        dispatch(clearImageSearch());
+        router.push(`/?searchTerm=${encodeURIComponent(trimmed)}`);
+    };
+
     // Clear image search state when navigating to home
     const handleGoHome = () => {
+        setSearchQuery('');
         dispatch(clearImageSearch());
     };
 
@@ -242,7 +251,7 @@ const NewHeader: React.FC = () => {
                                         type="text"
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
-                                        onKeyDown={(e) => e.key === 'Enter' && console.log('search:', searchQuery)}
+                                        onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                                         placeholder={isSearching ? 'Searching by image...' : 'Search products...'}
                                         className={`w-full h-full bg-white/15 backdrop-blur-sm border border-white/20 rounded-l-full ${selectedImage ? 'pl-14' : 'pl-7'
                                             } pr-12 text-white placeholder-white/50 focus:bg-white/20 focus:border-white/30 focus:outline-none transition-all text-sm`}
@@ -250,6 +259,7 @@ const NewHeader: React.FC = () => {
 
                                     {/* Search submit button — inside, right side of input */}
                                     <button
+                                        onClick={handleSearch}
                                         className="absolute right-0 top-0 h-full px-5 bg-white/20 hover:bg-white/30 text-white rounded-r-none transition-colors flex items-center justify-center border-l border-white/20"
                                         title="Search"
                                     >
@@ -300,11 +310,14 @@ const NewHeader: React.FC = () => {
                                     )}
                                     <input
                                         type="text"
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                                         placeholder="Search products..."
                                         className={`w-full bg-white/15 border border-white/20 rounded-l-full py-2.5 ${selectedImage ? 'pl-11' : 'pl-4'} pr-12 text-white placeholder-white/50 focus:outline-none text-sm`}
                                     />
                                     {/* Search icon inside */}
-                                    <button className="absolute right-0 top-0 h-full px-3 bg-white/20 text-white rounded-r-none border-l border-white/20 flex items-center">
+                                    <button onClick={handleSearch} className="absolute right-0 top-0 h-full px-3 bg-white/20 text-white rounded-r-none border-l border-white/20 flex items-center">
                                         <FiSearch size={14} />
                                     </button>
                                 </div>

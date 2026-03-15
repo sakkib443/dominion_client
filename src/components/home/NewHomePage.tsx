@@ -17,6 +17,7 @@ const NewHomePage: React.FC = () => {
     const dispatch = useAppDispatch();
 
     const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || '');
+    const [searchTerm, setSearchTerm] = useState(searchParams.get('searchTerm') || '');
     const [page, setPage] = useState(1);
     const [accumulatedProducts, setAccumulatedProducts] = useState<any[]>([]);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -31,7 +32,9 @@ const NewHomePage: React.FC = () => {
 
     useEffect(() => {
         const cat = searchParams.get('category') || '';
+        const search = searchParams.get('searchTerm') || '';
         setSelectedCategory(cat);
+        setSearchTerm(search);
         setPage(1);
         setAccumulatedProducts([]);
     }, [searchParams]);
@@ -42,6 +45,7 @@ const NewHomePage: React.FC = () => {
         sort: '-createdAt',
     };
     if (selectedCategory) queryParams.category = selectedCategory;
+    if (searchTerm) queryParams.searchTerm = searchTerm;
 
     const { data: productsData, isLoading, isFetching } = useGetProductsQuery(queryParams);
     const { data: categoriesData } = useGetCategoriesQuery({});
@@ -71,13 +75,19 @@ const NewHomePage: React.FC = () => {
     const handleClearImageSearch = () => {
         dispatch(clearImageSearch());
         setPage(1);
-        // Use already-fetched products from RTK Query cache instead of empty array
-        // (setting [] won't re-trigger the useEffect since the query is cached)
         if (products.length > 0) {
             setAccumulatedProducts(products);
         } else {
             setAccumulatedProducts([]);
         }
+    };
+
+    // ── Handle clearing text search ─────────────────────────────────
+    const handleClearTextSearch = () => {
+        setSearchTerm('');
+        setPage(1);
+        setAccumulatedProducts([]);
+        window.history.pushState({}, '', '/');
     };
 
     // ── Handle category change ──────────────────────────────────────
@@ -260,8 +270,33 @@ const NewHomePage: React.FC = () => {
                     </div>
                 )}
 
-
-
+                {/* ── Text Search Results Banner ── */}
+                {searchTerm && !imageSearch.isActive && (
+                    <div className="mb-6 bg-white border border-gray-200 rounded-xl p-5 shadow-sm animate-fadeIn">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-full bg-[#0B4222]/10 flex items-center justify-center flex-shrink-0">
+                                    <FiSearch className="text-[#0B4222]" size={18} />
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-bold text-gray-800">
+                                        Search results for &quot;<span className="text-[#0B4222]">{searchTerm}</span>&quot;
+                                    </h3>
+                                    <p className="text-sm text-gray-500">
+                                        Found <span className="font-bold text-[#0B4222]">{meta?.total || displayProducts.length}</span> products
+                                    </p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={handleClearTextSearch}
+                                className="flex items-center gap-1.5 px-4 py-2 bg-gray-100 hover:bg-red-50 text-gray-500 hover:text-red-500 rounded-full text-sm font-semibold transition-colors"
+                            >
+                                <FiX size={14} />
+                                Clear
+                            </button>
+                        </div>
+                    </div>
+                )}
                 {/* ── Selected Category Title ── */}
                 {selectedCategory && (
                     <div className="flex items-center justify-between mb-6">

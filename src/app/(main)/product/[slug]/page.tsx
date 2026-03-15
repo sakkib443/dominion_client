@@ -3,11 +3,12 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { FiHeart, FiShoppingCart, FiMinus, FiPlus, FiCheckCircle, FiStar, FiPackage, FiTruck, FiShield, FiX, FiZoomIn, FiCopy, FiShare2, FiDownload, FiThumbsUp } from 'react-icons/fi';
+import { FiHeart, FiShoppingCart, FiMinus, FiPlus, FiCheckCircle, FiStar, FiPackage, FiTruck, FiShield, FiX, FiZoomIn, FiCopy, FiShare2, FiDownload, FiThumbsUp, FiChevronRight } from 'react-icons/fi';
 import { FaFacebookF, FaTwitter, FaPinterestP, FaWhatsapp, FaTiktok, FaInstagram } from 'react-icons/fa';
-import { useGetProductBySlugQuery } from '@/redux/api/productApi';
+import { useGetProductBySlugQuery, useGetRelatedProductsQuery } from '@/redux/api/productApi';
 import { useAppDispatch } from '@/redux';
 import { addToCart } from '@/redux/slices/cartSlice';
+import NewProductCard from '@/components/shared/NewProductCard';
 
 export default function ProductDetailsPage() {
     const { slug } = useParams();
@@ -27,6 +28,13 @@ export default function ProductDetailsPage() {
 
     const { data: productData, isLoading, isError } = useGetProductBySlugQuery(slug as string, { skip: !slug });
     const product = productData?.data;
+
+    // Fetch related products from the same category
+    const { data: relatedData } = useGetRelatedProductsQuery(
+        { id: product?._id, categoryId: product?.category?._id },
+        { skip: !product?._id || !product?.category?._id }
+    );
+    const relatedProducts = relatedData?.data || [];
 
     const handleAddToCart = () => {
         if (!product) return;
@@ -220,10 +228,10 @@ export default function ProductDetailsPage() {
             </div>
 
             <div className="container mx-auto px-4 py-3">
-                <div className="flex flex-col lg:flex-row gap-5 lg:h-[calc(100vh-260px)]">
+                <div className="flex flex-col lg:flex-row gap-5 lg:h-[480px]">
 
                     {/* ═══ LEFT: Image Gallery (Square, Optimized) ═══ */}
-                    <div className="w-full lg:w-[50%] flex gap-3 lg:h-full h-[45vh] min-h-[350px]">
+                    <div className="w-full lg:w-[50%] flex gap-3 h-[350px] lg:h-full">
                         {/* Thumbnails column */}
                         {allImages.length > 1 && (
                             <div className="flex flex-col gap-2.5 overflow-y-auto no-scrollbar h-full flex-shrink-0">
@@ -241,13 +249,13 @@ export default function ProductDetailsPage() {
 
                         {/* Main image — square, auto-resize, clickable for fullscreen */}
                         <div
-                            className="flex-1 bg-white rounded-xl overflow-hidden relative group shadow-sm h-full cursor-pointer"
+                            className="flex-1 bg-white rounded-2xl overflow-hidden relative group shadow-sm h-full cursor-pointer"
                             onClick={() => setIsFullscreen(true)}
                         >
                             <img
                                 src={allImages[selectedImage] || allImages[0]}
                                 alt={product.name}
-                                className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-[1.02]"
+                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
                                 onError={(e) => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/600x600/f3f4f6/9ca3af?text=No+Image'; }}
                             />
 
@@ -273,10 +281,10 @@ export default function ProductDetailsPage() {
                     </div>
 
                     {/* ═══ RIGHT: Product Info + Fixed Tabs at Bottom ═══ */}
-                    <div className="w-full lg:w-[50%] lg:h-full flex flex-col bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div className="w-full lg:w-[50%] lg:h-full h-[420px] flex flex-col bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
 
                         {/* ── Scrollable Content Area (above tabs) ── */}
-                        <div className="flex-1 overflow-y-auto custom-scrollbar p-5 sm:p-6">
+                        <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-5">
 
                             {/* === Overview Tab Content === */}
                             {activeTab === 'overview' && (
@@ -540,27 +548,82 @@ export default function ProductDetailsPage() {
                                 </div>
                             )}
                         </div>
+                    </div>
+                </div>
 
-                        {/* ═══ FIXED TABS at BOTTOM (Always visible) ═══ */}
-                        <div className="border-t border-gray-200 bg-white px-4 py-3 flex-shrink-0">
-                            <div className="flex gap-2 overflow-x-auto no-scrollbar">
-                                {tabs.map(tab => (
-                                    <button
-                                        key={tab.key}
-                                        onClick={() => setActiveTab(tab.key)}
-                                        className={`px-4 py-2 text-xs font-bold rounded-full transition-all whitespace-nowrap border ${activeTab === tab.key
-                                            ? 'bg-[#0B4222] text-white border-[#0B4222] shadow-sm'
-                                            : 'bg-gray-50 text-gray-500 border-gray-200 hover:border-[#0B4222] hover:text-[#0B4222] hover:bg-[#EDF2EE]/30'
-                                            }`}
-                                    >
-                                        {tab.label}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
+                {/* ═══ TABS below the product sections ═══ */}
+                <div className="flex justify-end mt-3">
+                    <div className="flex gap-2 overflow-x-auto no-scrollbar">
+                        {tabs.map(tab => (
+                            <button
+                                key={tab.key}
+                                onClick={() => setActiveTab(tab.key)}
+                                className={`px-4 py-2 text-xs font-bold rounded-full transition-all whitespace-nowrap border ${activeTab === tab.key
+                                    ? 'bg-[#0B4222] text-white border-[#0B4222] shadow-sm'
+                                    : 'bg-white text-gray-500 border-gray-200 hover:border-[#0B4222] hover:text-[#0B4222] hover:bg-[#EDF2EE]/30'
+                                    }`}
+                            >
+                                {tab.label}
+                            </button>
+                        ))}
                     </div>
                 </div>
             </div>
+
+            {/* ═══ Related Products Section ═══ */}
+            {relatedProducts.length > 0 && (
+                <div className="bg-white border-t border-gray-100 mt-4">
+                    <div className="container mx-auto px-4 py-8">
+                        {/* Section Header */}
+                        <div className="flex items-center justify-between mb-6">
+                            <div>
+                                <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
+                                    Related Products
+                                </h2>
+                                {product?.category?.name && (
+                                    <p className="text-sm text-gray-500 mt-1">
+                                        More from <span className="text-[#0B4222] font-semibold">{product.category.name}</span>
+                                    </p>
+                                )}
+                            </div>
+                            {product?.category?._id && (
+                                <Link
+                                    href={`/?category=${product.category._id}`}
+                                    className="flex items-center gap-1 text-sm font-semibold text-[#0B4222] hover:text-[#093519] bg-[#EDF2EE] hover:bg-[#d9e8db] px-4 py-2 rounded-full transition-all duration-200"
+                                >
+                                    View All
+                                    <FiChevronRight size={16} />
+                                </Link>
+                            )}
+                        </div>
+
+                        {/* Products Grid */}
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
+                            {relatedProducts.slice(0, 10).map((item: any) => (
+                                <NewProductCard
+                                    key={item._id}
+                                    product={{
+                                        id: item._id,
+                                        slug: item.slug,
+                                        name: item.name,
+                                        image: item.thumbnail,
+                                        price: item.discount > 0
+                                            ? item.price - (item.price * item.discount) / 100
+                                            : item.price,
+                                        originalPrice: item.originalPrice,
+                                        mrp: item.originalPrice || item.price,
+                                        discount: item.discount,
+                                        rating: item.rating,
+                                        reviews: item.reviewCount,
+                                        categoryName: item.category?.name || product?.category?.name,
+                                        priceType: item.priceType,
+                                    }}
+                                />
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
