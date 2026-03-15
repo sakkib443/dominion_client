@@ -10,7 +10,7 @@ import { addToWishlist } from '@/redux/slices/wishlistSlice';
 
 interface Product {
     _id?: string;
-    id: string;
+    id: string | number;
     slug?: string;
     name: string;
     image: string;
@@ -33,7 +33,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     const handleAddToCart = (e: React.MouseEvent) => {
         e.preventDefault();
         dispatch(addToCart({
-            id: product.id,
+            id: String(product._id || product.id),
             name: product.name,
             price: product.price,
             mrp: product.mrp || product.originalPrice || product.price,
@@ -45,7 +45,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     const handleAddToWishlist = (e: React.MouseEvent) => {
         e.preventDefault();
         dispatch(addToWishlist({
-            id: product.id,
+            id: String(product._id || product.id),
             name: product.name,
             price: product.price,
             mrp: product.mrp || product.originalPrice || product.price,

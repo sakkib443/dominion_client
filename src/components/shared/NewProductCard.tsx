@@ -7,7 +7,7 @@ import { addToCart } from '@/redux/slices/cartSlice';
 
 interface Product {
     _id?: string;
-    id: string;
+    id: string | number;
     slug?: string;
     name: string;
     image: string;
@@ -34,7 +34,7 @@ const NewProductCard: React.FC<NewProductCardProps> = ({ product }) => {
     const handleAddToCart = (e: React.MouseEvent) => {
         e.preventDefault();
         dispatch(addToCart({
-            id: product._id || product.id,
+            id: String(product._id || product.id),
             name: product.name,
             price: product.price,
             mrp: product.mrp || product.originalPrice || product.price,
