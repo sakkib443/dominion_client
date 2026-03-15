@@ -329,3 +329,102 @@ h6 {
 .custom-scrollbar:hover::-webkit-scrollbar-thumb {
   background: #CBD5E1;
 }
+
+/* ===== Preloader Animations ===== */
+@keyframes preloaderSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes preloaderSpinSlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes preloaderSpinReverse {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
+}
+
+@keyframes preloaderFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -30px) scale(1.05); }
+  66% { transform: translate(-20px, 20px) scale(0.95); }
+}
+
+@keyframes preloaderFloatReverse {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(-30px, 30px) scale(0.95); }
+  66% { transform: translate(20px, -20px) scale(1.05); }
+}
+
+@keyframes preloaderPulseSlow {
+  0%, 100% { opacity: 0.2; transform: translate(-50%, -50%) scale(1); }
+  50% { opacity: 0.4; transform: translate(-50%, -50%) scale(1.1); }
+}
+
+@keyframes preloaderPulseGlow {
+  0%, 100% { box-shadow: 0 0 20px rgba(110, 231, 183, 0.1); }
+  50% { box-shadow: 0 0 40px rgba(110, 231, 183, 0.25); }
+}
+
+@keyframes preloaderTextReveal {
+  0% { opacity: 0; letter-spacing: 0.8em; filter: blur(8px); }
+  100% { opacity: 1; letter-spacing: 0.2em; filter: blur(0); }
+}
+
+@keyframes preloaderLineExpand {
+  0% { width: 0; opacity: 0; }
+  100% { width: 100%; opacity: 1; }
+}
+
+@keyframes preloaderFadeInDelay {
+  0%, 50% { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes preloaderParticle {
+  0%, 100% { opacity: 0; transform: translateY(0) scale(0.5); }
+  50% { opacity: 1; transform: translateY(-30px) scale(1); }
+}
+
+.preloader-spin {
+  animation: preloaderSpin 2s linear infinite;
+}
+
+.preloader-spin-slow {
+  animation: preloaderSpinSlow 8s linear infinite;
+}
+
+.preloader-spin-reverse {
+  animation: preloaderSpinReverse 3s linear infinite;
+}
+
+.preloader-float {
+  animation: preloaderFloat 8s ease-in-out infinite;
+}
+
+.preloader-float-reverse {
+  animation: preloaderFloatReverse 10s ease-in-out infinite;
+}
+
+.preloader-pulse-slow {
+  animation: preloaderPulseSlow 4s ease-in-out infinite;
+}
+
+.preloader-pulse-glow {
+  animation: preloaderPulseGlow 2s ease-in-out infinite;
+}
+
+.preloader-text-reveal {
+  animation: preloaderTextReveal 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.preloader-line-expand {
+  animation: preloaderLineExpand 1.5s ease-out 0.5s forwards;
+  width: 0;
+}
+
+.preloader-fade-in-delay {
+  animation: preloaderFadeInDelay 1.5s ease-out forwards;
+}
