@@ -148,6 +148,8 @@ const AdminDashboard: React.FC = () => {
     const recentOrders = ordersData?.data || [];
     const topProducts = productsData?.data || [];
     const monthlyRevenue = revenueData?.data || { labels: [], revenue: [], orders: [] };
+    const labels = monthlyRevenue.labels || [];
+    const revenue = monthlyRevenue.revenue || [];
 
     const isLoading = isSummaryLoading || isOrdersLoading || isProductsLoading || isRevenueLoading;
 
@@ -301,11 +303,11 @@ const AdminDashboard: React.FC = () => {
 
                     {/* Chart */}
                     <div className="h-72 flex items-end justify-between gap-3 px-2">
-                        {monthlyRevenue.labels.length > 0 ? (
-                            monthlyRevenue.labels.map((month: string, i: number) => {
-                                const rev = monthlyRevenue.revenue[i] || 0;
+                        {labels.length > 0 ? (
+                            labels.map((month: string, i: number) => {
+                                const rev = revenue[i] || 0;
                                 // Calculate height relative to max revenue
-                                const maxRev = Math.max(...monthlyRevenue.revenue, 1);
+                                const maxRev = Math.max(...revenue, 1);
                                 const heightPercentage = (rev / maxRev) * 100;
 
                                 return (

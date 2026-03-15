@@ -1,15 +1,15 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAppDispatch } from '@/redux/hooks';
 import { loginSuccess } from '@/redux/slices/authSlice';
 import { useLoginMutation } from '@/redux/api/authApi';
 import { toast } from 'react-hot-toast';
-import { FiMail, FiLock, FiEye, FiEyeOff, FiArrowRight } from 'react-icons/fi';
+import { FiMail, FiLock, FiEye, FiEyeOff, FiArrowRight, FiAlertCircle } from 'react-icons/fi';
 
-const LoginPage = () => {
+const LoginPageInner = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [formData, setFormData] = useState({
         email: '',
@@ -17,8 +17,12 @@ const LoginPage = () => {
     });
 
     const router = useRouter();
+    const searchParams = useSearchParams();
     const dispatch = useAppDispatch();
     const [login, { isLoading }] = useLoginMutation();
+
+    const isExpired = searchParams.get('expired') === 'true';
+    const redirectPath = searchParams.get('redirect');
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -47,8 +51,10 @@ const LoginPage = () => {
                 },
             });
 
-            // Redirect based on role
-            if (res.data.user.role === 'admin') {
+            // Redirect to saved path or based on role
+            if (redirectPath) {
+                router.push(redirectPath);
+            } else if (res.data.user.role === 'admin') {
                 router.push('/dashboard/admin');
             } else {
                 router.push('/dashboard/user');
@@ -62,6 +68,17 @@ const LoginPage = () => {
 
     return (
         <div className="bg-white p-8 rounded-md shadow-2xl shadow-gray-200 border border-gray-100">
+            {/* Session Expired Warning */}
+            {isExpired && (
+                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-md flex items-center gap-3">
+                    <FiAlertCircle size={20} className="text-red-500 flex-shrink-0" />
+                    <div>
+                        <p className="text-sm font-bold text-red-700">Session Expired</p>
+                        <p className="text-xs text-red-600">Your session has expired. Please login again to continue.</p>
+                    </div>
+                </div>
+            )}
+
             <div className="text-center mb-10">
                 <h1 className="text-3xl font-black text-gray-900 mb-2">Welcome Back</h1>
                 <p className="text-gray-500 font-medium">Please enter your details to sign in</p>
@@ -156,6 +173,15 @@ const LoginPage = () => {
                 </p>
             </div>
         </div>
+    );
+};
+
+// Wrap with Suspense for useSearchParams
+const LoginPage = () => {
+    return (
+        <Suspense fallback={<div className="p-8 text-center">Loading...</div>}>
+            <LoginPageInner />
+        </Suspense>
     );
 };
 

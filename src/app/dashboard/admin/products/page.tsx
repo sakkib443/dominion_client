@@ -24,7 +24,7 @@ const ProductsPage = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [page, setPage] = useState(1);
     const { data: productsData, isLoading, refetch } = useGetProductsQuery({
-        search: searchTerm,
+        searchTerm: searchTerm || undefined,
         page: page,
         limit: 10
     });

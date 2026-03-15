@@ -29,10 +29,6 @@ export const dashboardApi = baseApi.injectEndpoints({
             query: () => '/analytics/sales-by-category',
             providesTags: ['Analytics', 'Products'],
         }),
-        getOrderStats: builder.query({
-            query: () => '/orders/admin/stats',
-            providesTags: ['Orders'],
-        }),
         getApiHealth: builder.query({
             query: () => '/health',
             providesTags: ['Stats'],
@@ -47,6 +43,5 @@ export const {
     useGetRecentOrdersQuery,
     useGetTopProductsQuery,
     useGetSalesByCategoryQuery,
-    useGetOrderStatsQuery,
     useGetApiHealthQuery,
 } = dashboardApi;
