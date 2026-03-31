@@ -273,6 +273,21 @@ h6 {
   animation-play-state: paused;
 }
 
+/* ===== Product Card Tagline Marquee ===== */
+@keyframes marqueeCard {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee-card {
+  display: inline-block;
+  animation: marqueeCard 8s linear infinite;
+}
+
 /* ===== Hover Effects ===== */
 .hover-lift {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -427,4 +442,41 @@ h6 {
 
 .preloader-fade-in-delay {
   animation: preloaderFadeInDelay 1.5s ease-out forwards;
+}
+
+/* ===== Cart Icon Bounce + Glow Animation ===== */
+@keyframes cartBounceGlow {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes cartGlowPulse {
+  0%, 100% {
+    box-shadow: 0 0 0px transparent;
+  }
+  50% {
+    box-shadow: 0 0 10px rgba(11, 66, 34, 0.35), 0 0 20px rgba(11, 66, 34, 0.15);
+  }
+}
+
+.cart-icon-animate {
+  animation: cartBounceGlow 2s ease-in-out infinite;
+  border-radius: 50%;
+}
+
+.cart-icon-animate::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  animation: cartGlowPulse 2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.cart-icon-animate:hover {
+  animation-play-state: paused;
 }
