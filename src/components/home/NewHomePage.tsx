@@ -192,7 +192,7 @@ const NewHomePage: React.FC = () => {
         return (
             <div className="min-h-screen bg-gray-50">
                 <div className="w-[95%] mx-auto py-6">
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
                         {[...Array(10)].map((_, i) => (
                             <div key={i} className="bg-white border border-gray-200 rounded-md overflow-hidden animate-pulse">
                                 <div className="aspect-square bg-gray-200" />
@@ -314,7 +314,7 @@ const NewHomePage: React.FC = () => {
                 )}
 
                 {/* ── Product Grid ── */}
-                <div className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 transition-opacity duration-200 ${(isFetching && page === 1) ? 'opacity-60' : 'opacity-100'}`}>
+                <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 transition-opacity duration-200 ${(isFetching && page === 1) ? 'opacity-60' : 'opacity-100'}`}>
                     {displayProducts.map((product: any) => (
                         <NewProductCard
                             key={product._id}
@@ -384,7 +384,7 @@ const NewHomePage: React.FC = () => {
 
                 {/* ── Loading more skeleton ── */}
                 {isLoadingMore && (
-                    <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
+                    <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
                         {[...Array(5)].map((_, i) => (
                             <div key={`skeleton-${i}`} className="bg-white border border-gray-200 rounded-md overflow-hidden animate-pulse">
                                 <div className="aspect-square bg-gray-200" />
