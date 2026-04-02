@@ -374,23 +374,23 @@ const NewHeader: React.FC = () => {
                 </div>
 
                 {/* Scrolling Offer Ticker */}
-                <div className="bg-[#0B4222]/15 py-1 overflow-hidden">
+                <div className="bg-[#0B4222]/15 py-0.5 overflow-hidden">
                     <div className="animate-marquee whitespace-nowrap">
-                        <span className="text-[#0B4222] text-sm font-semibold mx-8">Supply</span>
-                        <span className="text-[#0B4222] text-sm font-semibold mx-8">Solution</span>
-                        <span className="text-[#0B4222] text-sm font-semibold mx-8">Satisfaction</span>
-                        <span className="text-[#E4525C] text-sm font-medium mx-8">🎉 Special Offer: Get 50% OFF on all Electronics! Limited Time Only!</span>
+                        <span className="text-[#E4525C] text-sm font-normal mx-8">Supply</span>
+                        <span className="text-[#E4525C] text-sm font-normal mx-8">Solution</span>
+                        <span className="text-[#E4525C] text-sm font-normal mx-8">Satisfaction</span>
+                        <span className="text-[#E4525C] text-sm font-normal mx-8">🎉 Special Offer: Get 50% OFF on all Electronics! Limited Time Only!</span>
                         <span className="text-[#E4525C]/50 mx-2">•</span>
-                        <span className="text-[#E4525C] text-sm font-medium mx-8">🚚 Free Shipping on orders over Tk.5000</span>
+                        <span className="text-[#E4525C] text-sm font-normal mx-8">🚚 Free Shipping on orders over Tk.5000</span>
                         <span className="text-[#E4525C]/50 mx-2">•</span>
-                        <span className="text-[#E4525C] text-sm font-medium mx-8">💳 Extra 10% Cashback with bKash Payment</span>
+                        <span className="text-[#E4525C] text-sm font-normal mx-8">💳 Extra 10% Cashback with bKash Payment</span>
                         <span className="text-[#E4525C]/50 mx-2">•</span>
-                        <span className="text-[#0B4222] text-sm font-semibold mx-8">Supply</span>
-                        <span className="text-[#0B4222] text-sm font-semibold mx-8">Solution</span>
-                        <span className="text-[#0B4222] text-sm font-semibold mx-8">Satisfaction</span>
-                        <span className="text-[#E4525C] text-sm font-medium mx-8">🔥 Flash Sale: Up to 70% OFF on Fashion Items</span>
+                        <span className="text-[#E4525C] text-sm font-normal mx-8">Supply</span>
+                        <span className="text-[#E4525C] text-sm font-normal mx-8">Solution</span>
+                        <span className="text-[#E4525C] text-sm font-normal mx-8">Satisfaction</span>
+                        <span className="text-[#E4525C] text-sm font-normal mx-8">🔥 Flash Sale: Up to 70% OFF on Fashion Items</span>
                         <span className="text-[#E4525C]/50 mx-2">•</span>
-                        <span className="text-[#E4525C] text-sm font-medium mx-8">📱 Download Our App & Get Tk.100 Discount</span>
+                        <span className="text-[#E4525C] text-sm font-normal mx-8">📱 Download Our App & Get Tk.100 Discount</span>
                     </div>
                 </div>
             </header>

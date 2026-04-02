@@ -212,7 +212,7 @@ export default function ProductDetailsPage() {
                 <div className="container" style={{ padding: '10px 1rem' }}>
                     {/* Product Name + Code */}
                     <h1 style={{
-                        fontSize: '15px', fontWeight: 700, color: '#1a1a1a',
+                        fontSize: '20px', fontWeight: 700, color: '#1a1a1a',
                         margin: 0, lineHeight: 1.4
                     }}>
                         {product.sku ? `${product.sku}: ` : ''}{product.name}

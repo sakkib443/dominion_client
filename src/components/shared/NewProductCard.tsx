@@ -106,7 +106,7 @@ const NewProductCard: React.FC<NewProductCardProps> = ({ product }) => {
                     </div>
 
                     {/* Product Info */}
-                    <div className='px-3 pt-2.5 pb-1.5 space-y-1 text-center'>
+                    <div className='px-3 pt-2.5 pb-1.5 space-y-0.5 text-center'>
                         {/* Product Name */}
                         <h3 className='text-gray-900 font-semibold text-sm line-clamp-1 group-hover:text-[#0B4222] transition-colors'>
                             {product.name}
