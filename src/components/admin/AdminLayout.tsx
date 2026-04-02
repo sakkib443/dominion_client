@@ -8,29 +8,16 @@ import {
     FiHome,
     FiShoppingBag,
     FiUsers,
-    FiShoppingCart,
-    FiPackage,
-    FiSettings,
-    FiBarChart2,
-    FiTag,
+    FiCreditCard,
     FiGrid,
-    FiFileText,
-    FiMessageSquare,
     FiLogOut,
     FiMenu,
     FiX,
     FiBell,
     FiSearch,
     FiChevronDown,
-    FiDroplet,
-    FiCreditCard,
-    FiTruck,
-    FiStar,
-    FiImage,
     FiGlobe,
-    FiMail,
-    FiChevronRight,
-    FiActivity,
+    FiUser,
 } from 'react-icons/fi';
 
 interface AdminLayoutProps {
@@ -55,7 +42,7 @@ const menuItems = [
         ]
     },
     {
-        name: 'Categories',
+        name: 'Category',
         href: '/dashboard/admin/categories',
         icon: FiGrid,
         badge: null,
@@ -65,68 +52,23 @@ const menuItems = [
         ]
     },
     {
-        name: 'Orders',
-        href: '/dashboard/admin/orders',
-        icon: FiShoppingCart,
-        badge: '12',
-        badgeColor: 'bg-red-500'
-    },
-    {
-        name: 'Customers',
-        href: '/dashboard/admin/customers',
-        icon: FiUsers,
-        badge: null
-    },
-    {
-        name: 'Payments',
+        name: 'Payment',
         href: '/dashboard/admin/payments',
         icon: FiCreditCard,
         badge: null
     },
     {
-        name: 'Shipping',
-        href: '/dashboard/admin/shipping',
-        icon: FiTruck,
+        name: 'User',
+        href: '/dashboard/admin/customers',
+        icon: FiUsers,
         badge: null
     },
     {
-        name: 'Reviews',
-        href: '/dashboard/admin/reviews',
-        icon: FiStar,
-        badge: '5',
-        badgeColor: 'bg-yellow-500'
-    },
-    {
-        name: 'Coupons',
-        href: '/dashboard/admin/coupons',
-        icon: FiTag,
+        name: 'Profile',
+        href: '/dashboard/admin/profile',
+        icon: FiUser,
         badge: null
     },
-    {
-        name: 'Analytics',
-        href: '/dashboard/admin/analytics',
-        icon: FiBarChart2,
-        badge: null
-    },
-    {
-        name: 'System Health',
-        href: '/dashboard/admin/health',
-        icon: FiActivity,
-        badge: null
-    },
-    {
-        name: 'API Scanner',
-        href: '/dashboard/admin/scanner',
-        icon: FiSearch,
-        badge: null
-    },
-];
-
-const settingsItems = [
-    { name: 'General', href: '/dashboard/admin/settings', icon: FiSettings },
-    { name: 'Theme', href: '/dashboard/admin/theme', icon: FiDroplet },
-    { name: 'Site Content', href: '/dashboard/admin/content', icon: FiFileText },
-    { name: 'Media', href: '/dashboard/admin/media', icon: FiImage },
 ];
 
 const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
@@ -250,20 +192,11 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                                         <item.icon size={20} className={parentActive ? 'text-[#0B4222]' : ''} />
                                         {sidebarOpen && <span className="font-medium">{item.name}</span>}
                                     </div>
-                                    {sidebarOpen && (
-                                        <div className="flex items-center gap-2">
-                                            {item.badge && (
-                                                <span className={`px-2 py-0.5 text-xs font-bold rounded-full ${item.badgeColor || 'bg-gray-600'}`}>
-                                                    {item.badge}
-                                                </span>
-                                            )}
-                                            {hasSubmenu && (
-                                                <FiChevronDown
-                                                    size={16}
-                                                    className={`transition-transform ${isExpanded ? 'rotate-180' : ''}`}
-                                                />
-                                            )}
-                                        </div>
+                                    {sidebarOpen && hasSubmenu && (
+                                        <FiChevronDown
+                                            size={16}
+                                            className={`transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                                        />
                                     )}
                                 </Link>
 
@@ -291,33 +224,6 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                                     </div>
                                 )}
                             </div>
-                        );
-                    })}
-
-                    {/* Settings Section */}
-                    {sidebarOpen && (
-                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 mt-8 mb-3">
-                            Settings
-                        </p>
-                    )}
-
-                    {settingsItems.map((item) => {
-                        const active = pathname === item.href;
-                        return (
-                            <Link
-                                key={item.name}
-                                href={item.href}
-                                className={`
-                                    flex items-center gap-3 px-4 py-3 rounded-md transition-all duration-200
-                                    ${active
-                                        ? 'bg-white/10 text-white'
-                                        : 'text-gray-400 hover:bg-white/5 hover:text-white'
-                                    }
-                                `}
-                            >
-                                <item.icon size={20} />
-                                {sidebarOpen && <span className="font-medium">{item.name}</span>}
-                            </Link>
                         );
                     })}
                 </nav>

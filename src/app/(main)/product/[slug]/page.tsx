@@ -27,6 +27,7 @@ export default function ProductDetailsPage() {
     const [isLiked, setIsLiked] = useState(false);
     const [likeCount, setLikeCount] = useState(0);
     const [selectedColor, setSelectedColor] = useState<string>('');
+    const [activeInfoPanel, setActiveInfoPanel] = useState<'delivery' | 'payment' | 'terms' | null>(null);
     const colorSwatchRef = useRef<HTMLDivElement>(null);
     const detailsRef = useRef<HTMLDivElement>(null);
 
@@ -219,18 +220,18 @@ export default function ProductDetailsPage() {
 
                     {/* Warranty / Guarantee Text */}
                     {product.shortDescription ? (
-                        <p style={{ fontSize: '11px', color: '#16a34a', fontWeight: 600, margin: '2px 0 6px' }}>
+                        <p style={{ fontSize: '11px', color: '#E4525C', fontWeight: 600, margin: '2px 0 6px' }}>
                             {product.shortDescription}
                         </p>
                     ) : (
-                        <p style={{ fontSize: '11px', color: '#16a34a', fontWeight: 600, margin: '2px 0 6px' }}>
+                        <p style={{ fontSize: '11px', color: '#E4525C', fontWeight: 600, margin: '2px 0 6px' }}>
                             Warranty: Service Warranty Available
                         </p>
                     )}
 
                     {/* Stats Row */}
                     <div style={{
-                        display: 'flex', alignItems: 'center', gap: '12px',
+                        display: 'flex', alignItems: 'center', gap: '28px',
                         flexWrap: 'wrap', fontSize: '12px', color: '#555'
                     }}>
                         {/* Sold */}
@@ -315,13 +316,13 @@ export default function ProductDetailsPage() {
             {/* ═══ MAIN CONTENT AREA ═══ */}
             <div className="container" style={{ padding: '0 1rem' }}>
                 <div style={{
-                    display: 'flex', gap: 0,
-                    height: '480px',
+                    display: 'flex', flexWrap: 'wrap', gap: 0,
                 }}>
 
                     {/* ═══ LEFT SECTION: Color Swatches + Product Image ═══ */}
                     <div style={{
-                        display: 'flex', flex: '0 0 60%', maxWidth: '60%',
+                        display: 'flex', flex: '0 0 50%', maxWidth: '50%',
+                        height: '480px',
                     }}>
                         {/* Color Swatches Column */}
                         <div style={{
@@ -400,9 +401,8 @@ export default function ProductDetailsPage() {
                                 src={allImages[selectedImage] || allImages[0]}
                                 alt={product.name}
                                 style={{
-                                    maxWidth: '100%', maxHeight: '100%',
-                                    objectFit: 'contain', transition: 'transform 0.3s ease',
-                                    padding: '20px',
+                                    width: '100%', height: '100%',
+                                    objectFit: 'cover', transition: 'transform 0.3s ease',
                                 }}
                                 onError={(e) => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/600x600/f3f4f6/9ca3af?text=No+Image'; }}
                             />
@@ -445,10 +445,11 @@ export default function ProductDetailsPage() {
 
                     {/* ═══ RIGHT SECTION: Price + Product Details ═══ */}
                     <div style={{
-                        flex: '0 0 40%', maxWidth: '40%',
-                        borderLeft: '1px solid #e5e7eb',
+                        flex: '0 0 50%', maxWidth: '50%',
+                        borderLeft: '1px solid #e5e7eb', paddingLeft: '20px',
                         display: 'flex', flexDirection: 'column',
                         position: 'relative',
+                        height: '480px',
                     }}>
                         {/* Up Scroll Arrow for details */}
                         <button
@@ -463,6 +464,110 @@ export default function ProductDetailsPage() {
                             <FiChevronUp size={18} />
                         </button>
 
+                        {/* ── Info Panel Overlay ── */}
+                        {activeInfoPanel && (
+                            <div style={{
+                                position: 'absolute', inset: 0, zIndex: 10,
+                                background: '#fff', overflowY: 'auto',
+                                padding: '16px 20px',
+                                animation: 'fadeIn 0.2s ease-out',
+                            }} className="no-scrollbar">
+                                {/* Close Button */}
+                                <button
+                                    onClick={() => setActiveInfoPanel(null)}
+                                    style={{
+                                        position: 'absolute', top: '10px', right: '10px',
+                                        width: '32px', height: '32px', borderRadius: '50%',
+                                        background: '#f3f4f6', border: 'none', cursor: 'pointer',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        color: '#333', zIndex: 11,
+                                        transition: 'all 0.2s ease',
+                                    }}
+                                    onMouseEnter={(e) => { (e.target as HTMLElement).style.background = '#e5e7eb'; }}
+                                    onMouseLeave={(e) => { (e.target as HTMLElement).style.background = '#f3f4f6'; }}
+                                >
+                                    <FiX size={16} />
+                                </button>
+
+                                {/* Delivery Info */}
+                                {activeInfoPanel === 'delivery' && (
+                                    <div>
+                                        <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#1a1a1a', margin: '0 0 14px 0', borderBottom: '1px solid #e5e7eb', paddingBottom: '8px' }}>Delivery Information</h3>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13px', color: '#444', lineHeight: 1.7 }}>
+                                            <div style={{ background: '#f9fafb', padding: '10px 12px', borderRadius: '6px', border: '1px solid #e5e7eb' }}>
+                                                <strong style={{ color: '#1a1a1a' }}>Inside Dhaka:</strong>
+                                                <p style={{ margin: '4px 0 0' }}>Delivery within 1-2 business days. Delivery charge: ৳60-80</p>
+                                            </div>
+                                            <div style={{ background: '#f9fafb', padding: '10px 12px', borderRadius: '6px', border: '1px solid #e5e7eb' }}>
+                                                <strong style={{ color: '#1a1a1a' }}>Outside Dhaka:</strong>
+                                                <p style={{ margin: '4px 0 0' }}>Delivery within 3-5 business days. Delivery charge: ৳100-150</p>
+                                            </div>
+                                            <div style={{ padding: '6px 0' }}>
+                                                <strong style={{ color: '#1a1a1a' }}>Packaging:</strong> All products are carefully packaged to ensure safe delivery.
+                                            </div>
+                                            <div style={{ padding: '6px 0' }}>
+                                                <strong style={{ color: '#1a1a1a' }}>Tracking:</strong> You will receive a tracking number via SMS once your order is shipped.
+                                            </div>
+                                            <div style={{ padding: '6px 0', color: '#888', fontSize: '12px' }}>
+                                                * Delivery times may vary during holidays and peak seasons.
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Payment Info */}
+                                {activeInfoPanel === 'payment' && (
+                                    <div>
+                                        <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#1a1a1a', margin: '0 0 14px 0', borderBottom: '1px solid #e5e7eb', paddingBottom: '8px' }}>Payment Methods</h3>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13px', color: '#444', lineHeight: 1.7 }}>
+                                            <div style={{ background: '#f9fafb', padding: '10px 12px', borderRadius: '6px', border: '1px solid #e5e7eb' }}>
+                                                <strong style={{ color: '#1a1a1a' }}>Cash on Delivery (COD)</strong>
+                                                <p style={{ margin: '4px 0 0' }}>Pay when you receive your product. Available for all locations.</p>
+                                            </div>
+                                            <div style={{ background: '#f9fafb', padding: '10px 12px', borderRadius: '6px', border: '1px solid #e5e7eb' }}>
+                                                <strong style={{ color: '#1a1a1a' }}>bKash / Nagad / Rocket</strong>
+                                                <p style={{ margin: '4px 0 0' }}>Mobile banking payment accepted. Send money to our number and confirm via order notes.</p>
+                                            </div>
+                                            <div style={{ background: '#f9fafb', padding: '10px 12px', borderRadius: '6px', border: '1px solid #e5e7eb' }}>
+                                                <strong style={{ color: '#1a1a1a' }}>Bank Transfer</strong>
+                                                <p style={{ margin: '4px 0 0' }}>Direct bank transfer available. Contact us for bank details.</p>
+                                            </div>
+                                            <div style={{ padding: '6px 0', color: '#888', fontSize: '12px' }}>
+                                                * All payments are secure and encrypted.
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Terms & Conditions */}
+                                {activeInfoPanel === 'terms' && (
+                                    <div>
+                                        <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#1a1a1a', margin: '0 0 14px 0', borderBottom: '1px solid #e5e7eb', paddingBottom: '8px' }}>Terms & Conditions</h3>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13px', color: '#444', lineHeight: 1.7 }}>
+                                            <div style={{ background: '#f9fafb', padding: '10px 12px', borderRadius: '6px', border: '1px solid #e5e7eb' }}>
+                                                <strong style={{ color: '#1a1a1a' }}>Return Policy</strong>
+                                                <p style={{ margin: '4px 0 0' }}>Products can be returned within 7 days of delivery if damaged or defective. Item must be in original packaging.</p>
+                                            </div>
+                                            <div style={{ background: '#f9fafb', padding: '10px 12px', borderRadius: '6px', border: '1px solid #e5e7eb' }}>
+                                                <strong style={{ color: '#1a1a1a' }}>Warranty</strong>
+                                                <p style={{ margin: '4px 0 0' }}>Warranty is applicable as mentioned in the product details. Service warranty covers manufacturing defects only.</p>
+                                            </div>
+                                            <div style={{ background: '#f9fafb', padding: '10px 12px', borderRadius: '6px', border: '1px solid #e5e7eb' }}>
+                                                <strong style={{ color: '#1a1a1a' }}>Refund Policy</strong>
+                                                <p style={{ margin: '4px 0 0' }}>Refunds are processed within 5-7 business days after the return is approved. Refund will be made to the original payment method.</p>
+                                            </div>
+                                            <div style={{ padding: '6px 0' }}>
+                                                <strong style={{ color: '#1a1a1a' }}>Order Cancellation:</strong> Orders can be cancelled before they are shipped. Contact our support team for assistance.
+                                            </div>
+                                            <div style={{ padding: '6px 0', color: '#888', fontSize: '12px' }}>
+                                                * Terms are subject to change. Please check this section regularly.
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
                         {/* Scrollable Content */}
                         <div
                             ref={detailsRef}
@@ -476,7 +581,7 @@ export default function ProductDetailsPage() {
                             <div style={{ marginBottom: '16px' }}>
                                 <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', flexWrap: 'wrap' }}>
                                     <span style={{
-                                        fontSize: '20px', fontWeight: 800, color: '#dc2626'
+                                        fontSize: '20px', fontWeight: 800, color: '#1a1a1a'
                                     }}>
                                         Price Tk.{discountedPrice.toLocaleString()}
                                     </span>
@@ -569,79 +674,81 @@ export default function ProductDetailsPage() {
                             <FiChevronDown size={18} />
                         </button>
                     </div>
-                </div>
-            </div>
 
-            {/* ═══ ACTION BAR (ADD TO CART / BUY NOW) ═══ */}
-            <div style={{
-                display: 'flex', alignItems: 'stretch',
-                height: '52px', boxShadow: '0 2px 10px rgba(0,0,0,0.08)',
-            }}>
-                {/* ADD TO CART Section */}
-                <div style={{
-                    display: 'flex', alignItems: 'center',
-                    background: '#16a34a', flex: 1,
-                }}>
-                    <button
-                        onClick={handleAddToCart}
-                        disabled={product.stock === 0}
-                        style={{
-                            display: 'flex', alignItems: 'center', gap: '6px',
-                            background: 'none', border: 'none', color: '#fff',
-                            fontWeight: 800, fontSize: '13px', cursor: 'pointer',
-                            padding: '0 16px', height: '100%', letterSpacing: '0.5px',
-                            textTransform: 'uppercase',
-                            opacity: product.stock === 0 ? 0.5 : 1,
-                        }}
-                    >
-                        {addedToCart ? (
-                            <><FiCheckCircle size={16} /> ADDED!</>
-                        ) : (
-                            'ADD TO CART'
-                        )}
-                    </button>
-                    <div style={{ display: 'flex', alignItems: 'center', marginLeft: 'auto' }}>
-                        <button onClick={() => setQuantity(Math.max(1, quantity - 1))} style={{ background: '#14532d', border: 'none', color: '#fff', width: '36px', height: '52px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: 700 }}>−</button>
-                        <div style={{ background: '#14532d', color: '#fff', width: '40px', height: '52px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '14px' }}>{String(quantity).padStart(2, '0')}</div>
-                        <button onClick={() => setQuantity(Math.min(product.stock || 99, quantity + 1))} style={{ background: '#14532d', border: 'none', color: '#fff', width: '36px', height: '52px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: 700 }}>+</button>
+                    {/* ═══ ACTION BAR (ADD TO CART / BUY NOW) — under left section only ═══ */}
+                    <div style={{
+                        display: 'flex', alignItems: 'stretch', justifyContent: 'space-between',
+                        height: '52px', flex: '0 0 50%', maxWidth: '50%',
+                    }}>
+                        {/* ADD TO CART Section */}
+                        <div style={{
+                            display: 'flex', alignItems: 'center',
+                            background: '#16a34a',
+                        }}>
+                            <button
+                                onClick={handleAddToCart}
+                                disabled={product.stock === 0}
+                                style={{
+                                    display: 'flex', alignItems: 'center', gap: '6px',
+                                    background: 'none', border: 'none', color: '#fff',
+                                    fontWeight: 800, fontSize: '13px', cursor: 'pointer',
+                                    padding: '0 16px', height: '100%', letterSpacing: '0.5px',
+                                    textTransform: 'uppercase',
+                                    opacity: product.stock === 0 ? 0.5 : 1,
+                                    whiteSpace: 'nowrap',
+                                }}
+                            >
+                                {addedToCart ? (
+                                    <><FiCheckCircle size={16} /> ADDED!</>
+                                ) : (
+                                    'ADD TO CART'
+                                )}
+                            </button>
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                                <button onClick={() => setQuantity(Math.max(1, quantity - 1))} style={{ background: '#14532d', border: 'none', color: '#fff', width: '36px', height: '52px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: 700 }}>−</button>
+                                <div style={{ background: '#14532d', color: '#fff', width: '40px', height: '52px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '14px' }}>{String(quantity).padStart(2, '0')}</div>
+                                <button onClick={() => setQuantity(Math.min(product.stock || 99, quantity + 1))} style={{ background: '#14532d', border: 'none', color: '#fff', width: '36px', height: '52px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: 700 }}>+</button>
+                            </div>
+                        </div>
+                        {/* BUY NOW Section */}
+                        <div style={{
+                            display: 'flex', alignItems: 'center',
+                            background: '#1a1a1a',
+                        }}>
+                            <button
+                                disabled={product.stock === 0}
+                                style={{
+                                    display: 'flex', alignItems: 'center', gap: '6px',
+                                    background: 'none', border: 'none', color: '#fff',
+                                    fontWeight: 800, fontSize: '13px', cursor: 'pointer',
+                                    padding: '0 16px', height: '100%', letterSpacing: '0.5px',
+                                    textTransform: 'uppercase',
+                                    opacity: product.stock === 0 ? 0.5 : 1,
+                                    whiteSpace: 'nowrap',
+                                }}
+                            >
+                                BUY NOW
+                            </button>
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                                <button onClick={() => setBuyNowQty(Math.max(1, buyNowQty - 1))} style={{ background: '#333', border: 'none', color: '#fff', width: '36px', height: '52px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: 700 }}>−</button>
+                                <div style={{ background: '#333', color: '#fff', width: '40px', height: '52px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '14px' }}>{String(buyNowQty).padStart(2, '0')}</div>
+                                <button onClick={() => setBuyNowQty(Math.min(product.stock || 99, buyNowQty + 1))} style={{ background: '#333', border: 'none', color: '#fff', width: '36px', height: '52px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: 700 }}>+</button>
+                            </div>
+                        </div>
                     </div>
-                </div>
 
-                {/* BUY NOW Section */}
-                <div style={{
-                    display: 'flex', alignItems: 'center',
-                    background: '#1a1a1a', flex: 1,
-                }}>
-                    <button
-                        disabled={product.stock === 0}
-                        style={{
-                            display: 'flex', alignItems: 'center', gap: '6px',
-                            background: 'none', border: 'none', color: '#fff',
-                            fontWeight: 800, fontSize: '13px', cursor: 'pointer',
-                            padding: '0 16px', height: '100%', letterSpacing: '0.5px',
-                            textTransform: 'uppercase',
-                            opacity: product.stock === 0 ? 0.5 : 1,
-                        }}
-                    >
-                        BUY NOW
-                    </button>
-                    <div style={{ display: 'flex', alignItems: 'center', marginLeft: 'auto' }}>
-                        <button onClick={() => setBuyNowQty(Math.max(1, buyNowQty - 1))} style={{ background: '#333', border: 'none', color: '#fff', width: '36px', height: '52px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: 700 }}>−</button>
-                        <div style={{ background: '#333', color: '#fff', width: '40px', height: '52px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '14px' }}>{String(buyNowQty).padStart(2, '0')}</div>
-                        <button onClick={() => setBuyNowQty(Math.min(product.stock || 99, buyNowQty + 1))} style={{ background: '#333', border: 'none', color: '#fff', width: '36px', height: '52px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: 700 }}>+</button>
+                    {/* Right Side Links — under right section */}
+                    <div style={{
+                        display: 'flex', alignItems: 'center', gap: '16px',
+                        background: '#f5f5f5', flex: '0 0 50%', maxWidth: '50%',
+                        padding: '0 20px', height: '52px',
+                        borderLeft: '1px solid #e5e7eb',
+                    }}>
+                        <button onClick={() => setActiveInfoPanel(activeInfoPanel === 'delivery' ? null : 'delivery')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', fontWeight: 600, color: activeInfoPanel === 'delivery' ? '#0B4222' : '#333', whiteSpace: 'nowrap', borderBottom: activeInfoPanel === 'delivery' ? '2px solid #0B4222' : '2px solid transparent', paddingBottom: '2px', transition: 'all 0.2s ease' }}>Delivery</button>
+                        <button onClick={() => setActiveInfoPanel(activeInfoPanel === 'payment' ? null : 'payment')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', fontWeight: 600, color: activeInfoPanel === 'payment' ? '#0B4222' : '#333', whiteSpace: 'nowrap', borderBottom: activeInfoPanel === 'payment' ? '2px solid #0B4222' : '2px solid transparent', paddingBottom: '2px', transition: 'all 0.2s ease' }}>Payment</button>
+                        <button onClick={() => setActiveInfoPanel(activeInfoPanel === 'terms' ? null : 'terms')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', fontWeight: 600, color: activeInfoPanel === 'terms' ? '#0B4222' : '#333', whiteSpace: 'nowrap', borderBottom: activeInfoPanel === 'terms' ? '2px solid #0B4222' : '2px solid transparent', paddingBottom: '2px', transition: 'all 0.2s ease' }}>Terms & Conditions</button>
+                        <div style={{ marginLeft: '4px', color: '#333' }}><FiChevronUp size={16} style={{ transform: activeInfoPanel ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease' }} /></div>
                     </div>
-                </div>
-
-                {/* Right Side Links */}
-                <div style={{
-                    display: 'flex', alignItems: 'center', gap: '16px',
-                    background: '#f5f5f5', padding: '0 20px',
-                    borderTop: '1px solid #e5e7eb',
-                }}>
-                    <button style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', fontWeight: 600, color: '#333', whiteSpace: 'nowrap' }}>Delivery</button>
-                    <button style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', fontWeight: 600, color: '#333', whiteSpace: 'nowrap' }}>Payment</button>
-                    <button style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', fontWeight: 600, color: '#333', whiteSpace: 'nowrap' }}>Terms & Conditions</button>
-                    <div style={{ marginLeft: '4px', color: '#333' }}><FiChevronDown size={16} /></div>
                 </div>
             </div>
 

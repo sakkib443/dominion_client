@@ -4,7 +4,7 @@ import React, { useState, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { FiShoppingCart, FiCamera, FiChevronDown, FiSearch, FiMenu, FiX, FiUpload, FiPhone } from 'react-icons/fi';
+import { FiShoppingCart, FiCamera, FiChevronDown, FiSearch, FiMenu, FiX, FiUpload, FiPhone, FiUser } from 'react-icons/fi';
 import { useAppSelector, useAppDispatch } from '@/redux';
 import { useGetCategoriesQuery } from '@/redux/api/categoryApi';
 import { setImageSearching, setImageSearchResults, clearImageSearch } from '@/redux/slices/imageSearchSlice';
@@ -286,6 +286,11 @@ const NewHeader: React.FC = () => {
                                         {cartItems.length}
                                     </span>
                                 )}
+                            </Link>
+
+                            {/* Profile / Login */}
+                            <Link href="/login" className="relative flex flex-col items-center gap-0.5 text-white hover:text-white/80 transition-colors shrink-0 px-2">
+                                <FiUser size={22} />
                             </Link>
 
 
