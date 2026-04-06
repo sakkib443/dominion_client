@@ -280,7 +280,7 @@ const NewHeader: React.FC = () => {
 
                             {/* Cart */}
                             <Link href="/cart" className="relative flex flex-col items-center gap-0.5 text-white hover:text-white/80 transition-colors shrink-0 px-2">
-                                <FiShoppingCart size={22} />
+                                <img src="/ICON/cart.png" alt="Cart" className="w-[22px] h-[22px] brightness-0 invert" />
                                 {cartItems.length > 0 && (
                                     <span className="absolute -top-1.5 -right-0.5 bg-[#E4525C] text-white text-[10px] w-4.5 h-4.5 min-w-[18px] min-h-[18px] rounded-full flex items-center justify-center font-bold shadow-md">
                                         {cartItems.length}
@@ -291,6 +291,7 @@ const NewHeader: React.FC = () => {
                             {/* Profile / Login */}
                             <Link href="/login" className="relative flex flex-col items-center gap-0.5 text-white hover:text-white/80 transition-colors shrink-0 px-2">
                                 <FiUser size={22} />
+                                <span className="text-[11px] leading-tight whitespace-nowrap">Create Account</span>
                             </Link>
 
 

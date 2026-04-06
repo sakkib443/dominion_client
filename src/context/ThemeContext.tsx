@@ -65,8 +65,8 @@ const defaultTheme: ThemeConfig = {
   errorColor: '#EF4444',
 
   // Typography
-  fontFamily: "'Poppins', sans-serif",
-  headingFont: "'Poppins', sans-serif",
+  fontFamily: "'Roboto', sans-serif",
+  headingFont: "'Roboto', sans-serif",
   fontSize: {
     xs: '0.75rem',
     sm: '0.875rem',

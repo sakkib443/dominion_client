@@ -90,9 +90,7 @@ const NewProductCard: React.FC<NewProductCardProps> = ({ product }) => {
                                 className='relative text-gray-600 hover:text-[#0B4222] transition-colors p-1 cart-icon-animate'
                                 title='Add to Cart'
                             >
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121 0 2.09-.817 2.22-1.924l.975-8.317A1.125 1.125 0 0018.053 3H6.066l-.38-1.429A1.125 1.125 0 004.636.75H2.25M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
-                                </svg>
+                                <img src="/ICON/cart.png" alt="Cart" className="w-5 h-5 opacity-60" />
                             </button>
                         </div>
                         <img
@@ -106,18 +104,21 @@ const NewProductCard: React.FC<NewProductCardProps> = ({ product }) => {
                     </div>
 
                     {/* Product Info */}
-                    <div className='px-3 pt-2.5 pb-1.5 space-y-0.5 text-center'>
+                    <div className='px-3 pt-0.5 pb-0.5 text-center leading-tight'>
                         {/* Product Name */}
-                        <h3 className='text-gray-900 font-semibold text-sm line-clamp-1 group-hover:text-[#0B4222] transition-colors'>
+                        <h3 className='text-gray-900 pt-2 font-semibold text-sm line-clamp-1 group-hover:text-[#0B4222] transition-colors'>
                             {product.name}
                         </h3>
 
                         {/* Subtitle / Tagline — scrolling orange text */}
-                        <div className='overflow-hidden whitespace-nowrap'>
-                            <p className='text-[#E4525C] text-[11px] font-medium inline-block animate-marquee-card'>
-                                {product.warranty || 'Lower price than others but quality higher'}
-                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                                {product.warranty || 'Lower price than others but quality higher'}
+                        <div className='overflow-hidden whitespace-nowrap pb-1'>
+                            <p className='text-[#E4525C] text-[10px] font-normal inline-block animate-marquee-card'>
+                                <span>{product.warranty || 'Lower price than others but quality higher'}</span>
+                                <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                                <span>{product.warranty || 'Lower price than others but quality higher'}</span>
+                                <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                                <span>{product.warranty || 'Lower price than others but quality higher'}</span>
+                                <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
                             </p>
                         </div>
 
@@ -128,7 +129,7 @@ const NewProductCard: React.FC<NewProductCardProps> = ({ product }) => {
                                 <span className='line-through text-gray-400'>Tk.{oldPrice}</span>
                             )}
                             {discountPercent > 0 && (
-                                <span className='text-red-500 font-medium'>{discountPercent}% Off</span>
+                                <span className='text-gray-900 font-medium'>{discountPercent}% Off</span>
                             )}
                             <span className='text-gray-400 text-[11px]'>
                                 ({priceType === 'negotiable' ? 'price negotiable' : 'price fixed'})
@@ -137,39 +138,31 @@ const NewProductCard: React.FC<NewProductCardProps> = ({ product }) => {
                     </div>
 
                     {/* Bottom Social Stats Bar */}
-                    <div className='flex items-center justify-between px-3 py-1.5 border-t border-gray-100 text-gray-400 text-[11px]'>
+                    <div className='flex items-center justify-between px-3 py-1 border-t border-gray-100 text-gray-400 text-[11px]'>
                         {/* Heart / Like */}
                         <button
                             onClick={handleWishlist}
                             className={`flex items-center gap-1 hover:text-[#E4525C] transition-colors ${isWishlisted ? 'text-[#E4525C]' : ''}`}
                         >
-                            <svg xmlns="http://www.w3.org/2000/svg" fill={isWishlisted ? "currentColor" : "none"} viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-3.5 h-3.5">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
-                            </svg>
+                            <img src="/ICON/like.png" alt="Like" className="w-3.5 h-3.5 opacity-50" />
                             <span>{formatCount(stats.likes)}</span>
                         </button>
 
                         {/* Comments */}
                         <span className='flex items-center gap-1'>
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-3.5 h-3.5">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
-                            </svg>
+                            <img src="/ICON/comments.png" alt="Comments" className="w-3.5 h-3.5 opacity-50" />
                             <span>{formatCount(stats.comments)}</span>
                         </span>
 
                         {/* Shares */}
                         <span className='flex items-center gap-1'>
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-3.5 h-3.5">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
-                            </svg>
+                            <img src="/ICON/share.png" alt="Share" className="w-3.5 h-3.5 opacity-50" />
                             <span>{formatCount(stats.shares)}</span>
                         </span>
 
-                        {/* Rating */}
+                        {/* Views */}
                         <span className='flex items-center gap-1'>
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" className="w-3.5 h-3.5 text-yellow-400">
-                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                            </svg>
+                            <img src="/ICON/views.png" alt="Views" className="w-3.5 h-3.5 opacity-50" />
                             <span>{stats.rating.toFixed(1)}</span>
                         </span>
                     </div>

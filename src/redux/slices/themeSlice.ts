@@ -34,8 +34,8 @@ const defaultTheme: ThemeConfig = {
     successColor: '#22C55E',
     warningColor: '#F59E0B',
     errorColor: '#EF4444',
-    fontFamily: "'Poppins', sans-serif",
-    headingFont: "'Poppins', sans-serif",
+    fontFamily: "'Roboto', sans-serif",
+    headingFont: "'Roboto', sans-serif",
     darkMode: false,
 };
 

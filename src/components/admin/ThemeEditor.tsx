@@ -116,9 +116,9 @@ const ThemeEditor: React.FC = () => {
                                         onChange={(e) => dispatch(updateTheme({ fontFamily: e.target.value, headingFont: e.target.value }))}
                                         className="w-full px-3 py-2 border rounded-md"
                                     >
+                                        <option value="'Roboto', sans-serif">Roboto</option>
                                         <option value="'Poppins', sans-serif">Poppins</option>
                                         <option value="'Inter', sans-serif">Inter</option>
-                                        <option value="'Roboto', sans-serif">Roboto</option>
                                         <option value="'Open Sans', sans-serif">Open Sans</option>
                                         <option value="'Nunito', sans-serif">Nunito</option>
                                         <option value="'Montserrat', sans-serif">Montserrat</option>

@@ -2,7 +2,7 @@
 
 /* ===== Google Fonts ===== */
 * {
-  font-family: "Poppins", sans-serif;
+  font-family: "Roboto", sans-serif !important;
 }
 
 /* ===== CSS Variables System for Theme Customization ===== */
@@ -21,8 +21,8 @@
   --color-error: #EF4444;
 
   /* Typography */
-  --font-family: 'Poppins', sans-serif;
-  --font-heading: 'Poppins', sans-serif;
+  --font-family: 'Roboto', sans-serif;
+  --font-heading: 'Roboto', sans-serif;
   --font-size-xs: 0.75rem;
   --font-size-sm: 0.875rem;
   --font-size-base: 1rem;
@@ -279,13 +279,13 @@ h6 {
     transform: translateX(0);
   }
   100% {
-    transform: translateX(-50%);
+    transform: translateX(-33.33%);
   }
 }
 
 .animate-marquee-card {
   display: inline-block;
-  animation: marqueeCard 8s linear infinite;
+  animation: marqueeCard 12s linear infinite;
 }
 
 /* ===== Hover Effects ===== */
