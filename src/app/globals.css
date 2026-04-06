@@ -444,27 +444,17 @@ h6 {
   animation: preloaderFadeInDelay 1.5s ease-out forwards;
 }
 
-/* ===== Cart Icon Bounce + Glow Animation ===== */
-@keyframes cartBounceGlow {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-3px);
-  }
-}
-
+/* ===== Cart Icon Glow Animation ===== */
 @keyframes cartGlowPulse {
   0%, 100% {
     box-shadow: 0 0 0px transparent;
   }
   50% {
-    box-shadow: 0 0 10px rgba(11, 66, 34, 0.35), 0 0 20px rgba(11, 66, 34, 0.15);
+    box-shadow: 0 0 12px rgba(11, 66, 34, 0.4), 0 0 24px rgba(11, 66, 34, 0.15);
   }
 }
 
 .cart-icon-animate {
-  animation: cartBounceGlow 2s ease-in-out infinite;
   border-radius: 50%;
 }
 
@@ -477,6 +467,6 @@ h6 {
   pointer-events: none;
 }
 
-.cart-icon-animate:hover {
-  animation-play-state: paused;
+.cart-icon-animate:hover::before {
+  box-shadow: 0 0 14px rgba(11, 66, 34, 0.5), 0 0 28px rgba(11, 66, 34, 0.2);
 }
