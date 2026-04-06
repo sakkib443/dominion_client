@@ -70,9 +70,9 @@ const NewProductCard: React.FC<NewProductCardProps> = ({ product }) => {
             likes: (hash * 17) % 3000 + 500,
             comments: (hash * 13) % 2000 + 200,
             shares: (hash * 19) % 4000 + 500,
-            rating: product.rating || ((hash % 15) / 10 + 3.5),
+            views: (hash * 23) % 8000 + 1000,
         };
-    }, [product._id, product.id, product.rating]);
+    }, [product._id, product.id]);
 
     return (
         <>
@@ -163,7 +163,7 @@ const NewProductCard: React.FC<NewProductCardProps> = ({ product }) => {
                         {/* Views */}
                         <span className='flex items-center gap-1'>
                             <img src="/ICON/views.png" alt="Views" className="w-3.5 h-3.5 opacity-50" />
-                            <span>{stats.rating.toFixed(1)}</span>
+                            <span>{formatCount(stats.views)}</span>
                         </span>
                     </div>
                 </div>
