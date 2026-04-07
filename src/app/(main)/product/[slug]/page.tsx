@@ -28,6 +28,7 @@ export default function ProductDetailsPage() {
     const [likeCount, setLikeCount] = useState(0);
     const [selectedColor, setSelectedColor] = useState<string>('');
     const [activeInfoPanel, setActiveInfoPanel] = useState<'delivery' | 'payment' | 'terms' | null>(null);
+    const [showRatingModal, setShowRatingModal] = useState(false);
     const colorSwatchRef = useRef<HTMLDivElement>(null);
     const detailsRef = useRef<HTMLDivElement>(null);
 
@@ -209,7 +210,7 @@ export default function ProductDetailsPage() {
 
             {/* ═══ PRODUCT TITLE BAR ═══ */}
             <div style={{ background: '#fff', borderBottom: '1px solid #e5e7eb' }}>
-                <div className="container" style={{ padding: '10px 1rem' }}>
+                <div className="w-[95%] mx-auto" style={{ padding: '10px 0 18px 0' }}>
                     {/* Product Name + Code */}
                     <h1 style={{
                         fontSize: '20px', fontWeight: 700, color: '#1a1a1a',
@@ -220,61 +221,67 @@ export default function ProductDetailsPage() {
 
                     {/* Warranty / Guarantee Text */}
                     {product.shortDescription ? (
-                        <p style={{ fontSize: '11px', color: '#E4525C', fontWeight: 600, margin: '2px 0 6px' }}>
+                        <p style={{ fontSize: '11px', color: '#E4525C', fontWeight: 400, margin: '2px 0 6px' }}>
                             {product.shortDescription}
                         </p>
                     ) : (
-                        <p style={{ fontSize: '11px', color: '#E4525C', fontWeight: 600, margin: '2px 0 6px' }}>
+                        <p style={{ fontSize: '11px', color: '#E4525C', fontWeight: 400, margin: '2px 0 6px' }}>
                             Warranty: Service Warranty Available
                         </p>
                     )}
 
                     {/* Stats Row */}
                     <div style={{
-                        display: 'flex', alignItems: 'center', gap: '28px',
-                        flexWrap: 'wrap', fontSize: '12px', color: '#555'
+                        display: 'flex', alignItems: 'center', gap: '40px',
+                        flexWrap: 'wrap', fontSize: '14px', color: '#555'
                     }}>
                         {/* Sold */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <FiShoppingCart size={12} />
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                             <span style={{ fontWeight: 600 }}>Sold {product.soldCount || '0'}</span>
                         </div>
 
                         {/* Rating */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <FiStar size={12} style={{ color: '#f59e0b', fill: '#f59e0b' }} />
+                        <button
+                            onClick={() => setShowRatingModal(true)}
+                            style={{
+                                display: 'flex', alignItems: 'center', gap: '6px',
+                                background: 'none', border: 'none', cursor: 'pointer',
+                                color: '#555', fontSize: '14px'
+                            }}
+                        >
+                            <FiStar size={15} style={{ color: '#f59e0b', fill: '#f59e0b' }} />
                             <span style={{ fontWeight: 600 }}>{product.rating?.toFixed(1) || '0.0'}</span>
-                            <span style={{ color: '#888' }}>(Ratings Review)</span>
-                        </div>
+                            <span style={{ color: '#888' }}>({product.reviewCount || 0} Ratings)</span>
+                        </button>
 
                         {/* Like / Heart */}
                         <button
                             onClick={() => { setIsLiked(!isLiked); setLikeCount(prev => isLiked ? prev - 1 : prev + 1); }}
                             style={{
-                                display: 'flex', alignItems: 'center', gap: '4px',
+                                display: 'flex', alignItems: 'center', gap: '6px',
                                 background: 'none', border: 'none', cursor: 'pointer',
-                                color: isLiked ? '#ef4444' : '#555', fontSize: '12px'
+                                color: isLiked ? '#ef4444' : '#555', fontSize: '14px'
                             }}
                         >
-                            <FiHeart size={12} style={isLiked ? { fill: '#ef4444' } : {}} />
+                            <FiHeart size={15} style={isLiked ? { fill: '#ef4444' } : {}} />
                             <span style={{ fontWeight: 600 }}>{likeCount || '0'}</span>
                         </button>
 
                         {/* Comments */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <FiMessageSquare size={12} />
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <FiMessageSquare size={15} />
                             <span style={{ fontWeight: 600 }}>{product.reviewCount || '0'}</span>
                         </div>
 
                         {/* Share */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <FiShare2 size={12} />
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <FiShare2 size={15} />
                             <span style={{ fontWeight: 600 }}>0</span>
                         </div>
 
                         {/* Views */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <FiEye size={12} />
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <FiEye size={15} />
                             <span style={{ fontWeight: 600 }}>0</span>
                         </div>
 
@@ -288,12 +295,12 @@ export default function ProductDetailsPage() {
                                 }
                             }}
                             style={{
-                                display: 'flex', alignItems: 'center', gap: '4px',
+                                display: 'flex', alignItems: 'center', gap: '6px',
                                 background: 'none', border: 'none', cursor: 'pointer',
-                                color: '#555', fontSize: '12px'
+                                color: '#555', fontSize: '14px'
                             }}
                         >
-                            <FiCopy size={12} />
+                            <FiCopy size={15} />
                             <span style={{ fontWeight: 600 }}>{linkCopied ? 'Copied!' : 'Copy Link'}</span>
                         </button>
 
@@ -302,11 +309,11 @@ export default function ProductDetailsPage() {
                             href={allImages[0]}
                             download
                             style={{
-                                display: 'flex', alignItems: 'center', gap: '4px',
-                                color: '#555', fontSize: '12px', textDecoration: 'none'
+                                display: 'flex', alignItems: 'center', gap: '6px',
+                                color: '#555', fontSize: '14px', textDecoration: 'none'
                             }}
                         >
-                            <FiDownload size={12} />
+                            <FiDownload size={15} />
                             <span style={{ fontWeight: 600 }}>Image Download</span>
                         </a>
                     </div>
@@ -314,21 +321,20 @@ export default function ProductDetailsPage() {
             </div>
 
             {/* ═══ MAIN CONTENT AREA ═══ */}
-            <div className="container" style={{ padding: '0 1rem' }}>
+            <div className="w-[95%] mx-auto" style={{ paddingTop: '12px' }}>
                 <div style={{
                     display: 'flex', flexWrap: 'wrap', gap: 0,
                 }}>
 
                     {/* ═══ LEFT SECTION: Color Swatches + Product Image ═══ */}
                     <div style={{
-                        display: 'flex', flex: '0 0 50%', maxWidth: '50%',
+                        display: 'flex', flex: '0 0 66.66%', maxWidth: '66.66%',
                         height: '480px',
                     }}>
-                        {/* Color Swatches Column */}
                         <div style={{
                             width: '55px', display: 'flex', flexDirection: 'column',
-                            alignItems: 'center', padding: '8px 0', gap: '4px',
-                            flexShrink: 0,
+                            alignItems: 'center', padding: '8px 0',
+                            flexShrink: 0, justifyContent: 'space-between',
                         }}>
                             {/* Up Arrow */}
                             <button
@@ -419,11 +425,11 @@ export default function ProductDetailsPage() {
 
                             {/* Discount Badge */}
                             {product.discount > 0 && (
-                                <div style={{
+                                <div className="discount-badge" style={{
                                     position: 'absolute', top: '12px', left: '12px',
                                     background: '#ef4444', color: '#fff', fontSize: '11px',
                                     fontWeight: 700, padding: '4px 10px', borderRadius: '9999px',
-                                    zIndex: 2
+                                    zIndex: 2, opacity: 0, transition: 'opacity 0.3s ease'
                                 }}>
                                     -{product.discount}% OFF
                                 </div>
@@ -445,7 +451,7 @@ export default function ProductDetailsPage() {
 
                     {/* ═══ RIGHT SECTION: Price + Product Details ═══ */}
                     <div style={{
-                        flex: '0 0 50%', maxWidth: '50%',
+                        flex: '0 0 33.33%', maxWidth: '33.33%',
                         borderLeft: '1px solid #e5e7eb', paddingLeft: '20px',
                         display: 'flex', flexDirection: 'column',
                         position: 'relative',
@@ -492,77 +498,36 @@ export default function ProductDetailsPage() {
                                 {/* Delivery Info */}
                                 {activeInfoPanel === 'delivery' && (
                                     <div>
-                                        <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#1a1a1a', margin: '0 0 14px 0', borderBottom: '1px solid #e5e7eb', paddingBottom: '8px' }}>Delivery Information</h3>
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13px', color: '#444', lineHeight: 1.7 }}>
-                                            <div style={{ background: '#f9fafb', padding: '10px 12px', borderRadius: '6px', border: '1px solid #e5e7eb' }}>
-                                                <strong style={{ color: '#1a1a1a' }}>Inside Dhaka:</strong>
-                                                <p style={{ margin: '4px 0 0' }}>Delivery within 1-2 business days. Delivery charge: ৳60-80</p>
-                                            </div>
-                                            <div style={{ background: '#f9fafb', padding: '10px 12px', borderRadius: '6px', border: '1px solid #e5e7eb' }}>
-                                                <strong style={{ color: '#1a1a1a' }}>Outside Dhaka:</strong>
-                                                <p style={{ margin: '4px 0 0' }}>Delivery within 3-5 business days. Delivery charge: ৳100-150</p>
-                                            </div>
-                                            <div style={{ padding: '6px 0' }}>
-                                                <strong style={{ color: '#1a1a1a' }}>Packaging:</strong> All products are carefully packaged to ensure safe delivery.
-                                            </div>
-                                            <div style={{ padding: '6px 0' }}>
-                                                <strong style={{ color: '#1a1a1a' }}>Tracking:</strong> You will receive a tracking number via SMS once your order is shipped.
-                                            </div>
-                                            <div style={{ padding: '6px 0', color: '#888', fontSize: '12px' }}>
-                                                * Delivery times may vary during holidays and peak seasons.
-                                            </div>
-                                        </div>
+                                        <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#1a1a1a', margin: '0 0 14px 0' }}>Delivery Information</h3>
+                                        {product.deliveryInfo ? (
+                                            <div style={{ fontSize: '13px', color: '#444', lineHeight: 1.7 }} dangerouslySetInnerHTML={{ __html: product.deliveryInfo }} />
+                                        ) : (
+                                            <p style={{ fontSize: '13px', color: '#888' }}>No delivery information available.</p>
+                                        )}
                                     </div>
                                 )}
 
                                 {/* Payment Info */}
                                 {activeInfoPanel === 'payment' && (
                                     <div>
-                                        <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#1a1a1a', margin: '0 0 14px 0', borderBottom: '1px solid #e5e7eb', paddingBottom: '8px' }}>Payment Methods</h3>
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13px', color: '#444', lineHeight: 1.7 }}>
-                                            <div style={{ background: '#f9fafb', padding: '10px 12px', borderRadius: '6px', border: '1px solid #e5e7eb' }}>
-                                                <strong style={{ color: '#1a1a1a' }}>Cash on Delivery (COD)</strong>
-                                                <p style={{ margin: '4px 0 0' }}>Pay when you receive your product. Available for all locations.</p>
-                                            </div>
-                                            <div style={{ background: '#f9fafb', padding: '10px 12px', borderRadius: '6px', border: '1px solid #e5e7eb' }}>
-                                                <strong style={{ color: '#1a1a1a' }}>bKash / Nagad / Rocket</strong>
-                                                <p style={{ margin: '4px 0 0' }}>Mobile banking payment accepted. Send money to our number and confirm via order notes.</p>
-                                            </div>
-                                            <div style={{ background: '#f9fafb', padding: '10px 12px', borderRadius: '6px', border: '1px solid #e5e7eb' }}>
-                                                <strong style={{ color: '#1a1a1a' }}>Bank Transfer</strong>
-                                                <p style={{ margin: '4px 0 0' }}>Direct bank transfer available. Contact us for bank details.</p>
-                                            </div>
-                                            <div style={{ padding: '6px 0', color: '#888', fontSize: '12px' }}>
-                                                * All payments are secure and encrypted.
-                                            </div>
-                                        </div>
+                                        <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#1a1a1a', margin: '0 0 14px 0' }}>Payment Methods</h3>
+                                        {product.paymentInfo ? (
+                                            <div style={{ fontSize: '13px', color: '#444', lineHeight: 1.7 }} dangerouslySetInnerHTML={{ __html: product.paymentInfo }} />
+                                        ) : (
+                                            <p style={{ fontSize: '13px', color: '#888' }}>No payment information available.</p>
+                                        )}
                                     </div>
                                 )}
 
                                 {/* Terms & Conditions */}
                                 {activeInfoPanel === 'terms' && (
                                     <div>
-                                        <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#1a1a1a', margin: '0 0 14px 0', borderBottom: '1px solid #e5e7eb', paddingBottom: '8px' }}>Terms & Conditions</h3>
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13px', color: '#444', lineHeight: 1.7 }}>
-                                            <div style={{ background: '#f9fafb', padding: '10px 12px', borderRadius: '6px', border: '1px solid #e5e7eb' }}>
-                                                <strong style={{ color: '#1a1a1a' }}>Return Policy</strong>
-                                                <p style={{ margin: '4px 0 0' }}>Products can be returned within 7 days of delivery if damaged or defective. Item must be in original packaging.</p>
-                                            </div>
-                                            <div style={{ background: '#f9fafb', padding: '10px 12px', borderRadius: '6px', border: '1px solid #e5e7eb' }}>
-                                                <strong style={{ color: '#1a1a1a' }}>Warranty</strong>
-                                                <p style={{ margin: '4px 0 0' }}>Warranty is applicable as mentioned in the product details. Service warranty covers manufacturing defects only.</p>
-                                            </div>
-                                            <div style={{ background: '#f9fafb', padding: '10px 12px', borderRadius: '6px', border: '1px solid #e5e7eb' }}>
-                                                <strong style={{ color: '#1a1a1a' }}>Refund Policy</strong>
-                                                <p style={{ margin: '4px 0 0' }}>Refunds are processed within 5-7 business days after the return is approved. Refund will be made to the original payment method.</p>
-                                            </div>
-                                            <div style={{ padding: '6px 0' }}>
-                                                <strong style={{ color: '#1a1a1a' }}>Order Cancellation:</strong> Orders can be cancelled before they are shipped. Contact our support team for assistance.
-                                            </div>
-                                            <div style={{ padding: '6px 0', color: '#888', fontSize: '12px' }}>
-                                                * Terms are subject to change. Please check this section regularly.
-                                            </div>
-                                        </div>
+                                        <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#1a1a1a', margin: '0 0 14px 0' }}>Terms & Conditions</h3>
+                                        {product.termsInfo ? (
+                                            <div style={{ fontSize: '13px', color: '#444', lineHeight: 1.7 }} dangerouslySetInnerHTML={{ __html: product.termsInfo }} />
+                                        ) : (
+                                            <p style={{ fontSize: '13px', color: '#888' }}>No terms & conditions available.</p>
+                                        )}
                                     </div>
                                 )}
                             </div>
@@ -595,7 +560,7 @@ export default function ProductDetailsPage() {
                                     )}
                                     {product.discount > 0 && (
                                         <span style={{
-                                            fontSize: '14px', fontWeight: 700, color: '#dc2626'
+                                            fontSize: '20px', fontWeight: 700, color: '#1a1a1a'
                                         }}>
                                             {product.discount}% Off
                                         </span>
@@ -621,44 +586,13 @@ export default function ProductDetailsPage() {
                                     Product Details:
                                 </h3>
 
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                                    {productDetails.map((detail, idx) => (
-                                        <div key={idx} style={{
-                                            display: 'flex', gap: '4px',
-                                            fontSize: '13px', lineHeight: 1.6,
-                                        }}>
-                                            <span style={{
-                                                fontWeight: 700, color: '#1a1a1a',
-                                                minWidth: 'fit-content', whiteSpace: 'nowrap'
-                                            }}>
-                                                {detail.key}:
-                                            </span>
-                                            <span style={{ color: '#333', fontWeight: 500 }}>
-                                                {detail.value}
-                                            </span>
-                                        </div>
-                                    ))}
-                                </div>
+                                {product.description && (
+                                    <div
+                                        style={{ fontSize: '13px', color: '#444', lineHeight: 1.7 }}
+                                        dangerouslySetInnerHTML={{ __html: product.description }}
+                                    />
+                                )}
                             </div>
-
-                            {/* Description */}
-                            {product.description && (
-                                <div style={{ marginTop: '16px' }}>
-                                    <h3 style={{
-                                        fontSize: '15px', fontWeight: 700, color: '#1a1a1a',
-                                        margin: '0 0 8px 0', borderBottom: '1px solid #e5e7eb',
-                                        paddingBottom: '8px'
-                                    }}>
-                                        Description:
-                                    </h3>
-                                    <p style={{
-                                        fontSize: '13px', color: '#444', lineHeight: 1.7,
-                                        whiteSpace: 'pre-line', margin: 0
-                                    }}>
-                                        {product.description}
-                                    </p>
-                                </div>
-                            )}
                         </div>
 
                         {/* Down Scroll Arrow for details */}
@@ -678,12 +612,13 @@ export default function ProductDetailsPage() {
                     {/* ═══ ACTION BAR (ADD TO CART / BUY NOW) — under left section only ═══ */}
                     <div style={{
                         display: 'flex', alignItems: 'stretch', justifyContent: 'space-between',
-                        height: '52px', flex: '0 0 50%', maxWidth: '50%',
+                        height: '34px', flex: '0 0 66.66%', maxWidth: '66.66%',
+                        marginTop: '10px',
                     }}>
                         {/* ADD TO CART Section */}
                         <div style={{
                             display: 'flex', alignItems: 'center',
-                            background: '#16a34a',
+                            background: '#14532d',
                         }}>
                             <button
                                 onClick={handleAddToCart}
@@ -705,15 +640,15 @@ export default function ProductDetailsPage() {
                                 )}
                             </button>
                             <div style={{ display: 'flex', alignItems: 'center' }}>
-                                <button onClick={() => setQuantity(Math.max(1, quantity - 1))} style={{ background: '#14532d', border: 'none', color: '#fff', width: '36px', height: '52px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: 700 }}>−</button>
-                                <div style={{ background: '#14532d', color: '#fff', width: '40px', height: '52px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '14px' }}>{String(quantity).padStart(2, '0')}</div>
-                                <button onClick={() => setQuantity(Math.min(product.stock || 99, quantity + 1))} style={{ background: '#14532d', border: 'none', color: '#fff', width: '36px', height: '52px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: 700 }}>+</button>
+                                <button onClick={() => setQuantity(Math.max(1, quantity - 1))} style={{ background: '#16a34a', border: 'none', color: '#fff', width: '36px', height: '34px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: 700 }}>−</button>
+                                <div style={{ background: '#16a34a', color: '#fff', width: '40px', height: '34px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '14px' }}>{String(quantity).padStart(2, '0')}</div>
+                                <button onClick={() => setQuantity(Math.min(product.stock || 99, quantity + 1))} style={{ background: '#16a34a', border: 'none', color: '#fff', width: '36px', height: '34px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: 700 }}>+</button>
                             </div>
                         </div>
                         {/* BUY NOW Section */}
                         <div style={{
                             display: 'flex', alignItems: 'center',
-                            background: '#1a1a1a',
+                            background: '#14532d',
                         }}>
                             <button
                                 disabled={product.stock === 0}
@@ -730,23 +665,24 @@ export default function ProductDetailsPage() {
                                 BUY NOW
                             </button>
                             <div style={{ display: 'flex', alignItems: 'center' }}>
-                                <button onClick={() => setBuyNowQty(Math.max(1, buyNowQty - 1))} style={{ background: '#333', border: 'none', color: '#fff', width: '36px', height: '52px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: 700 }}>−</button>
-                                <div style={{ background: '#333', color: '#fff', width: '40px', height: '52px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '14px' }}>{String(buyNowQty).padStart(2, '0')}</div>
-                                <button onClick={() => setBuyNowQty(Math.min(product.stock || 99, buyNowQty + 1))} style={{ background: '#333', border: 'none', color: '#fff', width: '36px', height: '52px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: 700 }}>+</button>
+                                <button onClick={() => setBuyNowQty(Math.max(1, buyNowQty - 1))} style={{ background: '#16a34a', border: 'none', color: '#fff', width: '36px', height: '34px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: 700 }}>−</button>
+                                <div style={{ background: '#16a34a', color: '#fff', width: '40px', height: '34px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '14px' }}>{String(buyNowQty).padStart(2, '0')}</div>
+                                <button onClick={() => setBuyNowQty(Math.min(product.stock || 99, buyNowQty + 1))} style={{ background: '#16a34a', border: 'none', color: '#fff', width: '36px', height: '34px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: 700 }}>+</button>
                             </div>
                         </div>
                     </div>
 
                     {/* Right Side Links — under right section */}
                     <div style={{
-                        display: 'flex', alignItems: 'center', gap: '16px',
-                        background: '#f5f5f5', flex: '0 0 50%', maxWidth: '50%',
-                        padding: '0 20px', height: '52px',
+                        display: 'flex', alignItems: 'center', gap: '32px',
+                        background: '#f5f5f5', flex: '0 0 33.33%', maxWidth: '33.33%',
+                        padding: '0 24px', height: '34px',
                         borderLeft: '1px solid #e5e7eb',
+                        marginTop: '10px',
                     }}>
-                        <button onClick={() => setActiveInfoPanel(activeInfoPanel === 'delivery' ? null : 'delivery')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', fontWeight: 600, color: activeInfoPanel === 'delivery' ? '#0B4222' : '#333', whiteSpace: 'nowrap', borderBottom: activeInfoPanel === 'delivery' ? '2px solid #0B4222' : '2px solid transparent', paddingBottom: '2px', transition: 'all 0.2s ease' }}>Delivery</button>
-                        <button onClick={() => setActiveInfoPanel(activeInfoPanel === 'payment' ? null : 'payment')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', fontWeight: 600, color: activeInfoPanel === 'payment' ? '#0B4222' : '#333', whiteSpace: 'nowrap', borderBottom: activeInfoPanel === 'payment' ? '2px solid #0B4222' : '2px solid transparent', paddingBottom: '2px', transition: 'all 0.2s ease' }}>Payment</button>
-                        <button onClick={() => setActiveInfoPanel(activeInfoPanel === 'terms' ? null : 'terms')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', fontWeight: 600, color: activeInfoPanel === 'terms' ? '#0B4222' : '#333', whiteSpace: 'nowrap', borderBottom: activeInfoPanel === 'terms' ? '2px solid #0B4222' : '2px solid transparent', paddingBottom: '2px', transition: 'all 0.2s ease' }}>Terms & Conditions</button>
+                        <button onClick={() => setActiveInfoPanel(activeInfoPanel === 'delivery' ? null : 'delivery')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '14px', fontWeight: 600, color: activeInfoPanel === 'delivery' ? '#0B4222' : '#333', whiteSpace: 'nowrap', borderBottom: activeInfoPanel === 'delivery' ? '2px solid #0B4222' : '2px solid transparent', paddingBottom: '2px', transition: 'all 0.2s ease' }}>Delivery</button>
+                        <button onClick={() => setActiveInfoPanel(activeInfoPanel === 'payment' ? null : 'payment')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '14px', fontWeight: 600, color: activeInfoPanel === 'payment' ? '#0B4222' : '#333', whiteSpace: 'nowrap', borderBottom: activeInfoPanel === 'payment' ? '2px solid #0B4222' : '2px solid transparent', paddingBottom: '2px', transition: 'all 0.2s ease' }}>Payment</button>
+                        <button onClick={() => setActiveInfoPanel(activeInfoPanel === 'terms' ? null : 'terms')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '14px', fontWeight: 600, color: activeInfoPanel === 'terms' ? '#0B4222' : '#333', whiteSpace: 'nowrap', borderBottom: activeInfoPanel === 'terms' ? '2px solid #0B4222' : '2px solid transparent', paddingBottom: '2px', transition: 'all 0.2s ease' }}>Terms & Conditions</button>
                         <div style={{ marginLeft: '4px', color: '#333' }}><FiChevronUp size={16} style={{ transform: activeInfoPanel ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease' }} /></div>
                     </div>
                 </div>
@@ -755,7 +691,7 @@ export default function ProductDetailsPage() {
             {/* ═══ Related Products Section ═══ */}
             {relatedProducts.length > 0 && (
                 <div style={{ background: '#fff', borderTop: '1px solid #e5e7eb', marginTop: '1rem' }}>
-                    <div className="container" style={{ padding: '2rem 1rem' }}>
+                    <div className="w-[95%] mx-auto" style={{ padding: '2rem 0' }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
                             <div>
                                 <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#1a1a1a', margin: 0 }}>Related Products</h2>
@@ -810,10 +746,123 @@ export default function ProductDetailsPage() {
             )}
 
 
+            {/* ═══ Rating Popup Modal ═══ */}
+            {showRatingModal && (
+                <div
+                    style={{
+                        position: 'fixed', inset: 0, zIndex: 9999,
+                        background: 'rgba(0,0,0,0.5)', display: 'flex',
+                        alignItems: 'center', justifyContent: 'center', padding: '1rem'
+                    }}
+                    onClick={() => setShowRatingModal(false)}
+                >
+                    <div
+                        style={{
+                            background: '#fff', borderRadius: '12px', maxWidth: '500px',
+                            width: '100%', maxHeight: '80vh', overflowY: 'auto',
+                            padding: '24px', position: 'relative',
+                            animation: 'fadeIn 0.2s ease-out',
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {/* Close Button */}
+                        <button
+                            onClick={() => setShowRatingModal(false)}
+                            style={{
+                                position: 'absolute', top: '12px', right: '12px',
+                                width: '32px', height: '32px', borderRadius: '50%',
+                                background: '#f3f4f6', border: 'none', cursor: 'pointer',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            }}
+                        >
+                            <FiX size={16} />
+                        </button>
+
+                        {/* Header */}
+                        <h3 style={{ fontSize: '18px', fontWeight: 700, margin: '0 0 16px 0', color: '#1a1a1a' }}>
+                            Ratings & Reviews
+                        </h3>
+
+                        {/* Overall Rating */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '20px', padding: '16px', background: '#f9fafb', borderRadius: '8px' }}>
+                            <div style={{ textAlign: 'center' }}>
+                                <div style={{ fontSize: '36px', fontWeight: 800, color: '#1a1a1a' }}>
+                                    {product.rating?.toFixed(1) || '0.0'}
+                                </div>
+                                <div style={{ display: 'flex', gap: '2px', justifyContent: 'center', marginTop: '4px' }}>
+                                    {[1, 2, 3, 4, 5].map(star => (
+                                        <FiStar key={star} size={14} style={{
+                                            color: '#f59e0b',
+                                            fill: star <= Math.round(product.rating || 0) ? '#f59e0b' : 'none'
+                                        }} />
+                                    ))}
+                                </div>
+                                <div style={{ fontSize: '12px', color: '#888', marginTop: '4px' }}>
+                                    {product.reviewCount || 0} ratings
+                                </div>
+                            </div>
+
+                            {/* Star Breakdown */}
+                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                {[5, 4, 3, 2, 1].map(star => {
+                                    const count = product.ratingBreakdown?.[star] || 0;
+                                    const total = product.reviewCount || 1;
+                                    const percentage = Math.round((count / total) * 100);
+                                    return (
+                                        <div key={star} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px' }}>
+                                            <span style={{ width: '12px', fontWeight: 600, color: '#555' }}>{star}</span>
+                                            <FiStar size={10} style={{ color: '#f59e0b', fill: '#f59e0b' }} />
+                                            <div style={{ flex: 1, height: '8px', background: '#e5e7eb', borderRadius: '4px', overflow: 'hidden' }}>
+                                                <div style={{ width: `${percentage}%`, height: '100%', background: '#f59e0b', borderRadius: '4px', transition: 'width 0.3s ease' }} />
+                                            </div>
+                                            <span style={{ width: '30px', textAlign: 'right', color: '#888', fontSize: '11px' }}>{count}</span>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        {/* Reviews List */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                            {(product.reviews && product.reviews.length > 0) ? (
+                                product.reviews.map((review: any, idx: number) => (
+                                    <div key={idx} style={{ padding: '12px', border: '1px solid #e5e7eb', borderRadius: '8px' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                                            <span style={{ fontWeight: 600, fontSize: '13px', color: '#1a1a1a' }}>
+                                                {review.userName || review.user?.name || 'Anonymous'}
+                                            </span>
+                                            <div style={{ display: 'flex', gap: '2px' }}>
+                                                {[1, 2, 3, 4, 5].map(star => (
+                                                    <FiStar key={star} size={10} style={{
+                                                        color: '#f59e0b',
+                                                        fill: star <= (review.rating || 0) ? '#f59e0b' : 'none'
+                                                    }} />
+                                                ))}
+                                            </div>
+                                        </div>
+                                        {review.comment && (
+                                            <p style={{ fontSize: '12px', color: '#555', margin: 0, lineHeight: 1.6 }}>
+                                                {review.comment}
+                                            </p>
+                                        )}
+                                    </div>
+                                ))
+                            ) : (
+                                <div style={{ textAlign: 'center', padding: '20px', color: '#888', fontSize: '13px' }}>
+                                    No reviews yet. Be the first to review this product!
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Hover styles for zoom indicator */}
             <style>{`
                 div:hover > .zoom-indicator {
+                    opacity: 1 !important;
+                }
+                div:hover > .discount-badge {
                     opacity: 1 !important;
                 }
                 @media (max-width: 768px) {
