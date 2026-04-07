@@ -27,6 +27,7 @@ export default function ProductDetailsPage() {
     const [isLiked, setIsLiked] = useState(false);
     const [likeCount, setLikeCount] = useState(0);
     const [selectedColor, setSelectedColor] = useState<string>('');
+    const [selectedSize, setSelectedSize] = useState<string>('');
     const [activeInfoPanel, setActiveInfoPanel] = useState<'delivery' | 'payment' | 'terms' | null>(null);
     const [showRatingModal, setShowRatingModal] = useState(false);
     const colorSwatchRef = useRef<HTMLDivElement>(null);
@@ -396,10 +397,10 @@ export default function ProductDetailsPage() {
                         {/* Main Product Image */}
                         <div
                             style={{
-                                flex: 1, background: '#f5f5f5', display: 'flex',
+                                flex: '0 1 80%', background: '#f5f5f5', display: 'flex',
                                 alignItems: 'center', justifyContent: 'center',
                                 cursor: 'pointer', position: 'relative',
-                                overflow: 'hidden',
+                                overflow: 'hidden', margin: '0 auto',
                             }}
                             onClick={() => setIsFullscreen(true)}
                         >
@@ -447,12 +448,89 @@ export default function ProductDetailsPage() {
                                 </div>
                             )}
                         </div>
+
+                        {/* Size Swatches Column (RIGHT of image) */}
+                        <div style={{
+                            width: '55px', display: 'flex', flexDirection: 'column',
+                            alignItems: 'center', padding: '8px 0',
+                            flexShrink: 0, justifyContent: 'space-between',
+                        }}>
+                            <button style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <FiChevronUp size={18} />
+                            </button>
+                            <div style={{
+                                display: 'flex', flexDirection: 'column', gap: '6px',
+                                overflow: 'hidden', maxHeight: '350px', flex: 1,
+                            }} className="no-scrollbar">
+                                {(product.sizes && product.sizes.length > 0 ? product.sizes : ['S', 'M', 'L', 'XL', 'XXL']).map((size: string, idx: number) => (
+                                    <button
+                                        key={idx}
+                                        onClick={() => setSelectedSize(selectedSize === size ? '' : size)}
+                                        style={{
+                                            width: '42px', height: '42px', flexShrink: 0,
+                                            background: selectedSize === size ? '#0B4222' : '#fff',
+                                            color: selectedSize === size ? '#fff' : '#333',
+                                            border: selectedSize === size ? '2px solid #0B4222' : '2px solid #ddd',
+                                            borderRadius: '4px', cursor: 'pointer',
+                                            fontWeight: 700, fontSize: '12px',
+                                            transition: 'all 0.2s ease',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        }}
+                                    >
+                                        {size}
+                                    </button>
+                                ))}
+                            </div>
+                            <button style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <FiChevronDown size={18} />
+                            </button>
+                        </div>
+
+                        {/* Color Label Column (RIGHT of image) */}
+                        <div style={{
+                            width: '55px', display: 'flex', flexDirection: 'column',
+                            alignItems: 'center', padding: '8px 0',
+                            flexShrink: 0, justifyContent: 'space-between',
+                        }}>
+                            <button style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <FiChevronUp size={18} />
+                            </button>
+                            <div style={{
+                                display: 'flex', flexDirection: 'column', gap: '6px',
+                                overflow: 'hidden', maxHeight: '350px', flex: 1,
+                            }} className="no-scrollbar">
+                                {colorSwatches.map((color: any, idx: number) => (
+                                    <button
+                                        key={idx}
+                                        onClick={() => setSelectedColor(selectedColor === color.name ? '' : color.name)}
+                                        title={color.name}
+                                        style={{
+                                            width: '42px', height: '42px', flexShrink: 0,
+                                            background: getColorHex(color.hex || color.name),
+                                            border: selectedColor === color.name
+                                                ? '3px solid #0B4222'
+                                                : '2px solid #ddd',
+                                            borderRadius: '4px',
+                                            cursor: 'pointer',
+                                            transition: 'all 0.2s ease',
+                                            transform: selectedColor === color.name ? 'scale(1.1)' : 'scale(1)',
+                                            boxShadow: selectedColor === color.name
+                                                ? '0 0 0 2px #0B4222'
+                                                : 'none',
+                                        }}
+                                    />
+                                ))}
+                            </div>
+                            <button style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <FiChevronDown size={18} />
+                            </button>
+                        </div>
                     </div>
 
                     {/* ═══ RIGHT SECTION: Price + Product Details ═══ */}
                     <div style={{
                         flex: '0 0 33.33%', maxWidth: '33.33%',
-                        borderLeft: '1px solid #e5e7eb', paddingLeft: '20px',
+                        paddingLeft: '20px',
                         display: 'flex', flexDirection: 'column',
                         position: 'relative',
                         height: '480px',
