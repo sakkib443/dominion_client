@@ -229,8 +229,8 @@ const NewProductCard: React.FC<NewProductCardProps> = ({ product }) => {
                                     <button
                                         onClick={handleWishlist}
                                         className={`w-12 h-12 flex items-center justify-center border-2 transition-colors ${isWishlisted
-                                                ? 'border-[#E4525C] bg-[#E4525C] text-white'
-                                                : 'border-gray-300 hover:border-[#E4525C] hover:text-[#E4525C]'
+                                            ? 'border-[#E4525C] bg-[#E4525C] text-white'
+                                            : 'border-gray-300 hover:border-[#E4525C] hover:text-[#E4525C]'
                                             }`}
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" fill={isWishlisted ? "currentColor" : "none"} viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">

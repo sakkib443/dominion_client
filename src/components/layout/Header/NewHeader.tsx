@@ -291,7 +291,7 @@ const NewHeader: React.FC = () => {
                             {/* Profile / Login */}
                             <Link href="/login" className="relative flex flex-col items-center gap-0.5 text-white hover:text-white/80 transition-colors shrink-0 px-2">
                                 <FiUser size={22} />
-                                <span className="text-[11px] leading-tight whitespace-nowrap">Create Account</span>
+                                <span className="text-[11px] leading-tight whitespace-nowrap uppercase">Create Account</span>
                             </Link>
 
 

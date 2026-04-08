@@ -128,9 +128,9 @@ export default function ProductDetailsPage() {
         productDetails.push({ key: 'Stock', value: product.stock > 0 ? `${product.stock} available` : 'Out of Stock' });
     }
 
-    // Available color swatches (use product colors or default palette)
+    // Available color swatches (use product colors + colorHex, or default palette)
     const colorSwatches = product.colors?.length > 0
-        ? product.colors.map((c: string) => ({ name: c, hex: c }))
+        ? product.colors.map((c: string, i: number) => ({ name: c, hex: product.colorHex?.[i] || c }))
         : [
             { name: 'Red', hex: '#FF0000' },
             { name: 'Orange', hex: '#FF8C00' },
@@ -397,7 +397,8 @@ export default function ProductDetailsPage() {
                         {/* Main Product Image */}
                         <div
                             style={{
-                                flex: '0 1 80%', background: '#f5f5f5', display: 'flex',
+                                height: '100%', aspectRatio: '1 / 1',
+                                background: '#f5f5f5', display: 'flex',
                                 alignItems: 'center', justifyContent: 'center',
                                 cursor: 'pointer', position: 'relative',
                                 overflow: 'hidden', margin: '0 auto',
@@ -766,6 +767,63 @@ export default function ProductDetailsPage() {
                 </div>
             </div>
 
+            {/* ═══ Info Panel Content (Delivery / Payment / Terms) ═══ */}
+            {activeInfoPanel && (
+                <div className="w-[95%] mx-auto" style={{ padding: '16px 0' }}>
+                    <div style={{
+                        background: '#f9fafb', border: '1px solid #e5e7eb',
+                        padding: '20px 24px', fontSize: '13px', color: '#444',
+                        lineHeight: 1.8, animation: 'fadeIn 0.2s ease-out',
+                    }}>
+                        {activeInfoPanel === 'delivery' && (
+                            <div>
+                                <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#0B4222', marginBottom: '10px' }}>📦 Delivery Information</h3>
+                                {product.deliveryInfo ? (
+                                    <div dangerouslySetInnerHTML={{ __html: product.deliveryInfo }} />
+                                ) : (
+                                    <div style={{ color: '#555' }}>
+                                        <p>• Inside Dhaka: <strong>2-3 business days</strong></p>
+                                        <p>• Outside Dhaka: <strong>5-7 business days</strong></p>
+                                        <p>• Delivery charge may vary based on location.</p>
+                                        <p>• You will receive a tracking number once your order is shipped.</p>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                        {activeInfoPanel === 'payment' && (
+                            <div>
+                                <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#0B4222', marginBottom: '10px' }}>💳 Payment Methods</h3>
+                                {product.paymentInfo ? (
+                                    <div dangerouslySetInnerHTML={{ __html: product.paymentInfo }} />
+                                ) : (
+                                    <div style={{ color: '#555' }}>
+                                        <p>• <strong>Cash on Delivery (COD)</strong> — Pay when you receive.</p>
+                                        <p>• <strong>bKash / Nagad</strong> — Mobile banking payment.</p>
+                                        <p>• <strong>Bank Transfer</strong> — Direct bank payment.</p>
+                                        <p>• <strong>Online Payment</strong> — Visa / MasterCard / AMEX.</p>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                        {activeInfoPanel === 'terms' && (
+                            <div>
+                                <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#0B4222', marginBottom: '10px' }}>📋 Terms & Conditions</h3>
+                                {product.termsInfo ? (
+                                    <div dangerouslySetInnerHTML={{ __html: product.termsInfo }} />
+                                ) : (
+                                    <div style={{ color: '#555' }}>
+                                        <p>• Returns accepted within <strong>7 days</strong> of delivery (unused, original packaging).</p>
+                                        <p>• Warranty claims must be made within the warranty period.</p>
+                                        <p>• Damaged items must be reported within <strong>24 hours</strong> of delivery.</p>
+                                        <p>• Refunds will be processed within <strong>5-10 business days</strong>.</p>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+
             {/* ═══ Related Products Section ═══ */}
             {relatedProducts.length > 0 && (
                 <div style={{ background: '#fff', borderTop: '1px solid #e5e7eb', marginTop: '1rem' }}>
@@ -794,12 +852,8 @@ export default function ProductDetailsPage() {
                                 </Link>
                             )}
                         </div>
-                        <div style={{
-                            display: 'grid',
-                            gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
-                            gap: '1rem'
-                        }}>
-                            {relatedProducts.slice(0, 10).map((item: any) => (
+                        <div className="grid grid-cols-5 gap-2 overflow-hidden">
+                            {relatedProducts.slice(0, 5).map((item: any) => (
                                 <NewProductCard
                                     key={item._id}
                                     product={{

@@ -469,4 +469,68 @@ h6 {
 
 .cart-icon-animate:hover::before {
   box-shadow: 0 0 14px rgba(11, 66, 34, 0.5), 0 0 28px rgba(11, 66, 34, 0.2);
-}
+}
+
+/* ===== Rich Text Editor (Product Admin) ===== */
+.product-editor-wrapper .ql-toolbar.ql-snow {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px 8px 0 0;
+  background: #f8fafc;
+  padding: 8px 12px;
+  font-family: 'Roboto', sans-serif !important;
+}
+
+.product-editor-wrapper .ql-container.ql-snow {
+  border: 1px solid #e5e7eb;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  min-height: 300px;
+  font-family: 'Roboto', sans-serif !important;
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.product-editor-wrapper .ql-editor {
+  min-height: 280px;
+  padding: 16px 20px;
+  color: #1a1a1a;
+}
+
+.product-editor-wrapper .ql-editor.ql-blank::before {
+  color: #9ca3af;
+  font-style: normal;
+}
+
+.product-editor-wrapper .ql-snow .ql-picker {
+  font-family: 'Roboto', sans-serif !important;
+}
+
+.product-editor-wrapper .ql-toolbar .ql-formats {
+  margin-right: 8px;
+  padding-right: 8px;
+  border-right: 1px solid #e5e7eb;
+}
+
+.product-editor-wrapper .ql-toolbar .ql-formats:last-child {
+  border-right: none;
+}
+
+.product-editor-wrapper .ql-snow.ql-toolbar button:hover,
+.product-editor-wrapper .ql-snow .ql-toolbar button:hover,
+.product-editor-wrapper .ql-snow.ql-toolbar button.ql-active,
+.product-editor-wrapper .ql-snow .ql-toolbar button.ql-active {
+  color: #0B4222;
+}
+
+.product-editor-wrapper .ql-snow.ql-toolbar .ql-picker-label:hover,
+.product-editor-wrapper .ql-snow .ql-toolbar .ql-picker-label:hover {
+  color: #0B4222;
+}
+
+.product-editor-wrapper .ql-editor h1 { font-size: 24px; font-weight: 700; margin-bottom: 12px; }
+.product-editor-wrapper .ql-editor h2 { font-size: 20px; font-weight: 700; margin-bottom: 10px; }
+.product-editor-wrapper .ql-editor h3 { font-size: 17px; font-weight: 600; margin-bottom: 8px; }
+.product-editor-wrapper .ql-editor p { margin-bottom: 8px; }
+.product-editor-wrapper .ql-editor ul, .product-editor-wrapper .ql-editor ol { padding-left: 24px; margin-bottom: 8px; }
+.product-editor-wrapper .ql-editor blockquote { border-left: 4px solid #0B4222; padding-left: 16px; color: #555; margin: 12px 0; }
+.product-editor-wrapper .ql-editor img { max-width: 100%; border-radius: 4px; margin: 8px 0; }
