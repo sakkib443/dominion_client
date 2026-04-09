@@ -179,7 +179,7 @@ const NewHeader: React.FC = () => {
 
                                 {/* Dropdown */}
                                 <div
-                                    className={`absolute top-full left-0 mt-1 w-60 bg-white rounded-xl shadow-2xl z-50 border border-gray-100 overflow-hidden transition-all duration-200 origin-top ${isCategoryHovered
+                                    className={`absolute top-full left-0 mt-1 w-60 bg-white/50 backdrop-blur-[2px] rounded-xl shadow-2xl z-50 border border-gray-100 overflow-hidden transition-all duration-200 origin-top ${isCategoryHovered
                                         ? 'opacity-100 scale-y-100 translate-y-0 pointer-events-auto'
                                         : 'opacity-0 scale-y-95 -translate-y-1 pointer-events-none'
                                         }`}
@@ -188,7 +188,7 @@ const NewHeader: React.FC = () => {
                                 >
                                     <Link
                                         href="/"
-                                        className="flex items-center gap-3 px-4 py-3 text-sm text-gray-600 hover:bg-[#0B4222] hover:text-white transition-colors border-b border-gray-50 font-medium"
+                                        className="flex items-center gap-3 px-4 py-1.5 text-sm text-gray-600 hover:bg-gray-100 transition-colors border-b border-gray-50 font-medium"
                                         onClick={() => { setIsCategoryHovered(false); handleGoHome(); }}
                                     >
                                         <span className="text-base">🛒</span>
@@ -199,7 +199,7 @@ const NewHeader: React.FC = () => {
                                             <Link
                                                 key={category._id}
                                                 href={`/?category=${category._id}`}
-                                                className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-[#0B4222] hover:text-white transition-colors"
+                                                className="flex items-center gap-3 px-4 py-1.5 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                                                 onClick={() => setIsCategoryHovered(false)}
                                             >
                                                 {category.icon && <span className="text-base">{category.icon}</span>}

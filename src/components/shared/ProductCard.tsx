@@ -123,7 +123,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                         {/* Add to Cart Button */}
                         <button
                             onClick={handleAddToCart}
-                            className='w-10 h-10 bg-gray-900 text-white rounded-md flex items-center justify-center hover:bg-[var(--color-primary)] transition-all shadow-lg shadow-gray-200 hover:shadow-[var(--color-primary)]/20 active:scale-95 group/btn'
+                            className='w-10 h-10 bg-[var(--color-primary)]/30 text-[var(--color-primary)] rounded-full flex items-center justify-center hover:bg-[var(--color-primary)]/40 transition-all active:scale-95 group/btn'
                         >
                             <FiShoppingCart size={18} className='group-hover/btn:scale-110 transition-transform' />
                         </button>
