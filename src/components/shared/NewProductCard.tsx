@@ -4,7 +4,7 @@ import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useAppDispatch } from '@/redux';
 import { addToCart } from '@/redux/slices/cartSlice';
-import { useGetProductReviewsQuery, useCreateReviewMutation } from '@/redux/api/reviewApi';
+import { useGetProductReviewsQuery, usePublicCreateReviewMutation } from '@/redux/api/reviewApi';
 import { FiStar, FiX, FiCopy, FiCheck, FiSend } from 'react-icons/fi';
 import {
     FaFacebookF, FaWhatsapp, FaTelegramPlane,
@@ -134,7 +134,7 @@ const NewProductCard: React.FC<NewProductCardProps> = ({ product }) => {
                             <span className='text-gray-600 text-xs font-medium'>Sold {formatCount(soldCount)}</span>
                             <button
                                 onClick={handleAddToCart}
-                                className='relative text-gray-600 hover:text-[#0B4222] transition-all p-2 cart-icon-animate rounded-full bg-[#0B4222]/30 hover:bg-[#0B4222]/40'
+                                className='relative text-gray-600 hover:text-[#0B4222] transition-all p-2 cart-icon-animate rounded-full bg-[#0B4222]/50 hover:bg-[#0B4222]/60'
                                 title='Add to Cart'
                             >
                                 <img src="/ICON/cart.png" alt="Cart" className="w-5 h-5 opacity-70" />
@@ -159,7 +159,7 @@ const NewProductCard: React.FC<NewProductCardProps> = ({ product }) => {
 
                         {/* Subtitle / Tagline — scrolling orange text */}
                         <div className='overflow-hidden whitespace-nowrap pb-1'>
-                            <p className='text-[#E4525C] text-[10px] font-normal inline-block animate-marquee-card'>
+                            <p className='text-[#E4525C] text-[11px] font-normal inline-block animate-marquee-card'>
                                 <span>{product.warranty || 'Lower price than others but quality higher'}</span>
                                 <span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
                                 <span>{product.warranty || 'Lower price than others but quality higher'}</span>
@@ -189,12 +189,12 @@ const NewProductCard: React.FC<NewProductCardProps> = ({ product }) => {
                         {/* Heart / Like — unlimited clicks */}
                         <button
                             onClick={handleLike}
-                            className='flex items-center gap-1 hover:text-[#E4525C] transition-colors'
+                            className='flex items-center gap-1 transition-colors hover:text-[#E4525C] stat-item'
                         >
                             <img
                                 src="/ICON/like.png"
                                 alt="Like"
-                                className="w-3.5 h-3.5 opacity-50 transition-transform"
+                                className="w-3.5 h-3.5 opacity-50 transition-all stat-icon"
                                 style={{ transform: likeAnim ? 'scale(1.5)' : 'scale(1)' }}
                             />
                             <span style={{ color: localLikes > 0 ? '#E4525C' : undefined, fontWeight: localLikes > 0 ? 600 : undefined }}>
@@ -205,27 +205,36 @@ const NewProductCard: React.FC<NewProductCardProps> = ({ product }) => {
                         {/* Comments */}
                         <button
                             onClick={handleCommentsClick}
-                            className='flex items-center gap-1 hover:text-[#0B4222] transition-colors'
+                            className='flex items-center gap-1 transition-colors hover:text-[#E4525C] stat-item'
                         >
-                            <img src="/ICON/comments.png" alt="Comments" className="w-3.5 h-3.5 opacity-50" />
+                            <img src="/ICON/comments.png" alt="Comments" className="w-3.5 h-3.5 opacity-50 transition-all stat-icon" />
                             <span>{formatCount(stats.comments)}</span>
                         </button>
 
                         {/* Shares */}
                         <button
                             onClick={handleShareClick}
-                            className='flex items-center gap-1 hover:text-[#0B4222] transition-colors'
+                            className='flex items-center gap-1 transition-colors hover:text-[#E4525C] stat-item'
                         >
-                            <img src="/ICON/share.png" alt="Share" className="w-3.5 h-3.5 opacity-50" />
+                            <img src="/ICON/share.png" alt="Share" className="w-3.5 h-3.5 opacity-50 transition-all stat-icon" />
                             <span>{formatCount(stats.shares)}</span>
                         </button>
 
                         {/* Views */}
-                        <span className='flex items-center gap-1'>
-                            <img src="/ICON/views.png" alt="Views" className="w-3.5 h-3.5 opacity-50" />
+                        <span className='flex items-center gap-1 transition-colors hover:text-[#E4525C] stat-item'>
+                            <img src="/ICON/views.png" alt="Views" className="w-3.5 h-3.5 opacity-50 transition-all stat-icon" />
                             <span>{formatCount(stats.views)}</span>
                         </span>
                     </div>
+                    <style>{`
+                        .stat-item:hover .stat-icon {
+                            opacity: 1;
+                            filter: brightness(0) saturate(100%) invert(39%) sepia(68%) saturate(2494%) hue-rotate(333deg) brightness(92%) contrast(88%);
+                        }
+                        .stat-item {
+                            cursor: pointer;
+                        }
+                    `}</style>
                 </div>
             </Link>
 
@@ -246,41 +255,42 @@ const NewProductCard: React.FC<NewProductCardProps> = ({ product }) => {
             {/* ═══════════════════════════════════════ */}
             {showShare && (
                 <div
-                    className='fixed inset-0 bg-black/60 z-[9999] flex items-center justify-center p-4'
+                    className='fixed inset-0 bg-black/70 z-[9999] flex items-center justify-center p-4'
                     onClick={() => setShowShare(false)}
                 >
                     <div
-                        className='bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden'
+                        className='bg-white rounded-lg w-full max-w-[420px] overflow-hidden shadow-2xl'
                         onClick={(e) => e.stopPropagation()}
-                        style={{ animation: 'popIn 0.25s ease-out' }}
+                        style={{ animation: 'fbModalIn 0.2s ease-out' }}
                     >
-                        {/* Header with product preview */}
-                        <div className='px-5 pt-5 pb-3'>
-                            <div className='flex items-center justify-between mb-4'>
-                                <h3 className='text-lg font-bold text-gray-800'>Share On</h3>
-                                <button
-                                    onClick={() => setShowShare(false)}
-                                    className='w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors'
-                                >
-                                    <FiX size={20} />
-                                </button>
-                            </div>
-                            {/* Product mini-preview */}
-                            <div className='flex items-center gap-3 p-3 bg-gray-50 rounded-xl mb-1'>
+                        {/* Header — FB style */}
+                        <div className='flex items-center justify-between px-4 py-3 border-b border-gray-200'>
+                            <h3 className='text-base font-bold text-gray-900'>Share Product</h3>
+                            <button
+                                onClick={() => setShowShare(false)}
+                                className='w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-800 transition-colors'
+                            >
+                                <FiX size={18} />
+                            </button>
+                        </div>
+
+                        {/* Product preview — like a FB post */}
+                        <div className='px-4 py-3 border-b border-gray-100'>
+                            <div className='flex items-center gap-3'>
                                 <img
                                     src={product.image}
                                     alt={product.name}
-                                    className='w-12 h-12 rounded-lg object-cover border border-gray-200'
+                                    className='w-12 h-12 rounded-lg object-cover'
                                 />
                                 <div className='flex-1 min-w-0'>
-                                    <p className='text-sm font-semibold text-gray-800 truncate'>{product.name}</p>
+                                    <p className='text-sm font-semibold text-gray-900 truncate'>{product.name}</p>
                                     <p className='text-xs text-[#E4525C] font-medium'>Tk.{currentPrice.toLocaleString()}</p>
                                 </div>
                             </div>
                         </div>
 
                         {/* Social Media Grid */}
-                        <div className='px-5 py-4'>
+                        <div className='px-4 py-4'>
                             <div className='grid grid-cols-4 gap-3'>
                                 {shareLinks.map((social) => (
                                     <a
@@ -289,48 +299,47 @@ const NewProductCard: React.FC<NewProductCardProps> = ({ product }) => {
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         onClick={(e) => e.stopPropagation()}
-                                        className='flex flex-col items-center gap-1.5 py-2 rounded-xl hover:bg-gray-50 transition-all group/s'
+                                        className='flex flex-col items-center gap-1.5 py-2 rounded-lg hover:bg-gray-50 transition-colors'
                                     >
                                         <div
-                                            className='w-11 h-11 rounded-full flex items-center justify-center text-white shadow-sm transition-transform group-hover/s:scale-110'
+                                            className='w-10 h-10 rounded-full flex items-center justify-center text-white transition-transform hover:scale-110'
                                             style={{ background: social.color }}
                                         >
-                                            <social.icon size={18} />
+                                            <social.icon size={16} />
                                         </div>
-                                        <span className='text-[10px] font-medium text-gray-500'>{social.name}</span>
+                                        <span className='text-[10px] font-medium text-gray-600'>{social.name}</span>
                                     </a>
                                 ))}
                             </div>
                         </div>
 
                         {/* Copy Link Bar */}
-                        <div className='px-5 pb-5'>
-                            <div className='flex items-center gap-2 bg-gray-100 rounded-xl p-2'>
+                        <div className='px-4 pb-4'>
+                            <div className='flex items-center bg-gray-100 rounded-lg overflow-hidden'>
                                 <input
                                     type="text"
                                     readOnly
                                     value={productUrl}
-                                    className='flex-1 bg-transparent text-xs text-gray-600 outline-none px-2 truncate'
+                                    className='flex-1 bg-transparent text-xs text-gray-600 outline-none px-3 py-2.5 truncate'
                                 />
                                 <button
                                     onClick={handleCopyLink}
-                                    className='px-4 py-2 bg-[#0B4222] text-white text-xs font-semibold rounded-lg hover:bg-[#093519] transition-colors flex items-center gap-1.5 whitespace-nowrap'
+                                    className='px-4 py-2.5 bg-[#0B4222] text-white text-xs font-semibold hover:bg-[#093519] transition-colors flex items-center gap-1.5 whitespace-nowrap'
                                 >
                                     {linkCopied ? (
-                                        <><FiCheck size={14} /> Copied!</>
+                                        <><FiCheck size={13} /> Copied!</>
                                     ) : (
-                                        <><FiCopy size={14} /> Copy</>
+                                        <><FiCopy size={13} /> Copy</>
                                     )}
                                 </button>
                             </div>
                         </div>
                     </div>
 
-                    {/* Animation keyframes */}
                     <style>{`
-                        @keyframes popIn {
-                            from { transform: scale(0.9); opacity: 0; }
-                            to { transform: scale(1); opacity: 1; }
+                        @keyframes fbModalIn {
+                            from { transform: scale(0.95) translateY(10px); opacity: 0; }
+                            to { transform: scale(1) translateY(0); opacity: 1; }
                         }
                     `}</style>
                 </div>
@@ -350,7 +359,7 @@ const CommentsPopup: React.FC<{
     onClose: () => void;
 }> = ({ productId, productName, productImage, onClose }) => {
     const { data: reviewsData, isLoading } = useGetProductReviewsQuery({ productId });
-    const [createReview] = useCreateReviewMutation();
+    const [publicCreateReview] = usePublicCreateReviewMutation();
     const reviews = reviewsData?.data || [];
 
     const [newComment, setNewComment] = useState('');
@@ -364,7 +373,7 @@ const CommentsPopup: React.FC<{
         if (!newComment.trim()) return;
         setIsSubmitting(true);
         try {
-            await createReview({
+            await publicCreateReview({
                 product: productId,
                 rating: newRating,
                 comment: newComment.trim(),
@@ -384,138 +393,165 @@ const CommentsPopup: React.FC<{
 
     return (
         <div
-            className='fixed inset-0 bg-black/60 z-[9999] flex items-center justify-center p-4'
+            className='fixed inset-0 bg-black/70 z-[9999] flex items-center justify-center p-4'
             onClick={onClose}
         >
             <div
-                className='bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[85vh] flex flex-col overflow-hidden'
+                className='bg-white rounded-lg w-full max-w-[620px] max-h-[88vh] flex flex-col overflow-hidden shadow-2xl'
                 onClick={(e) => e.stopPropagation()}
-                style={{ animation: 'popIn 0.25s ease-out' }}
+                style={{ animation: 'fbModalIn 0.2s ease-out' }}
             >
-                {/* Header */}
-                <div className='flex items-center gap-3 px-5 py-4 border-b border-gray-100 shrink-0'>
-                    <img src={productImage} alt="" className='w-10 h-10 rounded-lg object-cover border border-gray-200' />
-                    <div className='flex-1 min-w-0'>
-                        <h3 className='text-sm font-bold text-gray-800'>Ratings & Reviews</h3>
-                        <p className='text-xs text-gray-400 truncate'>{productName}</p>
-                    </div>
+                {/* ── Header ── */}
+                <div className='flex items-center justify-between px-4 py-2.5 border-b border-gray-200 shrink-0'>
+                    <h3 className='text-[15px] font-bold text-gray-900 truncate pr-4'>{productName}</h3>
                     <button
                         onClick={onClose}
-                        className='w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors'
+                        className='w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-800 transition-colors shrink-0'
                     >
                         <FiX size={18} />
                     </button>
                 </div>
 
-                {/* Reviews List — scrollable */}
-                <div className='flex-1 overflow-y-auto p-5 space-y-3'>
+                {/* ── Product image — full view ── */}
+                <div className='shrink-0 border-b border-gray-200'>
+                    <div className='w-full bg-gray-50 flex items-center justify-center' style={{ maxHeight: '280px' }}>
+                        <img
+                            src={productImage}
+                            alt={productName}
+                            className='w-full object-contain'
+                            style={{ maxHeight: '280px' }}
+                            onError={(e) => {
+                                (e.target as HTMLImageElement).src = 'https://via.placeholder.com/620x200/f3f4f6/9ca3af?text=No+Image';
+                            }}
+                        />
+                    </div>
+                    {/* Stats bar */}
+                    <div className='flex items-center justify-between px-4 py-1.5 text-xs text-gray-500'>
+                        <span>{reviews.length} {reviews.length === 1 ? 'Comment' : 'Comments'}</span>
+                    </div>
+                </div>
+
+                {/* ── Comments List — scrollable ── */}
+                <div className='flex-1 overflow-y-auto px-4 py-2 space-y-1.5' style={{ minHeight: '60px' }}>
                     {isLoading ? (
-                        <div className='flex flex-col items-center py-10 gap-3'>
-                            <div className='w-8 h-8 border-2 border-gray-200 border-t-[#0B4222] rounded-full animate-spin' />
-                            <p className='text-sm text-gray-400'>Loading reviews...</p>
+                        <div className='flex items-center justify-center py-8'>
+                            <div className='w-6 h-6 border-2 border-gray-200 border-t-[#0B4222] rounded-full animate-spin' />
                         </div>
                     ) : reviews.length > 0 ? (
-                        reviews.map((review: any, idx: number) => (
-                            <div key={idx} className='p-3.5 bg-gray-50 rounded-xl'>
-                                <div className='flex items-center justify-between mb-2'>
-                                    <div className='flex items-center gap-2'>
-                                        <div className='w-7 h-7 rounded-full bg-[#0B4222]/10 flex items-center justify-center text-[#0B4222] text-xs font-bold'>
-                                            {(review.userName || review.user?.name || 'A').charAt(0).toUpperCase()}
-                                        </div>
-                                        <span className='font-semibold text-sm text-gray-700'>
-                                            {review.userName || review.user?.name || 'Anonymous'}
-                                        </span>
+                        <>
+                            <p className='text-[11px] font-semibold text-gray-400 uppercase tracking-wide'>Most relevant</p>
+                            {reviews.map((review: any, idx: number) => (
+                                <div key={idx} className='flex gap-2'>
+                                    <div className='w-7 h-7 rounded-full bg-gradient-to-br from-[#0B4222] to-[#16a34a] flex items-center justify-center text-white text-[10px] font-bold shrink-0'>
+                                        {(review.userName || review.user?.firstName || review.user?.name || 'A').charAt(0).toUpperCase()}
                                     </div>
-                                    <div className='flex gap-0.5'>
-                                        {[1, 2, 3, 4, 5].map(star => (
-                                            <FiStar key={star} size={11} style={{
-                                                color: '#f59e0b',
-                                                fill: star <= (review.rating || 0) ? '#f59e0b' : 'none'
-                                            }} />
-                                        ))}
+                                    <div className='flex-1 min-w-0'>
+                                        <div className='bg-gray-100 rounded-2xl px-3 py-1.5'>
+                                            <span className='text-[11px] font-semibold text-gray-900'>
+                                                {review.userName || review.user?.name || `${review.user?.firstName || ''} ${review.user?.lastName || ''}`.trim() || 'Anonymous'}
+                                            </span>
+                                            {review.comment && (
+                                                <p className='text-[11px] text-gray-700 leading-snug'>{review.comment}</p>
+                                            )}
+                                        </div>
+                                        <div className='flex items-center gap-3 px-3 mt-0.5 text-[10px] text-gray-400'>
+                                            <span className='flex gap-0.5'>
+                                                {[1, 2, 3, 4, 5].map(star => (
+                                                    <FiStar key={star} size={9} style={{
+                                                        color: '#f59e0b',
+                                                        fill: star <= (review.rating || 0) ? '#f59e0b' : 'none'
+                                                    }} />
+                                                ))}
+                                            </span>
+                                            <span className='font-medium hover:underline cursor-pointer'>Like</span>
+                                            <span className='font-medium hover:underline cursor-pointer'>Reply</span>
+                                        </div>
                                     </div>
                                 </div>
-                                {review.comment && (
-                                    <p className='text-xs text-gray-600 leading-relaxed pl-9'>{review.comment}</p>
-                                )}
-                            </div>
-                        ))
+                            ))}
+                        </>
                     ) : (
-                        <div className='text-center py-8'>
-                            <div className='text-4xl mb-3'>💬</div>
-                            <p className='text-sm font-medium text-gray-600'>No reviews yet</p>
-                            <p className='text-xs text-gray-400 mt-1'>Be the first to share your thoughts!</p>
+                        <div className='text-center py-6'>
+                            <p className='text-sm text-gray-500'>No comments yet</p>
+                            <p className='text-xs text-gray-400 mt-1'>Be the first to comment!</p>
                         </div>
                     )}
                 </div>
 
-                {/* Write Comment Section — always visible at bottom */}
-                <div className='border-t border-gray-100 px-5 py-4 shrink-0 bg-white'>
+                {/* ── Comment Input — bottom bar ── */}
+                <div className='border-t border-gray-200 px-4 py-2.5 shrink-0 bg-white'>
                     {submitSuccess && (
-                        <div className='mb-3 text-center text-xs text-green-600 font-medium bg-green-50 py-2 rounded-lg'>
-                            ✅ Your review has been submitted!
+                        <div className='mb-2 text-center text-xs text-green-600 font-medium bg-green-50 py-1.5 rounded-lg'>
+                            ✅ Comment posted!
                         </div>
                     )}
 
-                    {/* Star Rating Selector */}
-                    <div className='flex items-center gap-2 mb-3'>
-                        <span className='text-xs text-gray-500 font-medium'>Rating:</span>
-                        <div className='flex gap-0.5'>
-                            {[1, 2, 3, 4, 5].map(star => (
-                                <button
-                                    key={star}
-                                    onClick={() => setNewRating(star)}
-                                    onMouseEnter={() => setHoverRating(star)}
-                                    onMouseLeave={() => setHoverRating(0)}
-                                    className='p-0.5 transition-transform hover:scale-125'
-                                >
-                                    <FiStar size={16} style={{
-                                        color: '#f59e0b',
-                                        fill: star <= (hoverRating || newRating) ? '#f59e0b' : 'none',
-                                        transition: 'all 0.15s ease'
-                                    }} />
-                                </button>
-                            ))}
+                    <div className='flex items-start gap-2.5'>
+                        {/* Avatar — updates live with typed name */}
+                        <div className='w-8 h-8 rounded-full bg-gradient-to-br from-gray-400 to-gray-500 flex items-center justify-center text-white text-xs font-bold shrink-0 mt-0.5'>
+                            {userName ? userName.charAt(0).toUpperCase() : '?'}
                         </div>
-                    </div>
 
-                    {/* Name Input */}
-                    <input
-                        type="text"
-                        value={userName}
-                        onChange={(e) => setUserName(e.target.value)}
-                        placeholder="Your name (optional)"
-                        className='w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-700 placeholder-gray-400 outline-none focus:border-[#0B4222]/30 focus:ring-1 focus:ring-[#0B4222]/20 mb-2 transition-colors'
-                    />
-
-                    {/* Comment Input + Send */}
-                    <div className='flex items-end gap-2'>
-                        <textarea
-                            value={newComment}
-                            onChange={(e) => setNewComment(e.target.value)}
-                            placeholder="Write your review..."
-                            rows={2}
-                            className='flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-700 placeholder-gray-400 outline-none focus:border-[#0B4222]/30 focus:ring-1 focus:ring-[#0B4222]/20 resize-none transition-colors'
-                        />
-                        <button
-                            onClick={handleSubmitComment}
-                            disabled={!newComment.trim() || isSubmitting}
-                            className='w-10 h-10 rounded-xl bg-[#0B4222] text-white flex items-center justify-center hover:bg-[#093519] transition-colors disabled:opacity-40 disabled:cursor-not-allowed shrink-0'
-                        >
-                            {isSubmitting ? (
-                                <div className='w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin' />
-                            ) : (
-                                <FiSend size={16} />
-                            )}
-                        </button>
+                        {/* Name + Comment + Rating — all in one compact block */}
+                        <div className='flex-1 min-w-0 bg-gray-100 rounded-2xl px-3 py-1.5'>
+                            <input
+                                type="text"
+                                value={userName}
+                                onChange={(e) => setUserName(e.target.value)}
+                                placeholder="Your name"
+                                className='w-full bg-transparent text-[12px] text-gray-900 font-normal placeholder-gray-400 placeholder:font-normal outline-none pb-1 border-b border-gray-300/50'
+                            />
+                            <input
+                                type="text"
+                                value={newComment}
+                                onChange={(e) => setNewComment(e.target.value)}
+                                onKeyDown={(e) => { if (e.key === 'Enter' && newComment.trim()) handleSubmitComment(); }}
+                                placeholder="Write a comment..."
+                                className='w-full bg-transparent text-[12px] text-gray-700 font-normal placeholder-gray-400 placeholder:font-normal outline-none pt-1'
+                            />
+                            {/* Rating + Send row */}
+                            <div className='flex items-center justify-between mt-1.5 pt-1.5 border-t border-gray-200/60'>
+                                <div className='flex items-center gap-1.5'>
+                                    <span className='text-[11px] text-gray-400'>Rating</span>
+                                    <div className='flex gap-px'>
+                                        {[1, 2, 3, 4, 5].map(star => (
+                                            <button
+                                                key={star}
+                                                onClick={() => setNewRating(star)}
+                                                onMouseEnter={() => setHoverRating(star)}
+                                                onMouseLeave={() => setHoverRating(0)}
+                                                className='p-px transition-transform hover:scale-125'
+                                            >
+                                                <FiStar size={13} style={{
+                                                    color: '#f59e0b',
+                                                    fill: star <= (hoverRating || newRating) ? '#f59e0b' : 'none',
+                                                    transition: 'all 0.15s ease'
+                                                }} />
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={handleSubmitComment}
+                                    disabled={!newComment.trim() || isSubmitting}
+                                    className='text-[#0B4222] font-semibold text-[13px] hover:text-[#093519] transition-colors disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-1'
+                                >
+                                    {isSubmitting ? (
+                                        <div className='w-4 h-4 border-2 border-gray-300 border-t-[#0B4222] rounded-full animate-spin' />
+                                    ) : (
+                                        <><FiSend size={13} /> Post</>
+                                    )}
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <style>{`
-                @keyframes popIn {
-                    from { transform: scale(0.9); opacity: 0; }
-                    to { transform: scale(1); opacity: 1; }
+                @keyframes fbModalIn {
+                    from { transform: scale(0.95) translateY(10px); opacity: 0; }
+                    to { transform: scale(1) translateY(0); opacity: 1; }
                 }
             `}</style>
         </div>

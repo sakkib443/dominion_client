@@ -11,10 +11,19 @@ export const reviewApi = baseApi.injectEndpoints({
             }),
             providesTags: ['Reviews']
         }),
-        // User: create review — Backend route: POST /api/reviews/
+        // User: create review (auth required) — Backend route: POST /api/reviews/
         createReview: builder.mutation({
             query: (data) => ({
                 url: '/reviews',
+                method: 'POST',
+                body: data
+            }),
+            invalidatesTags: ['Reviews']
+        }),
+        // Public: create comment (no login required) — Backend route: POST /api/reviews/public
+        publicCreateReview: builder.mutation({
+            query: (data) => ({
+                url: '/reviews/public',
                 method: 'POST',
                 body: data
             }),
@@ -44,7 +53,7 @@ export const reviewApi = baseApi.injectEndpoints({
                 method: 'GET',
                 params
             }),
-            providesTags: (result, error, { productId }) => [{ type: 'Reviews', id: productId }]
+            providesTags: (result: any, error: any, { productId }: { productId: string }) => [{ type: 'Reviews' as const, id: productId }]
         }),
     })
 });
@@ -52,7 +61,9 @@ export const reviewApi = baseApi.injectEndpoints({
 export const {
     useGetAllReviewsQuery,
     useCreateReviewMutation,
+    usePublicCreateReviewMutation,
     useUpdateReviewMutation,
     useDeleteReviewMutation,
     useGetProductReviewsQuery
 } = reviewApi;
+

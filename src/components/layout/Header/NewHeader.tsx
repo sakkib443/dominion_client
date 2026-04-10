@@ -250,7 +250,7 @@ const NewHeader: React.FC = () => {
                                         onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                                         placeholder={isSearching ? 'Searching by image...' : 'Product Search by Name or Code'}
                                         className={`w-full h-full bg-white border border-white/80 rounded-none ${selectedImage ? 'pl-12' : 'pl-4'
-                                            } pr-4 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#0B4222]/30 transition-all text-sm`}
+                                            } pr-4 text-gray-700 placeholder-gray-300 focus:outline-none focus:ring-1 focus:ring-[#0B4222]/30 transition-all text-sm`}
                                     />
                                 </div>
 
@@ -271,9 +271,9 @@ const NewHeader: React.FC = () => {
                                 <button
                                     onClick={() => setIsImageSearchOpen(true)}
                                     title="Search by Image"
-                                    className="flex items-center gap-2 h-10 px-4 bg-gray-100 border-y border-r border-white/80 rounded-none text-gray-500 hover:text-[#0B4222] transition-colors text-sm font-medium whitespace-nowrap"
+                                    className="flex items-center gap-2 h-10 px-4 bg-gray-100 border-y border-r border-white/80 rounded-none text-gray-400 hover:text-[#0B4222] transition-colors text-sm font-medium whitespace-nowrap"
                                 >
-                                    <span className="hidden lg:inline text-xs">Image<br />Search</span>
+                                    <span className="hidden lg:inline text-xs text-gray-300">Image<br />Search</span>
                                 </button>
                             </div>
 
@@ -288,16 +288,16 @@ const NewHeader: React.FC = () => {
                                 )}
                             </Link>
 
-                            {/* Profile / Login */}
-                            <Link href="/login" className="relative flex flex-col items-center gap-0.5 text-white hover:text-white/80 transition-colors shrink-0 px-2">
+                            {/* Create Account */}
+                            <Link href="/register" className="relative flex flex-col items-center gap-0.5 text-white hover:text-white/80 transition-colors shrink-0 px-2">
                                 <FiUser size={22} />
-                                <span className="text-[11px] leading-tight whitespace-nowrap uppercase">Create Account</span>
+                                <span className="text-[11px] leading-tight whitespace-nowrap uppercase font-bold">Create Account</span>
                             </Link>
 
 
                             {/* Contact Us */}
                             <Link href="/contact" className="hidden lg:flex flex-col items-center gap-0.5 text-white hover:text-white/80 transition-colors shrink-0 px-2">
-                                <span className="text-sm font-medium tracking-wider uppercase leading-tight text-center">Contact<br />Us</span>
+                                <span className="text-sm font-bold tracking-wider uppercase leading-tight text-center">Contact<br />Us</span>
                             </Link>
                         </div>
 

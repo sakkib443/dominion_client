@@ -447,28 +447,16 @@ h6 {
 /* ===== Cart Icon Glow Animation ===== */
 @keyframes cartGlowPulse {
   0%, 100% {
-    box-shadow: 0 0 0px transparent;
+    box-shadow: 0 0 0px rgba(11, 66, 34, 0.3);
   }
   50% {
-    box-shadow: 0 0 12px rgba(11, 66, 34, 0.4), 0 0 24px rgba(11, 66, 34, 0.15);
+    box-shadow: 0 0 14px rgba(11, 66, 34, 0.6), 0 0 28px rgba(11, 66, 34, 0.25);
   }
 }
 
 .cart-icon-animate {
   border-radius: 50%;
-}
-
-.cart-icon-animate::before {
-  content: '';
-  position: absolute;
-  inset: -4px;
-  border-radius: 50%;
   animation: cartGlowPulse 2s ease-in-out infinite;
-  pointer-events: none;
-}
-
-.cart-icon-animate:hover::before {
-  box-shadow: 0 0 14px rgba(11, 66, 34, 0.5), 0 0 28px rgba(11, 66, 34, 0.2);
 }
 
 /* ===== Rich Text Editor (Product Admin) ===== */
