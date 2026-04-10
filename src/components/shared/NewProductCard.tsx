@@ -28,6 +28,13 @@ interface Product {
     warranty?: string;
     priceType?: 'negotiable' | 'fixed';
     sold?: number;
+    soldCount?: number;
+    totalSold?: number;
+    likeCount?: number;
+    commentCount?: number;
+    shareCount?: number;
+    viewCount?: number;
+    reviewCount?: number;
 }
 
 interface NewProductCardProps {
@@ -108,19 +115,15 @@ const NewProductCard: React.FC<NewProductCardProps> = ({ product }) => {
     const oldPrice = product.mrp || product.originalPrice;
     const discountPercent = oldPrice ? Math.round(((oldPrice - currentPrice) / oldPrice) * 100) : 0;
     const priceType = product.priceType || 'negotiable';
-    const soldCount = product.sold || Math.floor(Math.random() * 3000) + 500;
+    const soldCount = product.sold || product.soldCount || product.totalSold || 0;
 
-    // Stable random engagement stats based on product id
-    const stats = useMemo(() => {
-        const seed = String(product._id || product.id);
-        const hash = seed.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
-        return {
-            likes: (hash * 17) % 3000 + 500,
-            comments: (hash * 13) % 2000 + 200,
-            shares: (hash * 19) % 4000 + 500,
-            views: (hash * 23) % 8000 + 1000,
-        };
-    }, [product._id, product.id]);
+    // Use real stats from database
+    const stats = useMemo(() => ({
+        likes: product.likeCount || 0,
+        comments: product.commentCount || product.reviewCount || 0,
+        shares: product.shareCount || 0,
+        views: product.viewCount || 0,
+    }), [product.likeCount, product.commentCount, product.reviewCount, product.shareCount, product.viewCount]);
 
     return (
         <>

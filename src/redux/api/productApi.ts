@@ -96,6 +96,14 @@ export const productApi = baseApi.injectEndpoints({
                 body: data,
             }),
         }),
+        // Public: increment stat — Backend route: PATCH /api/products/:id/stat
+        incrementProductStat: builder.mutation({
+            query: ({ id, field }: { id: string; field: string }) => ({
+                url: `/products/${id}/stat`,
+                method: 'PATCH',
+                body: { field },
+            }),
+        }),
     }),
 });
 
@@ -113,4 +121,5 @@ export const {
     useBulkUpdateStatusMutation,
     useBulkDeleteMutation,
     useImageSearchMutation,
+    useIncrementProductStatMutation,
 } = productApi;

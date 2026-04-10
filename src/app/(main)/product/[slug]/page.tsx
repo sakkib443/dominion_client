@@ -7,12 +7,19 @@ import {
     FiHeart, FiShoppingCart, FiMinus, FiPlus, FiCheckCircle,
     FiStar, FiX, FiZoomIn, FiCopy, FiShare2, FiDownload,
     FiThumbsUp, FiChevronUp, FiChevronDown, FiMessageSquare,
-    FiEye, FiChevronRight
+    FiEye, FiChevronRight, FiChevronLeft
 } from 'react-icons/fi';
 import { useGetProductBySlugQuery, useGetRelatedProductsQuery } from '@/redux/api/productApi';
+import { useGetProductReviewsQuery, usePublicCreateReviewMutation } from '@/redux/api/reviewApi';
 import { useAppDispatch } from '@/redux';
 import { addToCart } from '@/redux/slices/cartSlice';
 import NewProductCard from '@/components/shared/NewProductCard';
+import { FiSend } from 'react-icons/fi';
+import {
+    FaFacebookF, FaWhatsapp, FaTelegramPlane,
+    FaLinkedinIn, FaPinterestP, FaEnvelope
+} from 'react-icons/fa';
+import { FaXTwitter } from 'react-icons/fa6';
 
 export default function ProductDetailsPage() {
     const { slug } = useParams();
@@ -30,8 +37,27 @@ export default function ProductDetailsPage() {
     const [selectedSize, setSelectedSize] = useState<string>('');
     const [activeInfoPanel, setActiveInfoPanel] = useState<'delivery' | 'payment' | 'terms' | null>(null);
     const [showRatingModal, setShowRatingModal] = useState(false);
+    const [showSharePopup, setShowSharePopup] = useState(false);
+    const [shareLinkCopied, setShareLinkCopied] = useState(false);
+    const [showCommentsModal, setShowCommentsModal] = useState(false);
+    const [cmtUserName, setCmtUserName] = useState('');
+    const [cmtText, setCmtText] = useState('');
+    const [cmtRating, setCmtRating] = useState(5);
+    const [cmtHoverRating, setCmtHoverRating] = useState(0);
+    const [cmtSubmitting, setCmtSubmitting] = useState(false);
+    const [cmtSuccess, setCmtSuccess] = useState(false);
+    const [zoomLevel, setZoomLevel] = useState(1);
+    const [showDownloadModal, setShowDownloadModal] = useState(false);
     const colorSwatchRef = useRef<HTMLDivElement>(null);
+    const sizeSwatchRef = useRef<HTMLDivElement>(null);
+    const colorSwatchRef2 = useRef<HTMLDivElement>(null);
     const detailsRef = useRef<HTMLDivElement>(null);
+
+    const scrollList = (ref: React.RefObject<HTMLDivElement | null>, dir: 'up' | 'down') => {
+        if (ref.current) {
+            ref.current.scrollBy({ top: dir === 'down' ? 96 : -96, behavior: 'smooth' });
+        }
+    };
 
     const { data: productData, isLoading, isError } = useGetProductBySlugQuery(slug as string, { skip: !slug });
     const product = productData?.data;
@@ -41,6 +67,32 @@ export default function ProductDetailsPage() {
         { skip: !product?._id || !product?.category?._id }
     );
     const relatedProducts = relatedData?.data || [];
+
+    const { data: reviewsData } = useGetProductReviewsQuery(product?._id, { skip: !product?._id });
+    const reviews = reviewsData?.data || [];
+    const [publicCreateReview] = usePublicCreateReviewMutation();
+
+    const handleCommentSubmit = async () => {
+        if (!cmtText.trim() || !product?._id) return;
+        setCmtSubmitting(true);
+        try {
+            await publicCreateReview({
+                product: product._id,
+                rating: cmtRating,
+                comment: cmtText.trim(),
+                userName: cmtUserName.trim() || 'Anonymous'
+            }).unwrap();
+            setCmtText('');
+            setCmtUserName('');
+            setCmtRating(5);
+            setCmtSuccess(true);
+            setTimeout(() => setCmtSuccess(false), 3000);
+        } catch (err) {
+            console.error('Failed to submit review:', err);
+        } finally {
+            setCmtSubmitting(false);
+        }
+    };
 
     const handleAddToCart = () => {
         if (!product) return;
@@ -162,10 +214,10 @@ export default function ProductDetailsPage() {
                         background: 'rgba(0,0,0,0.95)', display: 'flex',
                         alignItems: 'center', justifyContent: 'center', padding: '1rem'
                     }}
-                    onClick={() => setIsFullscreen(false)}
+                    onClick={() => { setIsFullscreen(false); setZoomLevel(1); }}
                 >
                     <button
-                        onClick={() => setIsFullscreen(false)}
+                        onClick={() => { setIsFullscreen(false); setZoomLevel(1); }}
                         style={{
                             position: 'absolute', top: '1rem', right: '1rem',
                             width: '40px', height: '40px', background: 'rgba(255,255,255,0.1)',
@@ -178,14 +230,14 @@ export default function ProductDetailsPage() {
                     </button>
                     {allImages.length > 1 && (
                         <div style={{
-                            position: 'absolute', left: '1rem', top: '50%',
+                            position: 'absolute', left: '5rem', top: '50%',
                             transform: 'translateY(-50%)', display: 'flex',
                             flexDirection: 'column', gap: '0.5rem', zIndex: 10
                         }}>
                             {allImages.map((img, idx) => (
                                 <button
                                     key={idx}
-                                    onClick={(e) => { e.stopPropagation(); setSelectedImage(idx); }}
+                                    onClick={(e) => { e.stopPropagation(); setSelectedImage(idx); setZoomLevel(1); }}
                                     style={{
                                         width: '56px', height: '56px', borderRadius: '8px',
                                         overflow: 'hidden', border: selectedImage === idx ? '2px solid #fff' : '2px solid rgba(255,255,255,0.2)',
@@ -200,18 +252,67 @@ export default function ProductDetailsPage() {
                             ))}
                         </div>
                     )}
-                    <img
-                        src={allImages[selectedImage] || allImages[0]}
-                        alt={product.name}
-                        style={{ maxWidth: '85vw', maxHeight: '90vh', objectFit: 'contain', borderRadius: '12px' }}
-                        onClick={(e) => e.stopPropagation()}
-                    />
+                    {/* Image + Arrows Container */}
+                    <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }} onClick={(e) => e.stopPropagation()}>
+                        {/* Left Arrow */}
+                        {selectedImage > 0 && (
+                            <button
+                                onClick={() => { setSelectedImage(prev => prev - 1); setZoomLevel(1); }}
+                                style={{
+                                    position: 'absolute', left: '-52px', top: '50%', transform: 'translateY(-50%)',
+                                    background: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: '50%',
+                                    width: '44px', height: '44px', cursor: 'pointer', display: 'flex',
+                                    alignItems: 'center', justifyContent: 'center', zIndex: 10,
+                                    transition: 'all 0.2s ease',
+                                }}
+                                onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.3)'; }}
+                                onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.15)'; }}
+                            >
+                                <FiChevronLeft size={24} color="#fff" />
+                            </button>
+                        )}
+
+                        <img
+                            src={allImages[selectedImage] || allImages[0]}
+                            alt={product.name}
+                            style={{
+                                maxWidth: '75vw', maxHeight: '90vh', objectFit: 'contain', borderRadius: '12px',
+                                transition: 'transform 0.3s ease', transform: `scale(${zoomLevel})`,
+                                cursor: zoomLevel > 1 ? 'zoom-out' : 'zoom-in',
+                            }}
+                            onWheel={(e) => {
+                                e.stopPropagation();
+                                setZoomLevel(prev => {
+                                    const next = prev + (e.deltaY < 0 ? 0.2 : -0.2);
+                                    return Math.max(1, Math.min(3, next));
+                                });
+                            }}
+                        />
+
+                        {/* Right Arrow */}
+                        {selectedImage < allImages.length - 1 && (
+                            <button
+                                onClick={() => { setSelectedImage(prev => prev + 1); setZoomLevel(1); }}
+                                style={{
+                                    position: 'absolute', right: '-52px', top: '50%', transform: 'translateY(-50%)',
+                                    background: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: '50%',
+                                    width: '44px', height: '44px', cursor: 'pointer', display: 'flex',
+                                    alignItems: 'center', justifyContent: 'center', zIndex: 10,
+                                    transition: 'all 0.2s ease',
+                                }}
+                                onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.3)'; }}
+                                onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.15)'; }}
+                            >
+                                <FiChevronRight size={24} color="#fff" />
+                            </button>
+                        )}
+                    </div>
                 </div>
             )}
 
             {/* ═══ PRODUCT TITLE BAR ═══ */}
             <div style={{ background: '#fff', borderBottom: '1px solid #e5e7eb' }}>
-                <div className="w-[95%] mx-auto" style={{ padding: '10px 0 18px 0' }}>
+                <div className="w-[95%] mx-auto" style={{ padding: '10px 0 10px 0' }}>
                     {/* Product Name + Code */}
                     <h1 style={{
                         fontSize: '20px', fontWeight: 700, color: '#1a1a1a',
@@ -222,11 +323,11 @@ export default function ProductDetailsPage() {
 
                     {/* Warranty / Guarantee Text */}
                     {product.shortDescription ? (
-                        <p style={{ fontSize: '11px', color: '#E4525C', fontWeight: 400, margin: '2px 0 6px' }}>
+                        <p style={{ fontSize: '11px', color: '#E4525C', fontWeight: 400, margin: '4px 0 4px' }}>
                             {product.shortDescription}
                         </p>
                     ) : (
-                        <p style={{ fontSize: '11px', color: '#E4525C', fontWeight: 400, margin: '2px 0 6px' }}>
+                        <p style={{ fontSize: '11px', color: '#E4525C', fontWeight: 400, margin: '4px 0 4px' }}>
                             Warranty: Service Warranty Available
                         </p>
                     )}
@@ -234,11 +335,12 @@ export default function ProductDetailsPage() {
                     {/* Stats Row */}
                     <div style={{
                         display: 'flex', alignItems: 'center', gap: '40px',
-                        flexWrap: 'wrap', fontSize: '14px', color: '#555'
+                        flexWrap: 'wrap', fontSize: '14px', color: '#555',
+                        marginTop: '14px'
                     }}>
                         {/* Sold */}
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <span style={{ fontWeight: 600 }}>Sold {product.soldCount || '0'}</span>
+                            <span style={{ fontWeight: 400 }}>Sold {product.soldCount || '01'}</span>
                         </div>
 
                         {/* Rating */}
@@ -251,7 +353,7 @@ export default function ProductDetailsPage() {
                             }}
                         >
                             <FiStar size={15} style={{ color: '#f59e0b', fill: '#f59e0b' }} />
-                            <span style={{ fontWeight: 600 }}>{product.rating?.toFixed(1) || '0.0'}</span>
+                            <span style={{ fontWeight: 400 }}>{product.rating?.toFixed(1) || '0.0'}</span>
                             <span style={{ color: '#888' }}>({product.reviewCount || 0} Ratings)</span>
                         </button>
 
@@ -264,26 +366,26 @@ export default function ProductDetailsPage() {
                                 color: isLiked ? '#ef4444' : '#555', fontSize: '14px'
                             }}
                         >
-                            <FiHeart size={15} style={isLiked ? { fill: '#ef4444' } : {}} />
-                            <span style={{ fontWeight: 600 }}>{likeCount || '0'}</span>
+                            <img src="/ICON/like.png" alt="Like" style={{ width: '16px', height: '16px', opacity: isLiked ? 1 : 0.6 }} />
+                            <span style={{ fontWeight: 400 }}>{(product.likeCount || 0) + likeCount}</span>
                         </button>
 
                         {/* Comments */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <FiMessageSquare size={15} />
-                            <span style={{ fontWeight: 600 }}>{product.reviewCount || '0'}</span>
+                        <div onClick={() => setShowCommentsModal(true)} style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
+                            <img src="/ICON/comments.png" alt="Comments" style={{ width: '16px', height: '16px', opacity: 0.6 }} />
+                            <span style={{ fontWeight: 400 }}>{product.commentCount || product.reviewCount || 0}</span>
                         </div>
 
                         {/* Share */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <FiShare2 size={15} />
-                            <span style={{ fontWeight: 600 }}>0</span>
+                        <div onClick={() => setShowSharePopup(true)} style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
+                            <img src="/ICON/share.png" alt="Share" style={{ width: '16px', height: '16px', opacity: 0.6 }} />
+                            <span style={{ fontWeight: 400 }}>{product.shareCount || 0}</span>
                         </div>
 
                         {/* Views */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <FiEye size={15} />
-                            <span style={{ fontWeight: 600 }}>0</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
+                            <img src="/ICON/views.png" alt="Views" style={{ width: '16px', height: '16px', opacity: 0.6 }} />
+                            <span style={{ fontWeight: 400 }}>{product.viewCount || 0}</span>
                         </div>
 
                         {/* Copy Link */}
@@ -302,21 +404,20 @@ export default function ProductDetailsPage() {
                             }}
                         >
                             <FiCopy size={15} />
-                            <span style={{ fontWeight: 600 }}>{linkCopied ? 'Copied!' : 'Copy Link'}</span>
+                            <span style={{ fontWeight: 400 }}>{linkCopied ? 'Copied!' : 'Copy Link'}</span>
                         </button>
 
                         {/* Image Download */}
-                        <a
-                            href={allImages[0]}
-                            download
+                        <button
+                            onClick={() => setShowDownloadModal(true)}
                             style={{
                                 display: 'flex', alignItems: 'center', gap: '6px',
-                                color: '#555', fontSize: '14px', textDecoration: 'none'
+                                color: '#555', fontSize: '14px', background: 'none', border: 'none', cursor: 'pointer'
                             }}
                         >
                             <FiDownload size={15} />
-                            <span style={{ fontWeight: 600 }}>Image Download</span>
-                        </a>
+                            <span style={{ fontWeight: 400 }}>Image Download</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -329,27 +430,18 @@ export default function ProductDetailsPage() {
 
                     {/* ═══ LEFT SECTION: Color Swatches + Product Image ═══ */}
                     <div style={{
-                        display: 'flex', flex: '0 0 66.66%', maxWidth: '66.66%',
+                        display: 'flex', flex: '0 0 50%', maxWidth: '50%',
                         height: '480px',
                     }}>
                         <div style={{
                             width: '55px', display: 'flex', flexDirection: 'column',
-                            alignItems: 'center', padding: '8px 0',
-                            flexShrink: 0, justifyContent: 'space-between',
+                            alignItems: 'center', padding: '8px 0', marginLeft: '8px',
+                            flexShrink: 0, gap: '4px',
                         }}>
-                            {/* Up Arrow */}
-                            <button
-                                onClick={() => scrollColors('up')}
-                                style={{
-                                    background: 'none', border: 'none', cursor: 'pointer',
-                                    padding: '4px', color: '#333', display: 'flex',
-                                    alignItems: 'center', justifyContent: 'center'
-                                }}
-                            >
-                                <FiChevronUp size={18} />
-                            </button>
+                            {/* Label */}
+                            <span style={{ fontSize: '11px', fontWeight: 400, color: '#555', textTransform: 'capitalize', letterSpacing: '0.5px' }}>Image</span>
 
-                            {/* Color Blocks */}
+                            {/* Image Thumbnails */}
                             <div
                                 ref={colorSwatchRef}
                                 style={{
@@ -358,43 +450,38 @@ export default function ProductDetailsPage() {
                                 }}
                                 className="no-scrollbar"
                             >
-                                {colorSwatches.map((color: any, idx: number) => (
+                                {allImages.map((img: string, idx: number) => (
                                     <button
                                         key={idx}
-                                        onClick={() => setSelectedColor(selectedColor === color.name ? '' : color.name)}
-                                        title={color.name}
+                                        onClick={() => setSelectedImage(idx)}
                                         style={{
                                             width: '42px', height: '42px', flexShrink: 0,
-                                            background: getColorHex(color.hex || color.name),
-                                            border: selectedColor === color.name
-                                                ? '3px solid #0B4222'
+                                            border: selectedImage === idx
+                                                ? '2px solid #0B4222'
                                                 : '2px solid #ddd',
                                             borderRadius: '4px',
                                             cursor: 'pointer',
                                             transition: 'all 0.2s ease',
-                                            transform: selectedColor === color.name ? 'scale(1.1)' : 'scale(1)',
-                                            boxShadow: selectedColor === color.name
-                                                ? '0 0 0 2px #0B4222'
-                                                : 'none',
+                                            overflow: 'hidden',
+                                            padding: 0, background: '#f5f5f5',
                                         }}
-                                    />
+                                    >
+                                        <img src={img} alt={`Product ${idx + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                    </button>
                                 ))}
                             </div>
 
-                            {/* Down Arrow */}
-                            <button
-                                onClick={() => scrollColors('down')}
-                                style={{
-                                    background: 'none', border: 'none', cursor: 'pointer',
-                                    padding: '4px', color: '#333', display: 'flex',
-                                    alignItems: 'center', justifyContent: 'center'
-                                }}
-                            >
-                                <FiChevronDown size={18} />
-                            </button>
+                            {/* Up & Down Arrows */}
+                            <div style={{ display: 'flex', gap: '4px' }}>
+                                <button onClick={() => scrollList(colorSwatchRef, 'up')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <FiChevronUp size={18} />
+                                </button>
+                                <button onClick={() => scrollList(colorSwatchRef, 'down')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <FiChevronDown size={18} />
+                                </button>
+                            </div>
                         </div>
 
-                        {/* Main Product Image */}
                         <div
                             style={{
                                 height: '100%', aspectRatio: '1 / 1',
@@ -415,10 +502,46 @@ export default function ProductDetailsPage() {
                                 onError={(e) => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/600x600/f3f4f6/9ca3af?text=No+Image'; }}
                             />
 
+                            {/* Left Arrow */}
+                            {selectedImage > 0 && (
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); setSelectedImage(prev => prev - 1); setZoomLevel(1); }}
+                                    style={{
+                                        position: 'absolute', left: '8px', top: '50%', transform: 'translateY(-50%)',
+                                        background: 'rgba(255,255,255,0.85)', border: 'none', borderRadius: '50%',
+                                        width: '32px', height: '32px', cursor: 'pointer', display: 'flex',
+                                        alignItems: 'center', justifyContent: 'center', zIndex: 3,
+                                        boxShadow: '0 2px 8px rgba(0,0,0,0.15)', transition: 'all 0.2s ease',
+                                    }}
+                                    onMouseEnter={(e) => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.25)'; }}
+                                    onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.85)'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)'; }}
+                                >
+                                    <FiChevronLeft size={18} color="#333" />
+                                </button>
+                            )}
+
+                            {/* Right Arrow */}
+                            {selectedImage < allImages.length - 1 && (
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); setSelectedImage(prev => prev + 1); setZoomLevel(1); }}
+                                    style={{
+                                        position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)',
+                                        background: 'rgba(255,255,255,0.85)', border: 'none', borderRadius: '50%',
+                                        width: '32px', height: '32px', cursor: 'pointer', display: 'flex',
+                                        alignItems: 'center', justifyContent: 'center', zIndex: 3,
+                                        boxShadow: '0 2px 8px rgba(0,0,0,0.15)', transition: 'all 0.2s ease',
+                                    }}
+                                    onMouseEnter={(e) => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.25)'; }}
+                                    onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.85)'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)'; }}
+                                >
+                                    <FiChevronRight size={18} color="#333" />
+                                </button>
+                            )}
+
                             {/* Zoom Indicator */}
                             <div style={{
                                 position: 'absolute', bottom: '12px', right: '12px',
-                                background: 'rgba(0,0,0,0.5)', borderRadius: '50%',
+                                background: '#0B4222', borderRadius: '50%',
                                 padding: '8px', color: '#fff', opacity: 0,
                                 transition: 'opacity 0.3s ease',
                             }} className="zoom-indicator">
@@ -429,11 +552,11 @@ export default function ProductDetailsPage() {
                             {product.discount > 0 && (
                                 <div className="discount-badge" style={{
                                     position: 'absolute', top: '12px', left: '12px',
-                                    background: '#ef4444', color: '#fff', fontSize: '11px',
+                                    background: '#0B4222', color: '#fff', fontSize: '11px',
                                     fontWeight: 700, padding: '4px 10px', borderRadius: '9999px',
                                     zIndex: 2, opacity: 0, transition: 'opacity 0.3s ease'
                                 }}>
-                                    -{product.discount}% OFF
+                                    -{product.discount}% Off
                                 </div>
                             )}
 
@@ -454,12 +577,10 @@ export default function ProductDetailsPage() {
                         <div style={{
                             width: '55px', display: 'flex', flexDirection: 'column',
                             alignItems: 'center', padding: '8px 0',
-                            flexShrink: 0, justifyContent: 'space-between',
+                            flexShrink: 0, gap: '4px',
                         }}>
-                            <button style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <FiChevronUp size={18} />
-                            </button>
-                            <div style={{
+                            <span style={{ fontSize: '11px', fontWeight: 400, color: '#555', textTransform: 'capitalize', letterSpacing: '0.5px' }}>Size</span>
+                            <div ref={sizeSwatchRef} style={{
                                 display: 'flex', flexDirection: 'column', gap: '6px',
                                 overflow: 'hidden', maxHeight: '350px', flex: 1,
                             }} className="no-scrollbar">
@@ -482,21 +603,20 @@ export default function ProductDetailsPage() {
                                     </button>
                                 ))}
                             </div>
-                            <button style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <FiChevronDown size={18} />
-                            </button>
+                            <div style={{ display: 'flex', gap: '4px' }}>
+                                <button onClick={() => scrollList(sizeSwatchRef, 'up')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FiChevronUp size={18} /></button>
+                                <button onClick={() => scrollList(sizeSwatchRef, 'down')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FiChevronDown size={18} /></button>
+                            </div>
                         </div>
 
                         {/* Color Label Column (RIGHT of image) */}
                         <div style={{
                             width: '55px', display: 'flex', flexDirection: 'column',
                             alignItems: 'center', padding: '8px 0',
-                            flexShrink: 0, justifyContent: 'space-between',
+                            flexShrink: 0, gap: '4px',
                         }}>
-                            <button style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <FiChevronUp size={18} />
-                            </button>
-                            <div style={{
+                            <span style={{ fontSize: '10px', fontWeight: 700, color: '#555', textTransform: 'capitalize', letterSpacing: '0.5px' }}>Color</span>
+                            <div ref={colorSwatchRef2} style={{
                                 display: 'flex', flexDirection: 'column', gap: '6px',
                                 overflow: 'hidden', maxHeight: '350px', flex: 1,
                             }} className="no-scrollbar">
@@ -522,15 +642,16 @@ export default function ProductDetailsPage() {
                                     />
                                 ))}
                             </div>
-                            <button style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <FiChevronDown size={18} />
-                            </button>
+                            <div style={{ display: 'flex', gap: '4px' }}>
+                                <button onClick={() => scrollList(colorSwatchRef2, 'up')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FiChevronUp size={18} /></button>
+                                <button onClick={() => scrollList(colorSwatchRef2, 'down')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FiChevronDown size={18} /></button>
+                            </div>
                         </div>
                     </div>
 
                     {/* ═══ RIGHT SECTION: Price + Product Details ═══ */}
                     <div style={{
-                        flex: '0 0 33.33%', maxWidth: '33.33%',
+                        flex: '0 0 50%', maxWidth: '50%',
                         paddingLeft: '20px',
                         display: 'flex', flexDirection: 'column',
                         position: 'relative',
@@ -616,13 +737,13 @@ export default function ProductDetailsPage() {
                         <div
                             ref={detailsRef}
                             style={{
-                                flex: 1, overflowY: 'auto', padding: '12px 16px',
+                                flex: 1, overflowY: 'auto', padding: '2px 16px',
                                 paddingRight: '24px',
                             }}
                             className="no-scrollbar"
                         >
                             {/* Price Section */}
-                            <div style={{ marginBottom: '16px' }}>
+                            <div style={{ marginBottom: '10px' }}>
                                 <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', flexWrap: 'wrap' }}>
                                     <span style={{
                                         fontSize: '20px', fontWeight: 800, color: '#1a1a1a'
@@ -656,11 +777,11 @@ export default function ProductDetailsPage() {
                             </div>
 
                             {/* Product Details Section */}
-                            <div>
+                            <div style={{ marginTop: '4px' }}>
                                 <h3 style={{
                                     fontSize: '15px', fontWeight: 700, color: '#1a1a1a',
-                                    margin: '0 0 12px 0', borderBottom: '1px solid #e5e7eb',
-                                    paddingBottom: '8px'
+                                    margin: '0 0 6px 0', borderBottom: '1px solid #e5e7eb',
+                                    paddingBottom: '6px'
                                 }}>
                                     Product Details:
                                 </h3>
@@ -688,141 +809,87 @@ export default function ProductDetailsPage() {
                         </button>
                     </div>
 
-                    {/* ═══ ACTION BAR (ADD TO CART / BUY NOW) — under left section only ═══ */}
+                    {/* ═══ ACTION BAR (ADD TO CART / BUY NOW / SEND INQUIRY) ═══ */}
                     <div style={{
-                        display: 'flex', alignItems: 'stretch', justifyContent: 'space-between',
-                        height: '34px', flex: '0 0 66.66%', maxWidth: '66.66%',
+                        display: 'flex', alignItems: 'center', gap: '12px', justifyContent: 'space-between',
+                        height: '38px', flex: '0 0 50%', maxWidth: '50%',
                         marginTop: '10px',
                     }}>
-                        {/* ADD TO CART Section */}
-                        <div style={{
-                            display: 'flex', alignItems: 'center',
-                            background: '#14532d',
-                        }}>
-                            <button
-                                onClick={handleAddToCart}
-                                disabled={product.stock === 0}
-                                style={{
-                                    display: 'flex', alignItems: 'center', gap: '6px',
-                                    background: 'none', border: 'none', color: '#fff',
-                                    fontWeight: 800, fontSize: '13px', cursor: 'pointer',
-                                    padding: '0 16px', height: '100%', letterSpacing: '0.5px',
-                                    textTransform: 'uppercase',
-                                    opacity: product.stock === 0 ? 0.5 : 1,
-                                    whiteSpace: 'nowrap',
-                                }}
-                            >
-                                {addedToCart ? (
-                                    <><FiCheckCircle size={16} /> ADDED!</>
-                                ) : (
-                                    'ADD TO CART'
-                                )}
-                            </button>
-                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                <button onClick={() => setQuantity(Math.max(1, quantity - 1))} style={{ background: '#16a34a', border: 'none', color: '#fff', width: '36px', height: '34px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: 700 }}>−</button>
-                                <div style={{ background: '#16a34a', color: '#fff', width: '40px', height: '34px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '14px' }}>{String(quantity).padStart(2, '0')}</div>
-                                <button onClick={() => setQuantity(Math.min(product.stock || 99, quantity + 1))} style={{ background: '#16a34a', border: 'none', color: '#fff', width: '36px', height: '34px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: 700 }}>+</button>
-                            </div>
-                        </div>
-                        {/* BUY NOW Section */}
-                        <div style={{
-                            display: 'flex', alignItems: 'center',
-                            background: '#14532d',
-                        }}>
-                            <button
-                                disabled={product.stock === 0}
-                                style={{
-                                    display: 'flex', alignItems: 'center', gap: '6px',
-                                    background: 'none', border: 'none', color: '#fff',
-                                    fontWeight: 800, fontSize: '13px', cursor: 'pointer',
-                                    padding: '0 16px', height: '100%', letterSpacing: '0.5px',
-                                    textTransform: 'uppercase',
-                                    opacity: product.stock === 0 ? 0.5 : 1,
-                                    whiteSpace: 'nowrap',
-                                }}
-                            >
-                                BUY NOW
-                            </button>
-                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                <button onClick={() => setBuyNowQty(Math.max(1, buyNowQty - 1))} style={{ background: '#16a34a', border: 'none', color: '#fff', width: '36px', height: '34px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: 700 }}>−</button>
-                                <div style={{ background: '#16a34a', color: '#fff', width: '40px', height: '34px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '14px' }}>{String(buyNowQty).padStart(2, '0')}</div>
-                                <button onClick={() => setBuyNowQty(Math.min(product.stock || 99, buyNowQty + 1))} style={{ background: '#16a34a', border: 'none', color: '#fff', width: '36px', height: '34px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: 700 }}>+</button>
-                            </div>
-                        </div>
+                        {/* ADD TO CART */}
+                        <button
+                            onClick={handleAddToCart}
+                            disabled={product.stock === 0}
+                            style={{
+                                display: 'flex', alignItems: 'center', gap: '6px',
+                                background: 'transparent', border: '1.5px solid #0B4222', color: '#0B4222',
+                                fontWeight: 700, fontSize: '12px', cursor: 'pointer',
+                                padding: '0 18px', height: '100%', letterSpacing: '0.5px',
+                                textTransform: 'uppercase', borderRadius: '9999px',
+                                opacity: product.stock === 0 ? 0.5 : 1,
+                                whiteSpace: 'nowrap', transition: 'all 0.2s ease',
+                            }}
+                            onMouseEnter={(e) => { e.currentTarget.style.background = '#0B4222'; e.currentTarget.style.color = '#fff'; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#0B4222'; }}
+                        >
+                            {addedToCart ? (
+                                <><FiCheckCircle size={14} /> ADDED!</>
+                            ) : (
+                                <><FiShoppingCart size={14} /> ADD TO CART</>
+                            )}
+                        </button>
+
+                        {/* BUY NOW */}
+                        <button
+                            disabled={product.stock === 0}
+                            style={{
+                                display: 'flex', alignItems: 'center', gap: '6px',
+                                background: 'transparent', border: '1.5px solid #0B4222', color: '#0B4222',
+                                fontWeight: 700, fontSize: '12px', cursor: 'pointer',
+                                padding: '0 18px', height: '100%', letterSpacing: '0.5px',
+                                textTransform: 'uppercase', borderRadius: '9999px',
+                                opacity: product.stock === 0 ? 0.5 : 1,
+                                whiteSpace: 'nowrap', transition: 'all 0.2s ease',
+                            }}
+                            onMouseEnter={(e) => { e.currentTarget.style.background = '#0B4222'; e.currentTarget.style.color = '#fff'; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#0B4222'; }}
+                        >
+                            BUY NOW
+                        </button>
+
+                        {/* SEND INQUIRY */}
+                        <button
+                            style={{
+                                display: 'flex', alignItems: 'center', gap: '6px',
+                                background: 'transparent', border: '1.5px solid #0B4222', color: '#0B4222',
+                                fontWeight: 700, fontSize: '12px', cursor: 'pointer',
+                                padding: '0 18px', height: '100%', letterSpacing: '0.5px',
+                                textTransform: 'uppercase', borderRadius: '9999px',
+                                whiteSpace: 'nowrap', transition: 'all 0.2s ease',
+                            }}
+                            onMouseEnter={(e) => { e.currentTarget.style.background = '#0B4222'; e.currentTarget.style.color = '#fff'; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#0B4222'; }}
+                        >
+                            SEND INQUIRY
+                        </button>
                     </div>
 
-                    {/* Right Side Links — under right section */}
+                    {/* Delivery / Payment / Terms — same row as action bar */}
                     <div style={{
                         display: 'flex', alignItems: 'center', gap: '32px',
-                        background: '#f5f5f5', flex: '0 0 33.33%', maxWidth: '33.33%',
-                        padding: '0 24px', height: '34px',
-                        borderLeft: '1px solid #e5e7eb',
-                        marginTop: '10px',
+                        background: '#f5f5f5', flex: '0 0 calc(50% - 20px)', maxWidth: 'calc(50% - 20px)',
+                        padding: '4px 24px 0 24px', height: '38px',
+                        marginTop: '10px', marginLeft: '20px',
                     }}>
                         <button onClick={() => setActiveInfoPanel(activeInfoPanel === 'delivery' ? null : 'delivery')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '14px', fontWeight: 600, color: activeInfoPanel === 'delivery' ? '#0B4222' : '#333', whiteSpace: 'nowrap', borderBottom: activeInfoPanel === 'delivery' ? '2px solid #0B4222' : '2px solid transparent', paddingBottom: '2px', transition: 'all 0.2s ease' }}>Delivery</button>
                         <button onClick={() => setActiveInfoPanel(activeInfoPanel === 'payment' ? null : 'payment')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '14px', fontWeight: 600, color: activeInfoPanel === 'payment' ? '#0B4222' : '#333', whiteSpace: 'nowrap', borderBottom: activeInfoPanel === 'payment' ? '2px solid #0B4222' : '2px solid transparent', paddingBottom: '2px', transition: 'all 0.2s ease' }}>Payment</button>
                         <button onClick={() => setActiveInfoPanel(activeInfoPanel === 'terms' ? null : 'terms')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '14px', fontWeight: 600, color: activeInfoPanel === 'terms' ? '#0B4222' : '#333', whiteSpace: 'nowrap', borderBottom: activeInfoPanel === 'terms' ? '2px solid #0B4222' : '2px solid transparent', paddingBottom: '2px', transition: 'all 0.2s ease' }}>Terms & Conditions</button>
                         <div style={{ marginLeft: '4px', color: '#333' }}><FiChevronUp size={16} style={{ transform: activeInfoPanel ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease' }} /></div>
                     </div>
+
                 </div>
             </div>
 
-            {/* ═══ Info Panel Content (Delivery / Payment / Terms) ═══ */}
-            {activeInfoPanel && (
-                <div className="w-[95%] mx-auto" style={{ padding: '16px 0' }}>
-                    <div style={{
-                        background: '#f9fafb', border: '1px solid #e5e7eb',
-                        padding: '20px 24px', fontSize: '13px', color: '#444',
-                        lineHeight: 1.8, animation: 'fadeIn 0.2s ease-out',
-                    }}>
-                        {activeInfoPanel === 'delivery' && (
-                            <div>
-                                <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#0B4222', marginBottom: '10px' }}>📦 Delivery Information</h3>
-                                {product.deliveryInfo ? (
-                                    <div dangerouslySetInnerHTML={{ __html: product.deliveryInfo }} />
-                                ) : (
-                                    <div style={{ color: '#555' }}>
-                                        <p>• Inside Dhaka: <strong>2-3 business days</strong></p>
-                                        <p>• Outside Dhaka: <strong>5-7 business days</strong></p>
-                                        <p>• Delivery charge may vary based on location.</p>
-                                        <p>• You will receive a tracking number once your order is shipped.</p>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-                        {activeInfoPanel === 'payment' && (
-                            <div>
-                                <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#0B4222', marginBottom: '10px' }}>💳 Payment Methods</h3>
-                                {product.paymentInfo ? (
-                                    <div dangerouslySetInnerHTML={{ __html: product.paymentInfo }} />
-                                ) : (
-                                    <div style={{ color: '#555' }}>
-                                        <p>• <strong>Cash on Delivery (COD)</strong> — Pay when you receive.</p>
-                                        <p>• <strong>bKash / Nagad</strong> — Mobile banking payment.</p>
-                                        <p>• <strong>Bank Transfer</strong> — Direct bank payment.</p>
-                                        <p>• <strong>Online Payment</strong> — Visa / MasterCard / AMEX.</p>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-                        {activeInfoPanel === 'terms' && (
-                            <div>
-                                <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#0B4222', marginBottom: '10px' }}>📋 Terms & Conditions</h3>
-                                {product.termsInfo ? (
-                                    <div dangerouslySetInnerHTML={{ __html: product.termsInfo }} />
-                                ) : (
-                                    <div style={{ color: '#555' }}>
-                                        <p>• Returns accepted within <strong>7 days</strong> of delivery (unused, original packaging).</p>
-                                        <p>• Warranty claims must be made within the warranty period.</p>
-                                        <p>• Damaged items must be reported within <strong>24 hours</strong> of delivery.</p>
-                                        <p>• Refunds will be processed within <strong>5-10 business days</strong>.</p>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-                    </div>
-                </div>
-            )}
+
 
             {/* ═══ Related Products Section ═══ */}
             {relatedProducts.length > 0 && (
@@ -1003,6 +1070,237 @@ export default function ProductDetailsPage() {
                     }
                 }
             `}</style>
+
+            {/* ── Share Popup Modal ── */}
+            {showSharePopup && (() => {
+                const productUrl = typeof window !== 'undefined' ? window.location.href : '';
+                const shareText = `${product.name} - Tk.${product.price}`;
+                const shareLinks = [
+                    { name: 'Facebook', icon: FaFacebookF, color: '#1877F2', url: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(productUrl)}&quote=${encodeURIComponent(shareText)}` },
+                    { name: 'WhatsApp', icon: FaWhatsapp, color: '#25D366', url: `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + '\n' + productUrl)}` },
+                    { name: 'Messenger', icon: FaFacebookF, color: '#0078FF', url: `https://www.facebook.com/dialog/send?link=${encodeURIComponent(productUrl)}&app_id=966242223397117&redirect_uri=${encodeURIComponent(productUrl)}` },
+                    { name: 'X', icon: FaXTwitter, color: '#000000', url: `https://twitter.com/intent/tweet?url=${encodeURIComponent(productUrl)}&text=${encodeURIComponent(shareText)}` },
+                    { name: 'Telegram', icon: FaTelegramPlane, color: '#0088cc', url: `https://t.me/share/url?url=${encodeURIComponent(productUrl)}&text=${encodeURIComponent(shareText)}` },
+                    { name: 'LinkedIn', icon: FaLinkedinIn, color: '#0A66C2', url: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(productUrl)}` },
+                    { name: 'Pinterest', icon: FaPinterestP, color: '#E60023', url: `https://pinterest.com/pin/create/button/?url=${encodeURIComponent(productUrl)}&media=${encodeURIComponent(allImages[0])}&description=${encodeURIComponent(shareText)}` },
+                    { name: 'Email', icon: FaEnvelope, color: '#555555', url: `mailto:?subject=${encodeURIComponent(product.name)}&body=${encodeURIComponent(shareText + '\n\n' + productUrl)}` },
+                ];
+                return (
+                    <div
+                        className='fixed inset-0 bg-black/70 z-[9999] flex items-center justify-center p-4'
+                        onClick={() => setShowSharePopup(false)}
+                    >
+                        <div
+                            className='bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl'
+                            onClick={(e) => e.stopPropagation()}
+                            style={{ animation: 'fadeIn 0.2s ease-out' }}
+                        >
+                            <div className='flex items-center justify-between px-5 py-3.5 border-b border-gray-100'>
+                                <h3 className='text-base font-bold text-gray-900'>Share Product</h3>
+                                <button onClick={() => setShowSharePopup(false)} className='text-gray-400 hover:text-gray-600 transition-colors'>
+                                    <FiX size={20} />
+                                </button>
+                            </div>
+                            <div className='px-5 py-4'>
+                                <div className='grid grid-cols-4 gap-3 mb-4'>
+                                    {shareLinks.map((link) => (
+                                        <a
+                                            key={link.name}
+                                            href={link.url}
+                                            target='_blank'
+                                            rel='noopener noreferrer'
+                                            className='flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-gray-50 transition-colors'
+                                        >
+                                            <div className='w-10 h-10 rounded-full flex items-center justify-center text-white' style={{ background: link.color }}>
+                                                <link.icon size={18} />
+                                            </div>
+                                            <span className='text-[10px] text-gray-500 font-medium'>{link.name}</span>
+                                        </a>
+                                    ))}
+                                </div>
+                                <div className='flex items-center gap-2 bg-gray-50 rounded-lg p-2.5'>
+                                    <input type='text' value={productUrl} readOnly className='flex-1 bg-transparent text-xs text-gray-600 outline-none truncate' />
+                                    <button
+                                        onClick={() => { navigator.clipboard.writeText(productUrl); setShareLinkCopied(true); setTimeout(() => setShareLinkCopied(false), 2000); }}
+                                        className='shrink-0 px-3 py-1.5 bg-[#0B4222] text-white text-xs font-semibold rounded-md hover:bg-[#093519] transition-colors flex items-center gap-1'
+                                    >
+                                        {shareLinkCopied ? <><FiCheckCircle size={12} /> Copied!</> : <><FiCopy size={12} /> Copy</>}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                );
+            })()}
+            {/* ── Comments Modal (same as product card) ── */}
+            {showCommentsModal && product && (
+                <div
+                    className='fixed inset-0 bg-black/70 z-[9999] flex items-center justify-center p-4'
+                    onClick={() => setShowCommentsModal(false)}
+                >
+                    <div
+                        className='bg-white rounded-lg w-full max-w-[620px] max-h-[88vh] flex flex-col overflow-hidden shadow-2xl'
+                        onClick={(e) => e.stopPropagation()}
+                        style={{ animation: 'fadeIn 0.2s ease-out' }}
+                    >
+                        {/* Header */}
+                        <div className='flex items-center justify-between px-4 py-2.5 border-b border-gray-200 bg-gray-50/80'>
+                            <span className='font-semibold text-gray-800' style={{ fontSize: '14px', fontFamily: 'Roboto, sans-serif' }}>{product.name}</span>
+                            <button onClick={() => setShowCommentsModal(false)} className='w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center hover:bg-gray-300 transition-colors cursor-pointer'>
+                                <FiX size={14} />
+                            </button>
+                        </div>
+
+                        {/* Product Image */}
+                        <div className='w-full flex justify-center bg-gray-50 border-b border-gray-100'>
+                            <img
+                                src={allImages[0]}
+                                alt={product.name}
+                                style={{ height: '280px', width: 'auto', objectFit: 'contain' }}
+                            />
+                        </div>
+
+                        {/* Comments List */}
+                        <div className='flex-1 overflow-y-auto px-4 py-2 space-y-1.5' style={{ maxHeight: '220px' }}>
+                            {reviews.length > 0 ? reviews.map((r: any, idx: number) => (
+                                <div key={idx} className='flex gap-2 items-start'>
+                                    <div className='w-6 h-6 rounded-full bg-gray-300 flex items-center justify-center text-[10px] font-bold text-white mt-0.5 shrink-0'>
+                                        {(r.userName || 'A')[0].toUpperCase()}
+                                    </div>
+                                    <div className='bg-gray-100 rounded-xl px-3 py-1.5 max-w-[85%]'>
+                                        <span className='font-semibold text-gray-800 block' style={{ fontSize: '11px', fontFamily: 'Roboto, sans-serif' }}>{r.userName || 'Anonymous'}</span>
+                                        <p className='text-gray-600 m-0 leading-snug' style={{ fontSize: '11px', fontFamily: 'Roboto, sans-serif' }}>{r.comment}</p>
+                                    </div>
+                                </div>
+                            )) : (
+                                <div className='text-center py-6 text-gray-400' style={{ fontSize: '12px' }}>No comments yet</div>
+                            )}
+                        </div>
+
+                        {/* Rating Stars */}
+                        <div className='flex items-center justify-center gap-1 py-1.5 border-t border-gray-100'>
+                            {[1, 2, 3, 4, 5].map(star => (
+                                <button
+                                    key={star}
+                                    onClick={() => setCmtRating(star)}
+                                    onMouseEnter={() => setCmtHoverRating(star)}
+                                    onMouseLeave={() => setCmtHoverRating(0)}
+                                    className='cursor-pointer bg-transparent border-none p-0.5'
+                                >
+                                    <FiStar size={16} style={{
+                                        color: '#f59e0b',
+                                        fill: star <= (cmtHoverRating || cmtRating) ? '#f59e0b' : 'none',
+                                        transition: 'all 0.1s'
+                                    }} />
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Input Area */}
+                        <div className='px-3 py-2 border-t border-gray-200 bg-white'>
+                            <div className='flex flex-col gap-0 border border-gray-200 rounded-lg overflow-hidden'>
+                                <input
+                                    type='text'
+                                    placeholder='Name'
+                                    value={cmtUserName}
+                                    onChange={(e) => setCmtUserName(e.target.value)}
+                                    className='w-full px-3 py-1.5 text-gray-700 outline-none border-b border-gray-100'
+                                    style={{ fontSize: '12px', fontWeight: 400, fontFamily: 'Roboto, sans-serif' }}
+                                />
+                                <div className='flex items-center'>
+                                    <input
+                                        type='text'
+                                        placeholder='Write a comment...'
+                                        value={cmtText}
+                                        onChange={(e) => setCmtText(e.target.value)}
+                                        onKeyDown={(e) => e.key === 'Enter' && handleCommentSubmit()}
+                                        className='flex-1 px-3 py-1.5 text-gray-700 outline-none'
+                                        style={{ fontSize: '12px', fontWeight: 400, fontFamily: 'Roboto, sans-serif' }}
+                                    />
+                                    <button
+                                        onClick={handleCommentSubmit}
+                                        disabled={cmtSubmitting || !cmtText.trim()}
+                                        className='px-3 py-1.5 text-[#0B4222] hover:text-[#093519] transition-colors disabled:opacity-30 cursor-pointer bg-transparent border-none'
+                                    >
+                                        {cmtSubmitting ? '...' : <FiSend size={16} />}
+                                    </button>
+                                </div>
+                            </div>
+                            {cmtSuccess && <p className='text-green-600 text-[10px] mt-1 text-center'>Comment posted!</p>}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ═══ Download Modal ═══ */}
+            {showDownloadModal && (
+                <div
+                    style={{
+                        position: 'fixed', inset: 0, zIndex: 9999,
+                        background: 'rgba(0,0,0,0.7)', display: 'flex',
+                        alignItems: 'center', justifyContent: 'center', padding: '2rem',
+                    }}
+                    onClick={() => setShowDownloadModal(false)}
+                >
+                    <div
+                        onClick={(e) => e.stopPropagation()}
+                        style={{
+                            background: '#fff', borderRadius: '12px', padding: '24px',
+                            maxWidth: '600px', width: '100%', maxHeight: '80vh', overflowY: 'auto',
+                            boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+                        }}
+                    >
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                            <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#1a1a1a', margin: 0 }}>
+                                <FiDownload size={16} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
+                                Download Images
+                            </h3>
+                            <button onClick={() => setShowDownloadModal(false)} style={{ background: '#f3f4f6', border: 'none', borderRadius: '50%', width: '32px', height: '32px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <FiX size={16} />
+                            </button>
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+                            {allImages.map((img: string, idx: number) => (
+                                <div
+                                    key={idx}
+                                    onClick={async () => {
+                                        try {
+                                            const res = await fetch(img);
+                                            const blob = await res.blob();
+                                            const url = URL.createObjectURL(blob);
+                                            const a = document.createElement('a');
+                                            a.href = url;
+                                            a.download = `${product.name || 'product'}-image-${idx + 1}.jpg`;
+                                            document.body.appendChild(a);
+                                            a.click();
+                                            document.body.removeChild(a);
+                                            URL.revokeObjectURL(url);
+                                        } catch {
+                                            window.open(img, '_blank');
+                                        }
+                                    }}
+                                    style={{
+                                        aspectRatio: '1/1', borderRadius: '8px', overflow: 'hidden',
+                                        cursor: 'pointer', border: '2px solid #e5e7eb', position: 'relative',
+                                        transition: 'all 0.2s ease',
+                                    }}
+                                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#0B4222'; e.currentTarget.style.transform = 'scale(1.03)'; (e.currentTarget.querySelector('.dl-overlay') as HTMLElement).style.opacity = '1'; }}
+                                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e5e7eb'; e.currentTarget.style.transform = 'scale(1)'; (e.currentTarget.querySelector('.dl-overlay') as HTMLElement).style.opacity = '0'; }}
+                                >
+                                    <img src={img} alt={`Image ${idx + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                    <div className="dl-overlay" style={{
+                                        position: 'absolute', inset: 0, background: 'rgba(11,66,34,0.5)',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        opacity: 0, transition: 'opacity 0.2s ease',
+                                    }}>
+                                        <FiDownload size={24} color="#fff" />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
