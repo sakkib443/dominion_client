@@ -2,7 +2,7 @@
 
 import React, { useState, useRef } from 'react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import {
     FiHeart, FiShoppingCart, FiMinus, FiPlus, FiCheckCircle,
     FiStar, FiX, FiZoomIn, FiCopy, FiShare2, FiDownload,
@@ -13,6 +13,7 @@ import { useGetProductBySlugQuery, useGetRelatedProductsQuery } from '@/redux/ap
 import { useGetProductReviewsQuery, usePublicCreateReviewMutation } from '@/redux/api/reviewApi';
 import { useAppDispatch } from '@/redux';
 import { addToCart } from '@/redux/slices/cartSlice';
+import { useCreateInquiryMutation } from '@/redux/api/inquiryApi';
 import NewProductCard from '@/components/shared/NewProductCard';
 import { FiSend } from 'react-icons/fi';
 import {
@@ -23,7 +24,9 @@ import { FaXTwitter } from 'react-icons/fa6';
 
 export default function ProductDetailsPage() {
     const { slug } = useParams();
+    const router = useRouter();
     const dispatch = useAppDispatch();
+    const [createInquiry] = useCreateInquiryMutation();
     const [quantity, setQuantity] = useState(1);
     const [buyNowQty, setBuyNowQty] = useState(1);
     const [selectedImage, setSelectedImage] = useState(0);
@@ -48,6 +51,12 @@ export default function ProductDetailsPage() {
     const [cmtSuccess, setCmtSuccess] = useState(false);
     const [zoomLevel, setZoomLevel] = useState(1);
     const [showDownloadModal, setShowDownloadModal] = useState(false);
+    const [showInquiryModal, setShowInquiryModal] = useState(false);
+    const [inquiryName, setInquiryName] = useState('');
+    const [inquiryContact, setInquiryContact] = useState('');
+    const [inquiryMessage, setInquiryMessage] = useState('');
+    const [inquirySubmitting, setInquirySubmitting] = useState(false);
+    const [inquirySuccess, setInquirySuccess] = useState(false);
     const colorSwatchRef = useRef<HTMLDivElement>(null);
     const sizeSwatchRef = useRef<HTMLDivElement>(null);
     const colorSwatchRef2 = useRef<HTMLDivElement>(null);
@@ -840,6 +849,18 @@ export default function ProductDetailsPage() {
 
                         {/* BUY NOW */}
                         <button
+                            onClick={() => {
+                                dispatch(addToCart({
+                                    id: product._id,
+                                    name: product.name,
+                                    price: discountedPrice,
+                                    image: product.thumbnail,
+                                    quantity: quantity,
+                                    selectedColor,
+                                    selectedSize,
+                                }));
+                                router.push('/cart');
+                            }}
                             disabled={product.stock === 0}
                             style={{
                                 display: 'flex', alignItems: 'center', gap: '6px',
@@ -858,6 +879,7 @@ export default function ProductDetailsPage() {
 
                         {/* SEND INQUIRY */}
                         <button
+                            onClick={() => setShowInquiryModal(true)}
                             style={{
                                 display: 'flex', alignItems: 'center', gap: '6px',
                                 background: 'transparent', border: '1.5px solid #0B4222', color: '#0B4222',
@@ -1298,6 +1320,149 @@ export default function ProductDetailsPage() {
                                 </div>
                             ))}
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ═══ Send Inquiry Modal ═══ */}
+            {showInquiryModal && (
+                <div
+                    style={{
+                        position: 'fixed', inset: 0, zIndex: 9999,
+                        background: 'rgba(0,0,0,0.7)', display: 'flex',
+                        alignItems: 'center', justifyContent: 'center', padding: '2rem',
+                    }}
+                    onClick={() => { setShowInquiryModal(false); setInquirySuccess(false); }}
+                >
+                    <div
+                        onClick={(e) => e.stopPropagation()}
+                        style={{
+                            background: '#fff', borderRadius: '12px', padding: '24px',
+                            maxWidth: '480px', width: '100%', maxHeight: '90vh', overflowY: 'auto',
+                            boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+                        }}
+                    >
+                        {/* Header */}
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+                            <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#1a1a1a', margin: 0 }}>
+                                <FiMessageSquare size={16} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
+                                Send Inquiry
+                            </h3>
+                            <button onClick={() => { setShowInquiryModal(false); setInquirySuccess(false); }} style={{ background: '#f3f4f6', border: 'none', borderRadius: '50%', width: '32px', height: '32px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <FiX size={16} />
+                            </button>
+                        </div>
+
+                        {/* Product Preview */}
+                        <div style={{ display: 'flex', gap: '12px', padding: '12px', background: '#f9fafb', borderRadius: '8px', marginBottom: '16px' }}>
+                            <img src={product.thumbnail} alt={product.name} style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '6px' }} />
+                            <div>
+                                <p style={{ fontSize: '13px', fontWeight: 600, color: '#1a1a1a', margin: '0 0 4px 0', lineHeight: 1.3 }}>{product.name}</p>
+                                <p style={{ fontSize: '14px', fontWeight: 700, color: '#0B4222', margin: 0 }}>Tk.{discountedPrice.toLocaleString()}</p>
+                            </div>
+                        </div>
+
+                        {inquirySuccess ? (
+                            <div style={{ textAlign: 'center', padding: '30px 0' }}>
+                                <FiCheckCircle size={48} color="#0B4222" />
+                                <p style={{ fontSize: '16px', fontWeight: 700, color: '#0B4222', marginTop: '12px' }}>Inquiry Sent!</p>
+                                <p style={{ fontSize: '13px', color: '#666', marginTop: '4px' }}>We'll get back to you soon.</p>
+                            </div>
+                        ) : (
+                            <form onSubmit={async (e) => {
+                                e.preventDefault();
+                                if (!inquiryName.trim() || !inquiryContact.trim() || !inquiryMessage.trim()) return;
+                                setInquirySubmitting(true);
+                                try {
+                                    await createInquiry({
+                                        product: product._id,
+                                        name: inquiryName.trim(),
+                                        phone: inquiryContact.trim(),
+                                        message: inquiryMessage.trim(),
+                                    }).unwrap();
+                                    setInquirySuccess(true);
+                                    setInquiryName('');
+                                    setInquiryContact('');
+                                    setInquiryMessage('');
+                                } catch (err) {
+                                    console.error('Inquiry error:', err);
+                                } finally {
+                                    setInquirySubmitting(false);
+                                }
+                            }}>
+                                {/* Name */}
+                                <div style={{ marginBottom: '12px' }}>
+                                    <label style={{ fontSize: '12px', fontWeight: 600, color: '#555', display: 'block', marginBottom: '4px' }}>Your Name *</label>
+                                    <input
+                                        value={inquiryName}
+                                        onChange={(e) => setInquiryName(e.target.value)}
+                                        placeholder="Enter your name"
+                                        required
+                                        style={{
+                                            width: '100%', padding: '10px 12px', borderRadius: '8px',
+                                            border: '1.5px solid #e5e7eb', fontSize: '13px', outline: 'none',
+                                            transition: 'border 0.2s ease', boxSizing: 'border-box',
+                                        }}
+                                        onFocus={(e) => e.currentTarget.style.borderColor = '#0B4222'}
+                                        onBlur={(e) => e.currentTarget.style.borderColor = '#e5e7eb'}
+                                    />
+                                </div>
+
+                                {/* Phone or Email */}
+                                <div style={{ marginBottom: '12px' }}>
+                                    <label style={{ fontSize: '12px', fontWeight: 600, color: '#555', display: 'block', marginBottom: '4px' }}>Phone or Email *</label>
+                                    <input
+                                        value={inquiryContact}
+                                        onChange={(e) => setInquiryContact(e.target.value)}
+                                        placeholder="01XXXXXXXXX or email@example.com"
+                                        required
+                                        style={{
+                                            width: '100%', padding: '10px 12px', borderRadius: '8px',
+                                            border: '1.5px solid #e5e7eb', fontSize: '13px', outline: 'none',
+                                            transition: 'border 0.2s ease', boxSizing: 'border-box',
+                                        }}
+                                        onFocus={(e) => e.currentTarget.style.borderColor = '#0B4222'}
+                                        onBlur={(e) => e.currentTarget.style.borderColor = '#e5e7eb'}
+                                    />
+                                </div>
+
+                                {/* Message */}
+                                <div style={{ marginBottom: '16px' }}>
+                                    <label style={{ fontSize: '12px', fontWeight: 600, color: '#555', display: 'block', marginBottom: '4px' }}>Your Query *</label>
+                                    <textarea
+                                        value={inquiryMessage}
+                                        onChange={(e) => setInquiryMessage(e.target.value)}
+                                        placeholder="Write your question or inquiry..."
+                                        required
+                                        rows={4}
+                                        style={{
+                                            width: '100%', padding: '10px 12px', borderRadius: '8px',
+                                            border: '1.5px solid #e5e7eb', fontSize: '13px', outline: 'none',
+                                            transition: 'border 0.2s ease', resize: 'vertical',
+                                            fontFamily: 'inherit', boxSizing: 'border-box',
+                                        }}
+                                        onFocus={(e) => e.currentTarget.style.borderColor = '#0B4222'}
+                                        onBlur={(e) => e.currentTarget.style.borderColor = '#e5e7eb'}
+                                    />
+                                </div>
+
+                                {/* Submit */}
+                                <button
+                                    type="submit"
+                                    disabled={inquirySubmitting}
+                                    style={{
+                                        width: '100%', padding: '12px', borderRadius: '9999px',
+                                        background: '#0B4222', color: '#fff', border: 'none',
+                                        fontWeight: 700, fontSize: '13px', cursor: 'pointer',
+                                        opacity: inquirySubmitting ? 0.7 : 1,
+                                        transition: 'all 0.2s ease', textTransform: 'uppercase',
+                                        letterSpacing: '0.5px',
+                                    }}
+                                >
+                                    {inquirySubmitting ? 'Submitting...' : 'Submit Inquiry'}
+                                </button>
+                            </form>
+                        )}
                     </div>
                 </div>
             )}
