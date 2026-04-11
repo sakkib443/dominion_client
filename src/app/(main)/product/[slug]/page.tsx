@@ -108,10 +108,11 @@ export default function ProductDetailsPage() {
         dispatch(addToCart({
             id: product._id,
             name: product.name,
-            price: product.price,
+            price: discountedPrice,
             mrp: product.originalPrice || product.price,
             image: product.thumbnail,
             category: product.category?.name || 'General',
+            quantity: quantity,
         }));
         setAddedToCart(true);
         setTimeout(() => setAddedToCart(false), 2000);
@@ -361,7 +362,7 @@ export default function ProductDetailsPage() {
                                 color: '#555', fontSize: '14px'
                             }}
                         >
-                            <FiStar size={15} style={{ color: '#f59e0b', fill: '#f59e0b' }} />
+                            <FiStar size={15} style={{ color: '#374151', fill: '#374151' }} />
                             <span style={{ fontWeight: 400 }}>{product.rating?.toFixed(1) || '0.0'}</span>
                             <span style={{ color: '#888' }}>({product.reviewCount || 0} Ratings)</span>
                         </button>
@@ -441,6 +442,7 @@ export default function ProductDetailsPage() {
                     <div style={{
                         display: 'flex', flex: '0 0 50%', maxWidth: '50%',
                         height: '480px',
+                        paddingRight: '20px',
                     }}>
                         <div style={{
                             width: '55px', display: 'flex', flexDirection: 'column',
@@ -665,6 +667,7 @@ export default function ProductDetailsPage() {
                         display: 'flex', flexDirection: 'column',
                         position: 'relative',
                         height: '480px',
+                        borderLeft: '1px solid #e5e7eb',
                     }}>
                         {/* Up Scroll Arrow for details */}
                         <button
@@ -820,73 +823,95 @@ export default function ProductDetailsPage() {
 
                     {/* ═══ ACTION BAR (ADD TO CART / BUY NOW / SEND INQUIRY) ═══ */}
                     <div style={{
-                        display: 'flex', alignItems: 'center', gap: '12px', justifyContent: 'space-between',
+                        display: 'flex', alignItems: 'center', gap: '100px', justifyContent: 'space-between',
                         height: '38px', flex: '0 0 50%', maxWidth: '50%',
-                        marginTop: '10px',
+                        marginTop: '10px', paddingRight: '20px',
                     }}>
-                        {/* ADD TO CART */}
-                        <button
-                            onClick={handleAddToCart}
-                            disabled={product.stock === 0}
+                        {/* ADD TO CART with quantity */}
+                        <div
                             style={{
-                                display: 'flex', alignItems: 'center', gap: '6px',
-                                background: 'transparent', border: '1.5px solid #0B4222', color: '#0B4222',
-                                fontWeight: 700, fontSize: '12px', cursor: 'pointer',
-                                padding: '0 18px', height: '100%', letterSpacing: '0.5px',
-                                textTransform: 'uppercase', borderRadius: '9999px',
+                                display: 'flex', alignItems: 'center',
+                                border: '1.5px solid #0B4222', borderRadius: '8px',
+                                height: '100%', overflow: 'hidden', flex: 1,
                                 opacity: product.stock === 0 ? 0.5 : 1,
-                                whiteSpace: 'nowrap', transition: 'all 0.2s ease',
+                                transition: 'background 0.2s ease',
                             }}
-                            onMouseEnter={(e) => { e.currentTarget.style.background = '#0B4222'; e.currentTarget.style.color = '#fff'; }}
-                            onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#0B4222'; }}
+                            onMouseEnter={(e) => { e.currentTarget.style.background = '#0B4222'; e.currentTarget.querySelectorAll<HTMLElement>('button, span').forEach(el => { el.style.color = '#fff'; }); }}
+                            onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.querySelectorAll<HTMLElement>('button, span').forEach(el => { el.style.color = '#0B4222'; }); }}
                         >
-                            {addedToCart ? (
-                                <><FiCheckCircle size={14} /> ADDED!</>
-                            ) : (
-                                <><FiShoppingCart size={14} /> ADD TO CART</>
-                            )}
-                        </button>
+                            <button
+                                onClick={handleAddToCart}
+                                disabled={product.stock === 0}
+                                style={{
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px',
+                                    background: 'transparent', border: 'none', color: '#0B4222',
+                                    fontWeight: 700, fontSize: '11px', cursor: 'pointer',
+                                    padding: '0 10px', height: '100%', letterSpacing: '0.4px',
+                                    textTransform: 'uppercase', whiteSpace: 'nowrap', flex: 1,
+                                }}
+                            >
+                                {addedToCart ? <><FiCheckCircle size={12} /> ADDED!</> : <><FiShoppingCart size={12} /> ADD TO CART</>}
+                            </button>
+                            <span style={{ color: '#0B4222', fontSize: '13px', paddingRight: '2px' }}>(</span>
+                            <button onClick={(e) => { e.preventDefault(); setQuantity(q => Math.max(1, q - 1)); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#0B4222', fontSize: '15px', fontWeight: 700, padding: '0 3px', lineHeight: 1 }}>-</button>
+                            <span style={{ fontSize: '11px', fontWeight: 700, color: '#0B4222', minWidth: '20px', textAlign: 'center' }}>{String(quantity).padStart(2, '0')}</span>
+                            <button onClick={(e) => { e.preventDefault(); setQuantity(q => q + 1); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#0B4222', fontSize: '15px', fontWeight: 700, padding: '0 3px', lineHeight: 1 }}>+</button>
+                            <span style={{ color: '#0B4222', fontSize: '13px', paddingLeft: '2px', paddingRight: '8px' }}>)</span>
+                        </div>
 
-                        {/* BUY NOW */}
-                        <button
-                            onClick={() => {
-                                dispatch(addToCart({
-                                    id: product._id,
-                                    name: product.name,
-                                    price: discountedPrice,
-                                    image: product.thumbnail,
-                                    quantity: quantity,
-                                    selectedColor,
-                                    selectedSize,
-                                }));
-                                router.push('/cart');
-                            }}
-                            disabled={product.stock === 0}
+                        {/* BUY NOW with quantity */}
+                        <div
                             style={{
-                                display: 'flex', alignItems: 'center', gap: '6px',
-                                background: 'transparent', border: '1.5px solid #0B4222', color: '#0B4222',
-                                fontWeight: 700, fontSize: '12px', cursor: 'pointer',
-                                padding: '0 18px', height: '100%', letterSpacing: '0.5px',
-                                textTransform: 'uppercase', borderRadius: '9999px',
+                                display: 'flex', alignItems: 'center',
+                                border: '1.5px solid #0B4222', borderRadius: '8px',
+                                height: '100%', overflow: 'hidden', flex: 1,
                                 opacity: product.stock === 0 ? 0.5 : 1,
-                                whiteSpace: 'nowrap', transition: 'all 0.2s ease',
+                                transition: 'background 0.2s ease',
                             }}
-                            onMouseEnter={(e) => { e.currentTarget.style.background = '#0B4222'; e.currentTarget.style.color = '#fff'; }}
-                            onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#0B4222'; }}
+                            onMouseEnter={(e) => { e.currentTarget.style.background = '#0B4222'; e.currentTarget.querySelectorAll<HTMLElement>('button, span').forEach(el => { el.style.color = '#fff'; }); }}
+                            onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.querySelectorAll<HTMLElement>('button, span').forEach(el => { el.style.color = '#0B4222'; }); }}
                         >
-                            BUY NOW
-                        </button>
+                            <button
+                                onClick={() => {
+                                    dispatch(addToCart({
+                                        id: product._id,
+                                        name: product.name,
+                                        price: discountedPrice,
+                                        image: product.thumbnail,
+                                        quantity: buyNowQty,
+                                        selectedColor,
+                                        selectedSize,
+                                    }));
+                                    router.push('/cart');
+                                }}
+                                disabled={product.stock === 0}
+                                style={{
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    background: 'transparent', border: 'none', color: '#0B4222',
+                                    fontWeight: 700, fontSize: '11px', cursor: 'pointer',
+                                    padding: '0 10px', height: '100%', letterSpacing: '0.4px',
+                                    textTransform: 'uppercase', whiteSpace: 'nowrap', flex: 1,
+                                }}
+                            >
+                                BUY NOW
+                            </button>
+                            <span style={{ color: '#0B4222', fontSize: '13px', paddingRight: '2px' }}>(</span>
+                            <button onClick={(e) => { e.preventDefault(); setBuyNowQty(q => Math.max(1, q - 1)); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#0B4222', fontSize: '15px', fontWeight: 700, padding: '0 3px', lineHeight: 1 }}>-</button>
+                            <span style={{ fontSize: '11px', fontWeight: 700, color: '#0B4222', minWidth: '20px', textAlign: 'center' }}>{String(buyNowQty).padStart(2, '0')}</span>
+                            <button onClick={(e) => { e.preventDefault(); setBuyNowQty(q => q + 1); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#0B4222', fontSize: '15px', fontWeight: 700, padding: '0 3px', lineHeight: 1 }}>+</button>
+                            <span style={{ color: '#0B4222', fontSize: '13px', paddingLeft: '2px', paddingRight: '8px' }}>)</span>
+                        </div>
 
                         {/* SEND INQUIRY */}
                         <button
                             onClick={() => setShowInquiryModal(true)}
                             style={{
-                                display: 'flex', alignItems: 'center', gap: '6px',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
                                 background: 'transparent', border: '1.5px solid #0B4222', color: '#0B4222',
-                                fontWeight: 700, fontSize: '12px', cursor: 'pointer',
-                                padding: '0 18px', height: '100%', letterSpacing: '0.5px',
-                                textTransform: 'uppercase', borderRadius: '9999px',
-                                whiteSpace: 'nowrap', transition: 'all 0.2s ease',
+                                fontWeight: 700, fontSize: '11px', cursor: 'pointer',
+                                padding: '0 14px', height: '100%', letterSpacing: '0.4px',
+                                textTransform: 'uppercase', borderRadius: '8px',
+                                whiteSpace: 'nowrap', transition: 'all 0.2s ease', flex: 1,
                             }}
                             onMouseEnter={(e) => { e.currentTarget.style.background = '#0B4222'; e.currentTarget.style.color = '#fff'; }}
                             onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#0B4222'; }}
@@ -898,7 +923,7 @@ export default function ProductDetailsPage() {
                     {/* Delivery / Payment / Terms — same row as action bar */}
                     <div style={{
                         display: 'flex', alignItems: 'center', gap: '32px',
-                        background: '#f5f5f5', flex: '0 0 calc(50% - 20px)', maxWidth: 'calc(50% - 20px)',
+                        flex: '0 0 calc(50% - 20px)', maxWidth: 'calc(50% - 20px)',
                         padding: '4px 24px 0 24px', height: '38px',
                         marginTop: '10px', marginLeft: '20px',
                     }}>
