@@ -440,13 +440,13 @@ export default function ProductDetailsPage() {
 
                     {/* ═══ LEFT SECTION: Color Swatches + Product Image ═══ */}
                     <div style={{
-                        display: 'flex', flex: '0 0 50%', maxWidth: '50%',
+                        display: 'flex', flex: '0 0 60%', maxWidth: '60%',
                         height: '480px',
-                        paddingRight: '20px',
+                        paddingRight: '16px',
                     }}>
                         <div style={{
-                            width: '55px', display: 'flex', flexDirection: 'column',
-                            alignItems: 'center', padding: '8px 0', marginLeft: '8px',
+                            width: '44px', display: 'flex', flexDirection: 'column',
+                            alignItems: 'center', padding: '8px 0', marginLeft: '4px',
                             flexShrink: 0, gap: '4px',
                         }}>
                             {/* Label */}
@@ -466,7 +466,7 @@ export default function ProductDetailsPage() {
                                         key={idx}
                                         onClick={() => setSelectedImage(idx)}
                                         style={{
-                                            width: '42px', height: '42px', flexShrink: 0,
+                                            width: '38px', height: '38px', flexShrink: 0,
                                             border: selectedImage === idx
                                                 ? '2px solid #0B4222'
                                                 : '2px solid #ddd',
@@ -586,7 +586,7 @@ export default function ProductDetailsPage() {
 
                         {/* Size Swatches Column (RIGHT of image) */}
                         <div style={{
-                            width: '55px', display: 'flex', flexDirection: 'column',
+                            width: '44px', display: 'flex', flexDirection: 'column',
                             alignItems: 'center', padding: '8px 0',
                             flexShrink: 0, gap: '4px',
                         }}>
@@ -600,7 +600,7 @@ export default function ProductDetailsPage() {
                                         key={idx}
                                         onClick={() => setSelectedSize(selectedSize === size ? '' : size)}
                                         style={{
-                                            width: '42px', height: '42px', flexShrink: 0,
+                                            width: '38px', height: '38px', flexShrink: 0,
                                             background: selectedSize === size ? '#0B4222' : '#fff',
                                             color: selectedSize === size ? '#fff' : '#333',
                                             border: selectedSize === size ? '2px solid #0B4222' : '2px solid #ddd',
@@ -622,7 +622,7 @@ export default function ProductDetailsPage() {
 
                         {/* Color Label Column (RIGHT of image) */}
                         <div style={{
-                            width: '55px', display: 'flex', flexDirection: 'column',
+                            width: '44px', display: 'flex', flexDirection: 'column',
                             alignItems: 'center', padding: '8px 0',
                             flexShrink: 0, gap: '4px',
                         }}>
@@ -637,7 +637,7 @@ export default function ProductDetailsPage() {
                                         onClick={() => setSelectedColor(selectedColor === color.name ? '' : color.name)}
                                         title={color.name}
                                         style={{
-                                            width: '42px', height: '42px', flexShrink: 0,
+                                            width: '38px', height: '38px', flexShrink: 0,
                                             background: getColorHex(color.hex || color.name),
                                             border: selectedColor === color.name
                                                 ? '3px solid #0B4222'
@@ -662,7 +662,7 @@ export default function ProductDetailsPage() {
 
                     {/* ═══ RIGHT SECTION: Price + Product Details ═══ */}
                     <div style={{
-                        flex: '0 0 50%', maxWidth: '50%',
+                        flex: '0 0 40%', maxWidth: '40%',
                         paddingLeft: '4px',
                         display: 'flex', flexDirection: 'column',
                         position: 'relative',
@@ -824,7 +824,7 @@ export default function ProductDetailsPage() {
                     {/* ═══ ACTION BAR (ADD TO CART / BUY NOW / SEND INQUIRY) ═══ */}
                     <div style={{
                         display: 'flex', alignItems: 'center', gap: '100px', justifyContent: 'space-between',
-                        height: '30px', flex: '0 0 50%', maxWidth: '50%',
+                        height: '30px', flex: '0 0 60%', maxWidth: '60%',
                         marginTop: '10px', paddingRight: '20px',
                     }}>
                         {/* ADD TO CART with quantity */}
@@ -923,9 +923,9 @@ export default function ProductDetailsPage() {
                     {/* Delivery / Payment / Terms — same row as action bar */}
                     <div style={{
                         display: 'flex', alignItems: 'center', gap: '32px',
-                        flex: '0 0 calc(50% - 20px)', maxWidth: 'calc(50% - 20px)',
-                        padding: '4px 24px 0 24px', height: '38px',
-                        marginTop: '10px', marginLeft: '20px',
+                        flex: '0 0 calc(40% - 4px)', maxWidth: 'calc(40% - 4px)',
+                        padding: '4px 8px 0 8px', height: '30px',
+                        marginTop: '10px', marginLeft: '4px',
                     }}>
                         <button onClick={() => setActiveInfoPanel(activeInfoPanel === 'delivery' ? null : 'delivery')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '14px', fontWeight: 600, color: activeInfoPanel === 'delivery' ? '#0B4222' : '#333', whiteSpace: 'nowrap', borderBottom: activeInfoPanel === 'delivery' ? '2px solid #0B4222' : '2px solid transparent', paddingBottom: '2px', transition: 'all 0.2s ease' }}>Delivery</button>
                         <button onClick={() => setActiveInfoPanel(activeInfoPanel === 'payment' ? null : 'payment')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '14px', fontWeight: 600, color: activeInfoPanel === 'payment' ? '#0B4222' : '#333', whiteSpace: 'nowrap', borderBottom: activeInfoPanel === 'payment' ? '2px solid #0B4222' : '2px solid transparent', paddingBottom: '2px', transition: 'all 0.2s ease' }}>Payment</button>
