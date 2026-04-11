@@ -433,7 +433,7 @@ export default function ProductDetailsPage() {
             </div>
 
             {/* ═══ MAIN CONTENT AREA ═══ */}
-            <div className="w-[95%] mx-auto" style={{ paddingTop: '12px' }}>
+            <div className="w-[95%] mx-auto" style={{ paddingTop: '0px' }}>
                 <div style={{
                     display: 'flex', flexWrap: 'wrap', gap: 0,
                 }}>
@@ -663,7 +663,7 @@ export default function ProductDetailsPage() {
                     {/* ═══ RIGHT SECTION: Price + Product Details ═══ */}
                     <div style={{
                         flex: '0 0 50%', maxWidth: '50%',
-                        paddingLeft: '20px',
+                        paddingLeft: '4px',
                         display: 'flex', flexDirection: 'column',
                         position: 'relative',
                         height: '480px',
