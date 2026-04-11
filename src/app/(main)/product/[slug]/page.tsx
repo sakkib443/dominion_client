@@ -824,7 +824,7 @@ export default function ProductDetailsPage() {
                     {/* ═══ ACTION BAR (ADD TO CART / BUY NOW / SEND INQUIRY) ═══ */}
                     <div style={{
                         display: 'flex', alignItems: 'center', gap: '100px', justifyContent: 'space-between',
-                        height: '38px', flex: '0 0 50%', maxWidth: '50%',
+                        height: '30px', flex: '0 0 50%', maxWidth: '50%',
                         marginTop: '10px', paddingRight: '20px',
                     }}>
                         {/* ADD TO CART with quantity */}
@@ -850,7 +850,7 @@ export default function ProductDetailsPage() {
                                     textTransform: 'uppercase', whiteSpace: 'nowrap', flex: 1,
                                 }}
                             >
-                                {addedToCart ? <><FiCheckCircle size={12} /> ADDED!</> : <><FiShoppingCart size={12} /> ADD TO CART</>}
+                                {addedToCart ? 'ADDED!' : 'ADD TO CART'}
                             </button>
                             <span style={{ color: '#0B4222', fontSize: '13px', paddingRight: '2px' }}>(</span>
                             <button onClick={(e) => { e.preventDefault(); setQuantity(q => Math.max(1, q - 1)); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#0B4222', fontSize: '15px', fontWeight: 700, padding: '0 3px', lineHeight: 1 }}>-</button>
