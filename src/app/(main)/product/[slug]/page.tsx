@@ -433,7 +433,7 @@ export default function ProductDetailsPage() {
             </div>
 
             {/* ═══ MAIN CONTENT AREA ═══ */}
-            <div className="w-[95%] mx-auto" style={{ paddingTop: '0px' }}>
+            <div className="w-[95%] mx-auto" style={{ paddingTop: '0px', maxWidth: '1440px' }}>
                 <div style={{
                     display: 'flex', flexWrap: 'wrap', gap: 0,
                 }}>
@@ -441,7 +441,7 @@ export default function ProductDetailsPage() {
                     {/* ═══ LEFT SECTION: Color Swatches + Product Image ═══ */}
                     <div style={{
                         display: 'flex', flex: '0 0 60%', maxWidth: '60%',
-                        height: '480px',
+                        height: 'clamp(380px, 32vw, 500px)',
                         paddingRight: '16px',
                     }}>
                         <div style={{
@@ -666,7 +666,7 @@ export default function ProductDetailsPage() {
                         paddingLeft: '4px',
                         display: 'flex', flexDirection: 'column',
                         position: 'relative',
-                        height: '480px',
+                        height: 'clamp(380px, 32vw, 500px)',
                         borderLeft: '1px solid #e5e7eb',
                     }}>
                         {/* Up Scroll Arrow for details */}
