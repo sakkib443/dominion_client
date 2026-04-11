@@ -877,10 +877,10 @@ export default function ProductDetailsPage() {
                                         id: product._id,
                                         name: product.name,
                                         price: discountedPrice,
+                                        mrp: product.originalPrice || product.price,
                                         image: product.thumbnail,
+                                        category: product.category?.name || 'General',
                                         quantity: buyNowQty,
-                                        selectedColor,
-                                        selectedSize,
                                     }));
                                     router.push('/cart');
                                 }}
