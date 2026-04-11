@@ -18,6 +18,8 @@ import {
     FiChevronDown,
     FiGlobe,
     FiUser,
+    FiShoppingCart,
+    FiMessageSquare,
 } from 'react-icons/fi';
 
 interface AdminLayoutProps {
@@ -50,6 +52,18 @@ const menuItems = [
             { name: 'All Categories', href: '/dashboard/admin/categories' },
             { name: 'Create Category', href: '/dashboard/admin/categories/new' },
         ]
+    },
+    {
+        name: 'Orders',
+        href: '/dashboard/admin/orders',
+        icon: FiShoppingCart,
+        badge: null,
+    },
+    {
+        name: 'Inquiries',
+        href: '/dashboard/admin/inquiries',
+        icon: FiMessageSquare,
+        badge: null,
     },
     {
         name: 'Payment',
