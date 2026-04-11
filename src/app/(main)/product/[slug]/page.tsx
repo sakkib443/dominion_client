@@ -362,7 +362,7 @@ export default function ProductDetailsPage() {
                                 color: '#555', fontSize: '14px'
                             }}
                         >
-                            <FiStar size={15} style={{ color: '#374151', fill: '#374151' }} />
+                            <FiStar size={15} style={{ color: '#374151' }} />
                             <span style={{ fontWeight: 400 }}>{product.rating?.toFixed(1) || '0.0'}</span>
                             <span style={{ color: '#888' }}>({product.reviewCount || 0} Ratings)</span>
                         </button>
