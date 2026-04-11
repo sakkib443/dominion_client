@@ -424,61 +424,7 @@ const ProductFormInner = () => {
                         </div>
                     </div>
 
-                    {/* ── 4. Specifications ─────────────────────────── */}
-                    <div className="bg-white p-6 rounded-md border border-gray-200 shadow-sm space-y-5">
-                        <div className="flex justify-between items-center pb-4 border-b border-gray-100">
-                            <SectionHeader icon={<FiList size={20} />} title="Specifications" color="bg-purple-50 text-purple-600" />
-                            <button type="button" onClick={addSpec} className="flex items-center gap-1.5 px-4 py-2 bg-purple-50 text-purple-600 rounded-md text-sm font-bold hover:bg-purple-600 hover:text-white transition-all border border-purple-100">
-                                <FiPlus size={16} /> Add
-                            </button>
-                        </div>
-                        <div className="space-y-3">
-                            {formData.specifications.map((spec: any, idx: number) => (
-                                <div key={idx} className="grid grid-cols-12 gap-3 p-3 bg-gray-50 rounded-md border border-gray-100">
-                                    <div className="col-span-5">
-                                        <input type="text" placeholder="Key (e.g. Motor Power)" className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm outline-none focus:border-purple-300 bg-white" value={spec.key} onChange={(e) => handleSpecChange(idx, 'key', e.target.value)} />
-                                    </div>
-                                    <div className="col-span-6">
-                                        <input type="text" placeholder="Value (e.g. 7.5KW)" className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm outline-none focus:border-purple-300 bg-white" value={spec.value} onChange={(e) => handleSpecChange(idx, 'value', e.target.value)} />
-                                    </div>
-                                    <div className="col-span-1 flex items-center justify-center">
-                                        <button onClick={() => removeSpec(idx)} className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded transition-all"><FiTrash2 size={16} /></button>
-                                    </div>
-                                </div>
-                            ))}
-                            {formData.specifications.length === 0 && (
-                                <div className="py-8 text-center border-2 border-dashed border-gray-100 rounded-md">
-                                    <p className="text-gray-400 text-sm">No specifications. Click &apos;Add&apos; to define key-value pairs.</p>
-                                </div>
-                            )}
-                        </div>
-                    </div>
 
-                    {/* ── 5. Highlights ──────────────────────────────── */}
-                    <div className="bg-white p-6 rounded-md border border-gray-200 shadow-sm space-y-5">
-                        <div className="flex justify-between items-center pb-4 border-b border-gray-100">
-                            <SectionHeader icon={<FiCheckCircle size={20} />} title="Key Highlights" color="bg-emerald-50 text-emerald-600" />
-                            <button type="button" onClick={addHighlight} className="flex items-center gap-1.5 px-4 py-2 bg-emerald-50 text-emerald-600 rounded-md text-sm font-bold hover:bg-emerald-600 hover:text-white transition-all border border-emerald-100">
-                                <FiPlus size={16} /> Add
-                            </button>
-                        </div>
-                        <div className="space-y-2">
-                            {formData.highlights.map((hl: string, idx: number) => (
-                                <div key={idx} className="flex gap-2">
-                                    <span className="text-emerald-500 font-bold text-sm mt-2.5">•</span>
-                                    <input type="text" placeholder="e.g. Industrial grade 7.5KW motor" className="flex-1 px-3 py-2 border border-gray-200 rounded-md text-sm outline-none focus:border-emerald-300 bg-white" value={hl} onChange={(e) => handleHighlightChange(idx, e.target.value)} />
-                                    <button onClick={() => removeHighlight(idx)} className="p-1.5 text-red-400 hover:text-red-600 rounded transition-all"><FiTrash2 size={16} /></button>
-                                </div>
-                            ))}
-                            {formData.highlights.length === 0 && (
-                                <div className="py-6 text-center border-2 border-dashed border-gray-100 rounded-md">
-                                    <p className="text-gray-400 text-sm">No highlights added yet.</p>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* ── 6. Content Tabs (Delivery, Payment, Terms) ── */}
                     <div className="bg-white p-6 rounded-md border border-gray-200 shadow-sm space-y-5">
                         <SectionHeader icon={<FiFileText size={20} />} title="Content Tabs (Product Page)" color="bg-amber-50 text-amber-600" />
 
