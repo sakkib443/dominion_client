@@ -216,6 +216,7 @@ export default function ProductDetailsPage() {
 
     return (
         <div style={{ background: '#fff', minHeight: '100vh' }}>
+            <div className="container">
             {/* ── Fullscreen Image Modal ── */}
             {isFullscreen && (
                 <div
@@ -321,8 +322,8 @@ export default function ProductDetailsPage() {
             )}
 
             {/* ═══ PRODUCT TITLE BAR ═══ */}
-            <div style={{ background: '#fff', borderBottom: '1px solid #e5e7eb' }}>
-                <div className="w-[95%] mx-auto" style={{ padding: '10px 0 10px 0' }}>
+            <div style={{ borderBottom: '1px solid #e5e7eb' }}>
+                <div style={{ padding: '10px 0 10px 0' }}>
                     {/* Product Name + Code */}
                     <h1 style={{
                         fontSize: '20px', fontWeight: 700, color: '#1a1a1a',
@@ -433,7 +434,7 @@ export default function ProductDetailsPage() {
             </div>
 
             {/* ═══ MAIN CONTENT AREA ═══ */}
-            <div className="w-[95%] mx-auto" style={{ paddingTop: '0px', maxWidth: '1440px' }}>
+            <div style={{ paddingTop: '0px' }}>
                 <div style={{
                     display: 'flex', flexWrap: 'wrap', gap: 0,
                 }}>
@@ -441,11 +442,11 @@ export default function ProductDetailsPage() {
                     {/* ═══ LEFT SECTION: Color Swatches + Product Image ═══ */}
                     <div style={{
                         display: 'flex', flex: '0 0 60%', maxWidth: '60%',
-                        height: 'clamp(380px, 32vw, 500px)',
+                        height: 'clamp(500px, 48vw, 680px)',
                         paddingRight: '16px',
                     }}>
                         <div style={{
-                            width: '44px', display: 'flex', flexDirection: 'column',
+                            width: '82px', display: 'flex', flexDirection: 'column',
                             alignItems: 'center', padding: '8px 0', marginLeft: '4px',
                             flexShrink: 0, gap: '4px',
                         }}>
@@ -456,8 +457,8 @@ export default function ProductDetailsPage() {
                             <div
                                 ref={colorSwatchRef}
                                 style={{
-                                    display: 'flex', flexDirection: 'column', gap: '6px',
-                                    overflow: 'hidden', maxHeight: '350px', flex: 1,
+                                    display: 'flex', flexDirection: 'column', gap: '8px',
+                                    overflow: 'hidden', maxHeight: '580px', flex: 1,
                                 }}
                                 className="no-scrollbar"
                             >
@@ -466,15 +467,16 @@ export default function ProductDetailsPage() {
                                         key={idx}
                                         onClick={() => setSelectedImage(idx)}
                                         style={{
-                                            width: '38px', height: '38px', flexShrink: 0,
+                                            width: '75px', height: '75px', flexShrink: 0,
                                             border: selectedImage === idx
                                                 ? '2px solid #0B4222'
-                                                : '2px solid #ddd',
-                                            borderRadius: '4px',
+                                                : '2px solid #e0e0e0',
+                                            borderRadius: '6px',
                                             cursor: 'pointer',
                                             transition: 'all 0.2s ease',
                                             overflow: 'hidden',
                                             padding: 0, background: '#f5f5f5',
+                                            boxShadow: selectedImage === idx ? '0 0 0 2px rgba(11,66,34,0.2)' : 'none',
                                         }}
                                     >
                                         <img src={img} alt={`Product ${idx + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -513,41 +515,41 @@ export default function ProductDetailsPage() {
                                 onError={(e) => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/600x600/f3f4f6/9ca3af?text=No+Image'; }}
                             />
 
-                            {/* Left Arrow */}
-                            {selectedImage > 0 && (
-                                <button
-                                    onClick={(e) => { e.stopPropagation(); setSelectedImage(prev => prev - 1); setZoomLevel(1); }}
-                                    style={{
-                                        position: 'absolute', left: '8px', top: '50%', transform: 'translateY(-50%)',
-                                        background: 'rgba(255,255,255,0.85)', border: 'none', borderRadius: '50%',
-                                        width: '32px', height: '32px', cursor: 'pointer', display: 'flex',
-                                        alignItems: 'center', justifyContent: 'center', zIndex: 3,
-                                        boxShadow: '0 2px 8px rgba(0,0,0,0.15)', transition: 'all 0.2s ease',
-                                    }}
-                                    onMouseEnter={(e) => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.25)'; }}
-                                    onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.85)'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)'; }}
-                                >
-                                    <FiChevronLeft size={18} color="#333" />
-                                </button>
-                            )}
+                            {/* Left Arrow — always rendered, hidden when no prev image */}
+                            <button
+                                onClick={(e) => { e.stopPropagation(); setSelectedImage(prev => prev - 1); setZoomLevel(1); }}
+                                disabled={selectedImage === 0}
+                                style={{
+                                    position: 'absolute', left: '8px', top: '50%', transform: 'translateY(-50%)',
+                                    background: 'rgba(255,255,255,0.9)', border: 'none', borderRadius: '50%',
+                                    width: '36px', height: '36px', cursor: selectedImage === 0 ? 'default' : 'pointer',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 3,
+                                    boxShadow: '0 2px 8px rgba(0,0,0,0.18)', transition: 'all 0.2s ease',
+                                    visibility: selectedImage === 0 ? 'hidden' : 'visible',
+                                }}
+                                onMouseEnter={(e) => { if (selectedImage > 0) { e.currentTarget.style.background = '#fff'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.28)'; } }}
+                                onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.9)'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.18)'; }}
+                            >
+                                <FiChevronLeft size={20} color="#333" />
+                            </button>
 
-                            {/* Right Arrow */}
-                            {selectedImage < allImages.length - 1 && (
-                                <button
-                                    onClick={(e) => { e.stopPropagation(); setSelectedImage(prev => prev + 1); setZoomLevel(1); }}
-                                    style={{
-                                        position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)',
-                                        background: 'rgba(255,255,255,0.85)', border: 'none', borderRadius: '50%',
-                                        width: '32px', height: '32px', cursor: 'pointer', display: 'flex',
-                                        alignItems: 'center', justifyContent: 'center', zIndex: 3,
-                                        boxShadow: '0 2px 8px rgba(0,0,0,0.15)', transition: 'all 0.2s ease',
-                                    }}
-                                    onMouseEnter={(e) => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.25)'; }}
-                                    onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.85)'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)'; }}
-                                >
-                                    <FiChevronRight size={18} color="#333" />
-                                </button>
-                            )}
+                            {/* Right Arrow — always rendered, hidden when no next image */}
+                            <button
+                                onClick={(e) => { e.stopPropagation(); setSelectedImage(prev => prev + 1); setZoomLevel(1); }}
+                                disabled={selectedImage >= allImages.length - 1}
+                                style={{
+                                    position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)',
+                                    background: 'rgba(255,255,255,0.9)', border: 'none', borderRadius: '50%',
+                                    width: '36px', height: '36px', cursor: selectedImage >= allImages.length - 1 ? 'default' : 'pointer',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 3,
+                                    boxShadow: '0 2px 8px rgba(0,0,0,0.18)', transition: 'all 0.2s ease',
+                                    visibility: selectedImage >= allImages.length - 1 ? 'hidden' : 'visible',
+                                }}
+                                onMouseEnter={(e) => { if (selectedImage < allImages.length - 1) { e.currentTarget.style.background = '#fff'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.28)'; } }}
+                                onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.9)'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.18)'; }}
+                            >
+                                <FiChevronRight size={20} color="#333" />
+                            </button>
 
                             {/* Zoom Indicator */}
                             <div style={{
@@ -586,28 +588,29 @@ export default function ProductDetailsPage() {
 
                         {/* Size Swatches Column (RIGHT of image) */}
                         <div style={{
-                            width: '44px', display: 'flex', flexDirection: 'column',
+                            width: '56px', display: 'flex', flexDirection: 'column',
                             alignItems: 'center', padding: '8px 0',
                             flexShrink: 0, gap: '4px',
                         }}>
                             <span style={{ fontSize: '11px', fontWeight: 400, color: '#555', textTransform: 'capitalize', letterSpacing: '0.5px' }}>Size</span>
                             <div ref={sizeSwatchRef} style={{
-                                display: 'flex', flexDirection: 'column', gap: '6px',
-                                overflow: 'hidden', maxHeight: '350px', flex: 1,
+                                display: 'flex', flexDirection: 'column', gap: '8px',
+                                overflow: 'hidden', maxHeight: '580px', flex: 1,
                             }} className="no-scrollbar">
                                 {(product.sizes && product.sizes.length > 0 ? product.sizes : ['S', 'M', 'L', 'XL', 'XXL']).map((size: string, idx: number) => (
                                     <button
                                         key={idx}
                                         onClick={() => setSelectedSize(selectedSize === size ? '' : size)}
                                         style={{
-                                            width: '38px', height: '38px', flexShrink: 0,
+                                            width: '48px', height: '48px', flexShrink: 0,
                                             background: selectedSize === size ? '#0B4222' : '#fff',
                                             color: selectedSize === size ? '#fff' : '#333',
-                                            border: selectedSize === size ? '2px solid #0B4222' : '2px solid #ddd',
-                                            borderRadius: '4px', cursor: 'pointer',
+                                            border: selectedSize === size ? '2px solid #0B4222' : '2px solid #e0e0e0',
+                                            borderRadius: '6px', cursor: 'pointer',
                                             fontWeight: 700, fontSize: '12px',
                                             transition: 'all 0.2s ease',
                                             display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            boxShadow: selectedSize === size ? '0 0 0 2px rgba(11,66,34,0.2)' : 'none',
                                         }}
                                     >
                                         {size}
@@ -622,14 +625,14 @@ export default function ProductDetailsPage() {
 
                         {/* Color Label Column (RIGHT of image) */}
                         <div style={{
-                            width: '44px', display: 'flex', flexDirection: 'column',
+                            width: '56px', display: 'flex', flexDirection: 'column',
                             alignItems: 'center', padding: '8px 0',
                             flexShrink: 0, gap: '4px',
                         }}>
-                            <span style={{ fontSize: '10px', fontWeight: 700, color: '#555', textTransform: 'capitalize', letterSpacing: '0.5px' }}>Color</span>
+                            <span style={{ fontSize: '11px', fontWeight: 400, color: '#555', textTransform: 'capitalize', letterSpacing: '0.5px' }}>Color</span>
                             <div ref={colorSwatchRef2} style={{
-                                display: 'flex', flexDirection: 'column', gap: '6px',
-                                overflow: 'hidden', maxHeight: '350px', flex: 1,
+                                display: 'flex', flexDirection: 'column', gap: '8px',
+                                overflow: 'hidden', maxHeight: '580px', flex: 1,
                             }} className="no-scrollbar">
                                 {colorSwatches.map((color: any, idx: number) => (
                                     <button
@@ -637,17 +640,16 @@ export default function ProductDetailsPage() {
                                         onClick={() => setSelectedColor(selectedColor === color.name ? '' : color.name)}
                                         title={color.name}
                                         style={{
-                                            width: '38px', height: '38px', flexShrink: 0,
+                                            width: '48px', height: '48px', flexShrink: 0,
                                             background: getColorHex(color.hex || color.name),
                                             border: selectedColor === color.name
                                                 ? '3px solid #0B4222'
-                                                : '2px solid #ddd',
-                                            borderRadius: '4px',
+                                                : '2px solid #e0e0e0',
+                                            borderRadius: '6px',
                                             cursor: 'pointer',
                                             transition: 'all 0.2s ease',
-                                            transform: selectedColor === color.name ? 'scale(1.1)' : 'scale(1)',
                                             boxShadow: selectedColor === color.name
-                                                ? '0 0 0 2px #0B4222'
+                                                ? '0 0 0 2px rgba(11,66,34,0.2)'
                                                 : 'none',
                                         }}
                                     />
@@ -666,7 +668,7 @@ export default function ProductDetailsPage() {
                         paddingLeft: '4px',
                         display: 'flex', flexDirection: 'column',
                         position: 'relative',
-                        height: 'clamp(380px, 32vw, 500px)',
+                        height: 'clamp(500px, 48vw, 680px)',
                         borderLeft: '1px solid #e5e7eb',
                     }}>
                         {/* Up Scroll Arrow for details */}
@@ -800,7 +802,7 @@ export default function ProductDetailsPage() {
 
                                 {product.description && (
                                     <div
-                                        style={{ fontSize: '13px', color: '#444', lineHeight: 1.7 }}
+                                        style={{ fontSize: '13px', color: '#444', lineHeight: 1.7, textAlign: 'justify' }}
                                         dangerouslySetInnerHTML={{ __html: product.description }}
                                     />
                                 )}
@@ -940,8 +942,8 @@ export default function ProductDetailsPage() {
 
             {/* ═══ Related Products Section ═══ */}
             {relatedProducts.length > 0 && (
-                <div style={{ background: '#fff', borderTop: '1px solid #e5e7eb', marginTop: '1rem' }}>
-                    <div className="w-[95%] mx-auto" style={{ padding: '2rem 0' }}>
+                <div style={{ borderTop: '1px solid #e5e7eb', marginTop: '1rem' }}>
+                    <div style={{ padding: '2rem 0' }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
                             <div>
                                 <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#1a1a1a', margin: 0 }}>Related Products</h2>
@@ -1491,6 +1493,7 @@ export default function ProductDetailsPage() {
                     </div>
                 </div>
             )}
+            </div>
         </div>
     );
 }
