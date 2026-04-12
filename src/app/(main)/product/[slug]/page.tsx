@@ -363,7 +363,7 @@ export default function ProductDetailsPage() {
                                 color: '#555', fontSize: '14px'
                             }}
                         >
-                            <FiStar size={15} style={{ color: '#374151' }} />
+                            <FiStar size={15} style={{ color: '#555' }} />
                             <span style={{ fontWeight: 400 }}>{product.rating?.toFixed(1) || '0.0'}</span>
                             <span style={{ color: '#888' }}>({product.reviewCount || 0} Ratings)</span>
                         </button>
@@ -374,28 +374,28 @@ export default function ProductDetailsPage() {
                             style={{
                                 display: 'flex', alignItems: 'center', gap: '6px',
                                 background: 'none', border: 'none', cursor: 'pointer',
-                                color: isLiked ? '#ef4444' : '#555', fontSize: '14px'
+                                color: '#555', fontSize: '14px'
                             }}
                         >
-                            <img src="/ICON/like.png" alt="Like" style={{ width: '16px', height: '16px', opacity: isLiked ? 1 : 0.6 }} />
+                            <FiThumbsUp size={15} style={{ color: '#555' }} />
                             <span style={{ fontWeight: 400 }}>{(product.likeCount || 0) + likeCount}</span>
                         </button>
 
                         {/* Comments */}
                         <div onClick={() => setShowCommentsModal(true)} style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
-                            <img src="/ICON/comments.png" alt="Comments" style={{ width: '16px', height: '16px', opacity: 0.6 }} />
+                            <FiMessageSquare size={15} style={{ color: '#555' }} />
                             <span style={{ fontWeight: 400 }}>{product.commentCount || product.reviewCount || 0}</span>
                         </div>
 
                         {/* Share */}
                         <div onClick={() => setShowSharePopup(true)} style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
-                            <img src="/ICON/share.png" alt="Share" style={{ width: '16px', height: '16px', opacity: 0.6 }} />
+                            <FiShare2 size={15} style={{ color: '#555' }} />
                             <span style={{ fontWeight: 400 }}>{product.shareCount || 0}</span>
                         </div>
 
                         {/* Views */}
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
-                            <img src="/ICON/views.png" alt="Views" style={{ width: '16px', height: '16px', opacity: 0.6 }} />
+                            <FiEye size={15} style={{ color: '#555' }} />
                             <span style={{ fontWeight: 400 }}>{product.viewCount || 0}</span>
                         </div>
 
@@ -414,7 +414,7 @@ export default function ProductDetailsPage() {
                                 color: '#555', fontSize: '14px'
                             }}
                         >
-                            <FiCopy size={15} />
+                            <FiCopy size={15} style={{ color: '#555' }} />
                             <span style={{ fontWeight: 400 }}>{linkCopied ? 'Copied!' : 'Copy Link'}</span>
                         </button>
 
@@ -426,7 +426,7 @@ export default function ProductDetailsPage() {
                                 color: '#555', fontSize: '14px', background: 'none', border: 'none', cursor: 'pointer'
                             }}
                         >
-                            <FiDownload size={15} />
+                            <FiDownload size={15} style={{ color: '#555' }} />
                             <span style={{ fontWeight: 400 }}>Image Download</span>
                         </button>
                     </div>
@@ -442,7 +442,7 @@ export default function ProductDetailsPage() {
                     {/* ═══ LEFT SECTION: Color Swatches + Product Image ═══ */}
                     <div style={{
                         display: 'flex', flex: '0 0 60%', maxWidth: '60%',
-                        height: 'clamp(500px, 48vw, 680px)',
+                        height: 'clamp(400px, 38vw, 560px)',
                         paddingRight: '16px',
                     }}>
                         <div style={{
@@ -668,7 +668,7 @@ export default function ProductDetailsPage() {
                         paddingLeft: '4px',
                         display: 'flex', flexDirection: 'column',
                         position: 'relative',
-                        height: 'clamp(500px, 48vw, 680px)',
+                        height: 'clamp(400px, 38vw, 560px)',
                         borderLeft: '1px solid #e5e7eb',
                     }}>
                         {/* Up Scroll Arrow for details */}
@@ -832,46 +832,46 @@ export default function ProductDetailsPage() {
                         {/* ADD TO CART with quantity */}
                         <div
                             style={{
-                                display: 'flex', alignItems: 'center',
-                                border: '1.5px solid #0B4222', borderRadius: '8px',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                border: '1.5px solid #000', borderRadius: '8px',
                                 height: '100%', overflow: 'hidden', flex: 1,
                                 opacity: product.stock === 0 ? 0.5 : 1,
                                 transition: 'background 0.2s ease',
                             }}
-                            onMouseEnter={(e) => { e.currentTarget.style.background = '#0B4222'; e.currentTarget.querySelectorAll<HTMLElement>('button, span').forEach(el => { el.style.color = '#fff'; }); }}
-                            onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.querySelectorAll<HTMLElement>('button, span').forEach(el => { el.style.color = '#0B4222'; }); }}
+                            onMouseEnter={(e) => { e.currentTarget.style.background = '#0B4222'; e.currentTarget.style.borderColor = '#0B4222'; e.currentTarget.querySelectorAll<HTMLElement>('button, span').forEach(el => { el.style.color = '#fff'; }); }}
+                            onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = '#000'; e.currentTarget.querySelectorAll<HTMLElement>('button, span').forEach(el => { el.style.color = '#000'; }); }}
                         >
                             <button
                                 onClick={handleAddToCart}
                                 disabled={product.stock === 0}
                                 style={{
                                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px',
-                                    background: 'transparent', border: 'none', color: '#0B4222',
+                                    background: 'transparent', border: 'none', color: '#000',
                                     fontWeight: 700, fontSize: '11px', cursor: 'pointer',
-                                    padding: '0 10px', height: '100%', letterSpacing: '0.4px',
-                                    textTransform: 'uppercase', whiteSpace: 'nowrap', flex: 1,
+                                    padding: '0 8px', height: '100%', letterSpacing: '0.4px',
+                                    textTransform: 'uppercase', whiteSpace: 'nowrap',
                                 }}
                             >
                                 {addedToCart ? 'ADDED!' : 'ADD TO CART'}
                             </button>
-                            <span style={{ color: '#0B4222', fontSize: '13px', paddingRight: '2px' }}>(</span>
-                            <button onClick={(e) => { e.preventDefault(); setQuantity(q => Math.max(1, q - 1)); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#0B4222', fontSize: '15px', fontWeight: 700, padding: '0 3px', lineHeight: 1 }}>-</button>
-                            <span style={{ fontSize: '11px', fontWeight: 700, color: '#0B4222', minWidth: '20px', textAlign: 'center' }}>{String(quantity).padStart(2, '0')}</span>
-                            <button onClick={(e) => { e.preventDefault(); setQuantity(q => q + 1); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#0B4222', fontSize: '15px', fontWeight: 700, padding: '0 3px', lineHeight: 1 }}>+</button>
-                            <span style={{ color: '#0B4222', fontSize: '13px', paddingLeft: '2px', paddingRight: '8px' }}>)</span>
+                            <span style={{ color: '#000', fontSize: '13px', paddingRight: '2px' }}>(</span>
+                            <button onClick={(e) => { e.preventDefault(); setQuantity(q => Math.max(1, q - 1)); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#000', fontSize: '15px', fontWeight: 700, padding: '0 3px', lineHeight: 1 }}>-</button>
+                            <span style={{ fontSize: '11px', fontWeight: 700, color: '#000', minWidth: '20px', textAlign: 'center' }}>{String(quantity).padStart(2, '0')}</span>
+                            <button onClick={(e) => { e.preventDefault(); setQuantity(q => q + 1); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#000', fontSize: '15px', fontWeight: 700, padding: '0 3px', lineHeight: 1 }}>+</button>
+                            <span style={{ color: '#000', fontSize: '13px', paddingLeft: '2px', paddingRight: '8px' }}>)</span>
                         </div>
 
                         {/* BUY NOW with quantity */}
                         <div
                             style={{
-                                display: 'flex', alignItems: 'center',
-                                border: '1.5px solid #0B4222', borderRadius: '8px',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                border: '1.5px solid #000', borderRadius: '8px',
                                 height: '100%', overflow: 'hidden', flex: 1,
                                 opacity: product.stock === 0 ? 0.5 : 1,
                                 transition: 'background 0.2s ease',
                             }}
-                            onMouseEnter={(e) => { e.currentTarget.style.background = '#0B4222'; e.currentTarget.querySelectorAll<HTMLElement>('button, span').forEach(el => { el.style.color = '#fff'; }); }}
-                            onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.querySelectorAll<HTMLElement>('button, span').forEach(el => { el.style.color = '#0B4222'; }); }}
+                            onMouseEnter={(e) => { e.currentTarget.style.background = '#0B4222'; e.currentTarget.style.borderColor = '#0B4222'; e.currentTarget.querySelectorAll<HTMLElement>('button, span').forEach(el => { el.style.color = '#fff'; }); }}
+                            onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = '#000'; e.currentTarget.querySelectorAll<HTMLElement>('button, span').forEach(el => { el.style.color = '#000'; }); }}
                         >
                             <button
                                 onClick={() => {
@@ -889,19 +889,19 @@ export default function ProductDetailsPage() {
                                 disabled={product.stock === 0}
                                 style={{
                                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    background: 'transparent', border: 'none', color: '#0B4222',
+                                    background: 'transparent', border: 'none', color: '#000',
                                     fontWeight: 700, fontSize: '11px', cursor: 'pointer',
-                                    padding: '0 10px', height: '100%', letterSpacing: '0.4px',
-                                    textTransform: 'uppercase', whiteSpace: 'nowrap', flex: 1,
+                                    padding: '0 8px', height: '100%', letterSpacing: '0.4px',
+                                    textTransform: 'uppercase', whiteSpace: 'nowrap',
                                 }}
                             >
                                 BUY NOW
                             </button>
-                            <span style={{ color: '#0B4222', fontSize: '13px', paddingRight: '2px' }}>(</span>
-                            <button onClick={(e) => { e.preventDefault(); setBuyNowQty(q => Math.max(1, q - 1)); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#0B4222', fontSize: '15px', fontWeight: 700, padding: '0 3px', lineHeight: 1 }}>-</button>
-                            <span style={{ fontSize: '11px', fontWeight: 700, color: '#0B4222', minWidth: '20px', textAlign: 'center' }}>{String(buyNowQty).padStart(2, '0')}</span>
-                            <button onClick={(e) => { e.preventDefault(); setBuyNowQty(q => q + 1); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#0B4222', fontSize: '15px', fontWeight: 700, padding: '0 3px', lineHeight: 1 }}>+</button>
-                            <span style={{ color: '#0B4222', fontSize: '13px', paddingLeft: '2px', paddingRight: '8px' }}>)</span>
+                            <span style={{ color: '#000', fontSize: '13px', paddingRight: '2px' }}>(</span>
+                            <button onClick={(e) => { e.preventDefault(); setBuyNowQty(q => Math.max(1, q - 1)); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#000', fontSize: '15px', fontWeight: 700, padding: '0 3px', lineHeight: 1 }}>-</button>
+                            <span style={{ fontSize: '11px', fontWeight: 700, color: '#000', minWidth: '20px', textAlign: 'center' }}>{String(buyNowQty).padStart(2, '0')}</span>
+                            <button onClick={(e) => { e.preventDefault(); setBuyNowQty(q => q + 1); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#000', fontSize: '15px', fontWeight: 700, padding: '0 3px', lineHeight: 1 }}>+</button>
+                            <span style={{ color: '#000', fontSize: '13px', paddingLeft: '2px', paddingRight: '8px' }}>)</span>
                         </div>
 
                         {/* SEND INQUIRY */}
@@ -909,14 +909,14 @@ export default function ProductDetailsPage() {
                             onClick={() => setShowInquiryModal(true)}
                             style={{
                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                background: 'transparent', border: '1.5px solid #0B4222', color: '#0B4222',
+                                background: 'transparent', border: '1.5px solid #000', color: '#000',
                                 fontWeight: 700, fontSize: '11px', cursor: 'pointer',
                                 padding: '0 14px', height: '100%', letterSpacing: '0.4px',
                                 textTransform: 'uppercase', borderRadius: '8px',
                                 whiteSpace: 'nowrap', transition: 'all 0.2s ease', flex: 1,
                             }}
-                            onMouseEnter={(e) => { e.currentTarget.style.background = '#0B4222'; e.currentTarget.style.color = '#fff'; }}
-                            onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#0B4222'; }}
+                            onMouseEnter={(e) => { e.currentTarget.style.background = '#0B4222'; e.currentTarget.style.borderColor = '#0B4222'; e.currentTarget.style.color = '#fff'; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = '#000'; e.currentTarget.style.color = '#000'; }}
                         >
                             SEND INQUIRY
                         </button>

@@ -99,7 +99,7 @@ h6 {
 /* ===== Container ===== */
 .container {
   width: 100%;
-  max-width: 1536px;
+  max-width: 1700px;
   margin-left: auto;
   margin-right: auto;
   padding-left: 1rem;
@@ -108,22 +108,22 @@ h6 {
 
 @media (min-width: 640px) {
   .container {
-    padding-left: 2rem;
-    padding-right: 2rem;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
   }
 }
 
 @media (min-width: 768px) {
   .container {
-    padding-left: 3rem;
-    padding-right: 3rem;
+    padding-left: 2rem;
+    padding-right: 2rem;
   }
 }
 
 @media (min-width: 1024px) {
   .container {
-    padding-left: 4rem;
-    padding-right: 4rem;
+    padding-left: 2.5rem;
+    padding-right: 2.5rem;
   }
 }
 
