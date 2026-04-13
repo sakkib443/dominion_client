@@ -240,7 +240,7 @@ export default function ProductDetailsPage() {
                             <FiX size={22} />
                         </button>
                         {allImages.length > 1 && (
-                            <div style={{
+                            <div className="pd-zoom-thumbs" style={{
                                 position: 'absolute', left: '11rem', top: '50%',
                                 transform: 'translateY(-50%)', display: 'flex',
                                 flexDirection: 'column', gap: '0.5rem', zIndex: 10
@@ -1225,6 +1225,9 @@ export default function ProductDetailsPage() {
                     .pd-related-grid { grid-template-columns: repeat(2, 1fr) !important; }
                     .pd-title { font-size: 16px !important; }
                     .pd-price { font-size: 17px !important; }
+
+                    /* Hide zoom modal sidebar thumbnails on mobile */
+                    .pd-zoom-thumbs { display: none !important; }
                 }
             `}</style>
 
