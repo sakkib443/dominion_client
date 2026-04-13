@@ -344,7 +344,7 @@ export default function ProductDetailsPage() {
                         )}
 
                         {/* Stats Row */}
-                        <div style={{
+                        <div className="pd-stats-row" style={{
                             display: 'flex', alignItems: 'center', gap: '40px',
                             flexWrap: 'wrap', fontSize: '14px', color: '#555',
                             marginTop: '14px'
@@ -435,19 +435,19 @@ export default function ProductDetailsPage() {
 
                 {/* ═══ MAIN CONTENT AREA ═══ */}
                 <div style={{ paddingTop: '0px' }}>
-                    <div style={{
+                    <div className="pd-main-flex" style={{
                         display: 'flex', flexWrap: 'wrap', gap: 0,
                     }}>
 
                         {/* ═══ LEFT SECTION: Color Swatches + Product Image ═══ */}
-                        <div style={{
+                        <div className="pd-left-section" style={{
                             display: 'flex', flex: '0 0 60%', maxWidth: '60%',
                             minWidth: '320px',
                             height: 'clamp(300px, 32vw, 480px)',
                             paddingRight: '16px',
                             overflow: 'visible',
                         }}>
-                            <div style={{
+                            <div className="pd-thumb-col" style={{
                                 width: '82px', display: 'flex', flexDirection: 'column',
                                 alignItems: 'center', padding: '8px 0', marginLeft: '4px',
                                 flexShrink: 0, gap: '4px',
@@ -498,7 +498,7 @@ export default function ProductDetailsPage() {
                             </div>
 
                             {/* Image Wrapper — arrows sit INSIDE the image area */}
-                            <div style={{
+                            <div className="pd-image-wrapper" style={{
                                 position: 'relative', height: '100%', aspectRatio: '1 / 1',
                                 flexShrink: 0,
                                 margin: '0 auto', padding: '16px',
@@ -597,7 +597,7 @@ export default function ProductDetailsPage() {
                             </div>
 
                             {/* Size Swatches Column (RIGHT of image) */}
-                            <div style={{
+                            <div className="pd-swatch-col" style={{
                                 width: 'clamp(44px, 5vw, 56px)', display: 'flex', flexDirection: 'column',
                                 alignItems: 'center', padding: '8px 0',
                                 flexShrink: 0, gap: '4px',
@@ -634,7 +634,7 @@ export default function ProductDetailsPage() {
                             </div>
 
                             {/* Color Label Column (RIGHT of image) */}
-                            <div style={{
+                            <div className="pd-swatch-col" style={{
                                 width: 'clamp(44px, 5vw, 56px)', display: 'flex', flexDirection: 'column',
                                 alignItems: 'center', padding: '8px 0',
                                 flexShrink: 0, gap: '4px',
@@ -673,7 +673,7 @@ export default function ProductDetailsPage() {
                         </div>
 
                         {/* ═══ RIGHT SECTION: Price + Product Details ═══ */}
-                        <div style={{
+                        <div className="pd-right-section" style={{
                             flex: '0 0 40%', maxWidth: '40%',
                             paddingLeft: '4px',
                             display: 'flex', flexDirection: 'column',
@@ -683,6 +683,7 @@ export default function ProductDetailsPage() {
                         }}>
                             {/* Up Scroll Arrow for details */}
                             <button
+                                className="pd-scroll-arrow"
                                 onClick={() => scrollDetails('up')}
                                 style={{
                                     position: 'absolute', top: '4px', right: '8px',
@@ -764,7 +765,7 @@ export default function ProductDetailsPage() {
                                     flex: 1, overflowY: 'auto', padding: '2px 16px',
                                     paddingRight: '24px',
                                 }}
-                                className="no-scrollbar"
+                                className="no-scrollbar pd-right-scroll"
                             >
                                 {/* Price Section */}
                                 <div style={{ marginBottom: '10px' }}>
@@ -821,6 +822,7 @@ export default function ProductDetailsPage() {
 
                             {/* Down Scroll Arrow for details */}
                             <button
+                                className="pd-scroll-arrow"
                                 onClick={() => scrollDetails('down')}
                                 style={{
                                     position: 'absolute', bottom: '4px', right: '8px',
@@ -834,7 +836,7 @@ export default function ProductDetailsPage() {
                         </div>
 
                         {/* ═══ ACTION BAR (ADD TO CART / BUY NOW / SEND INQUIRY) ═══ */}
-                        <div style={{
+                        <div className="pd-action-bar" style={{
                             display: 'flex', alignItems: 'center', gap: '100px', justifyContent: 'space-between',
                             height: '30px', flex: '0 0 60%', maxWidth: '60%',
                             marginTop: '10px', paddingRight: '20px',
@@ -933,7 +935,7 @@ export default function ProductDetailsPage() {
                         </div>
 
                         {/* Delivery / Payment / Terms — same row as action bar */}
-                        <div style={{
+                        <div className="pd-info-bar" style={{
                             display: 'flex', alignItems: 'center', gap: '32px',
                             flex: '0 0 calc(40% - 4px)', maxWidth: 'calc(40% - 4px)',
                             padding: '4px 8px 0 8px', height: '30px',
@@ -978,7 +980,7 @@ export default function ProductDetailsPage() {
                                     </Link>
                                 )}
                             </div>
-                            <div className="grid grid-cols-5 gap-2 overflow-hidden">
+                            <div className="pd-related-grid grid grid-cols-5 gap-2 overflow-hidden">
                                 {relatedProducts.slice(0, 5).map((item: any) => (
                                     <NewProductCard
                                         key={item._id}
@@ -1123,9 +1125,111 @@ export default function ProductDetailsPage() {
                 div:hover > .discount-badge {
                     opacity: 1 !important;
                 }
-                @media (max-width: 768px) {
-                    .product-main-flex {
+
+                /* ═══ MOBILE RESPONSIVE ═══ */
+                @media (max-width: 767px) {
+
+                    /* Main flex → column */
+                    .pd-main-flex {
                         flex-direction: column !important;
+                    }
+
+                    /* Left (image) section → full width, auto height */
+                    .pd-left-section {
+                        flex: 0 0 100% !important;
+                        max-width: 100% !important;
+                        min-width: unset !important;
+                        height: auto !important;
+                        padding-right: 0 !important;
+                    }
+
+                    /* Right (details) section → full width, auto height */
+                    .pd-right-section {
+                        flex: 0 0 100% !important;
+                        max-width: 100% !important;
+                        height: auto !important;
+                        min-height: unset !important;
+                        border-left: none !important;
+                        border-top: 1px solid #e5e7eb !important;
+                        padding-left: 0 !important;
+                    }
+
+                    /* Right section scrollable content → not scrollable on mobile, just flow */
+                    .pd-right-scroll {
+                        overflow-y: visible !important;
+                        flex: unset !important;
+                        padding: 8px 0 !important;
+                    }
+
+                    /* Hide scroll arrows on mobile */
+                    .pd-scroll-arrow {
+                        display: none !important;
+                    }
+
+                    /* Thumbnail column (Image list) → smaller */
+                    .pd-thumb-col {
+                        width: 60px !important;
+                    }
+
+                    /* Thumbnail buttons */
+                    .pd-thumb-col button:not(.pd-scroll-arrow) {
+                        width: 52px !important;
+                        height: 52px !important;
+                    }
+
+                    /* Image square wrapper → full width square */
+                    .pd-image-wrapper {
+                        height: auto !important;
+                        aspect-ratio: 1 / 1 !important;
+                        flex: 1 !important;
+                    }
+
+                    /* Size/Color swatch columns → smaller */
+                    .pd-swatch-col {
+                        width: 40px !important;
+                    }
+
+                    /* Action bar → full width, wrap */
+                    .pd-action-bar {
+                        flex: 0 0 100% !important;
+                        max-width: 100% !important;
+                        flex-wrap: wrap !important;
+                        gap: 8px !important;
+                        height: auto !important;
+                        padding-right: 0 !important;
+                        margin-top: 16px !important;
+                    }
+
+                    /* Delivery/Payment/Terms bar → full width */
+                    .pd-info-bar {
+                        flex: 0 0 100% !important;
+                        max-width: 100% !important;
+                        height: auto !important;
+                        flex-wrap: wrap !important;
+                        margin-left: 0 !important;
+                        padding: 8px 0 0 0 !important;
+                        gap: 12px !important;
+                    }
+
+                    /* Stats row → wrap tightly */
+                    .pd-stats-row {
+                        gap: 12px !important;
+                        flex-wrap: wrap !important;
+                    }
+
+                    /* Related products → 2 cols on mobile */
+                    .pd-related-grid {
+                        grid-template-columns: repeat(2, 1fr) !important;
+                    }
+
+                    /* Title font → smaller */
+                    .pd-title {
+                        font-size: 16px !important;
+                    }
+
+                    /* Price font → smaller */
+                    .pd-price {
+                        font-size: 17px !important;
                     }
                 }
             `}</style>
