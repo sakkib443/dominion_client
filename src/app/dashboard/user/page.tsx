@@ -56,8 +56,8 @@ const UserDashboard = () => {
 
             {/* ── Welcome Banner ── */}
             <div style={{
-                background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 60%, #1a1a1a 100%)',
-                borderRadius: '8px', padding: '32px 36px',
+                background: '#f3f4f6',
+                borderRadius: '8px', padding: '28px 32px',
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                 overflow: 'hidden', position: 'relative',
             }}>
@@ -67,20 +67,20 @@ const UserDashboard = () => {
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '20px', zIndex: 1 }}>
                     <div style={{
-                        width: '60px', height: '60px', borderRadius: '50%',
-                        background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(10px)',
-                        border: '2px solid rgba(255,255,255,0.25)',
+                        width: '48px', height: '48px', borderRadius: '50%',
+                        background: '#e5e7eb',
+                        border: '2px solid #d1d5db',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: '22px', fontWeight: 800, color: '#fff',
+                        fontSize: '18px', fontWeight: 800, color: '#374151',
                         flexShrink: 0,
                     }}>
                         {initials}
                     </div>
                     <div>
-                        <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: '13px', margin: '0 0 4px', letterSpacing: '0.3px' }}>
+                        <p style={{ color: '#888', fontSize: '12px', margin: '0 0 4px', letterSpacing: '0.3px' }}>
                             Welcome back
                         </p>
-                        <h1 style={{ color: '#fff', fontSize: '24px', fontWeight: 800, margin: 0, letterSpacing: '-0.5px' }}>
+                        <h1 style={{ color: '#111', fontSize: '20px', fontWeight: 800, margin: 0, letterSpacing: '-0.5px' }}>
                             {firstName}! 👋
                         </h1>
                     </div>
@@ -88,11 +88,10 @@ const UserDashboard = () => {
 
                 <Link href="/dashboard/user/orders" style={{
                     display: 'flex', alignItems: 'center', gap: '8px',
-                    background: 'rgba(255,255,255,0.12)', color: '#fff',
-                    padding: '10px 20px', borderRadius: '10px',
-                    textDecoration: 'none', fontSize: '13px', fontWeight: 700,
-                    border: '1px solid rgba(255,255,255,0.2)',
-                    backdropFilter: 'blur(10px)',
+                    background: '#fff', color: '#111',
+                    padding: '8px 16px', borderRadius: '6px',
+                    textDecoration: 'none', fontSize: '12px', fontWeight: 700,
+                    border: '1px solid #e0e0e0',
                     zIndex: 1, whiteSpace: 'nowrap',
                 }}>
                     My Orders <FiArrowRight size={14} />
