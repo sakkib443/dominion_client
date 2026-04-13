@@ -1192,30 +1192,33 @@ export default function ProductDetailsPage() {
                     .pd-color-col > div:last-child { display: none !important; }
                     .pd-color-col button { width: 36px !important; height: 36px !important; }
 
-                    /* Right section → full width, auto height */
+                    /* Right section → full width, auto height, LAST on mobile */
                     .pd-right-section {
                         flex: 0 0 100% !important; max-width: 100% !important;
                         height: auto !important; border-left: none !important;
                         border-top: 1px solid #e5e7eb !important; padding-left: 0 !important;
+                        order: 10 !important;
                     }
                     .pd-right-scroll { overflow-y: visible !important; flex: unset !important; padding: 8px 0 !important; }
                     .pd-scroll-arrow { display: none !important; }
 
-                    /* Action bar → full width */
+                    /* Action bar → full width, BEFORE description */
                     .pd-action-bar {
                         flex: 0 0 100% !important; max-width: 100% !important;
                         flex-wrap: wrap !important; gap: 8px !important;
                         height: auto !important; padding-right: 0 !important; margin-top: 16px !important;
+                        order: 6 !important;
                     }
                     .pd-action-bar > div, .pd-action-bar > button {
                         flex: 1 1 auto !important; min-width: 100px !important; height: 42px !important;
                     }
 
-                    /* Info bar → full width */
+                    /* Info bar → full width, BEFORE description */
                     .pd-info-bar {
                         flex: 0 0 100% !important; max-width: 100% !important;
                         height: auto !important; flex-wrap: wrap !important;
                         margin-left: 0 !important; padding: 8px 0 0 0 !important; gap: 12px !important;
+                        order: 7 !important;
                     }
 
                     .pd-stats-row { gap: 12px !important; flex-wrap: wrap !important; }
