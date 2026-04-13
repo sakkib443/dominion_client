@@ -14,9 +14,9 @@ import {
     FiMenu,
     FiX,
     FiChevronRight,
+    FiChevronLeft,
     FiHome,
     FiPackage,
-    FiBell,
 } from 'react-icons/fi';
 
 interface NavItem {
@@ -93,17 +93,13 @@ const UserLayout = ({ children }: { children: React.ReactNode }) => {
                         <div className="flex items-center gap-3">
                             <Link
                                 href="/"
-                                className="hidden sm:flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-500 hover:text-[#0B4222] hover:bg-[#0B4222]/5 rounded-lg transition-all"
+                                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-md transition-all"
                             >
-                                <FiHome size={16} />
-                                Store
+                                <FiChevronLeft size={14} />
+                                Back to Store
                             </Link>
-                            <button className="relative p-2.5 rounded-lg hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600">
-                                <FiBell size={20} />
-                                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
-                            </button>
-                            <div className="w-px h-8 bg-gray-100 hidden sm:block"></div>
-                        <div className="flex items-center gap-2">
+                            <div className="w-px h-5 bg-gray-100 hidden sm:block"></div>
+                            <div className="flex items-center gap-2">
                                 <div className="w-7 h-7 rounded-full bg-[#ebebeb] flex items-center justify-center text-gray-700 text-xs font-bold">
                                     {getInitials()}
                                 </div>
