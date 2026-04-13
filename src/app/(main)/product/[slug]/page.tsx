@@ -241,7 +241,7 @@ export default function ProductDetailsPage() {
                         </button>
                         {allImages.length > 1 && (
                             <div style={{
-                                position: 'absolute', left: '5rem', top: '50%',
+                                position: 'absolute', left: '11rem', top: '50%',
                                 transform: 'translateY(-50%)', display: 'flex',
                                 flexDirection: 'column', gap: '0.5rem', zIndex: 10
                             }}>
