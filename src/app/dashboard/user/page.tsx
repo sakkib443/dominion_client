@@ -48,8 +48,8 @@ const UserDashboard = () => {
     const totalSpent = orders.reduce((sum: number, o: any) => sum + (o.total || 0), 0);
     const delivered = orders.filter((o: any) => o.status === 'delivered').length;
 
-    const firstName = user?.name?.split(' ')[0] || user?.firstName || 'User';
-    const initials = (user?.name || user?.firstName || 'U').charAt(0).toUpperCase();
+    const firstName = user?.name?.split(' ')[0] || 'User';
+    const initials = (user?.name || 'U').charAt(0).toUpperCase();
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
