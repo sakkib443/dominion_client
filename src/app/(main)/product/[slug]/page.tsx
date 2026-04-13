@@ -218,6 +218,7 @@ export default function ProductDetailsPage() {
     };
 
     return (
+        <>
         <div style={{ background: '#fff', minHeight: '100vh' }}>
             <div className="container">
                 {/* ── Fullscreen Image Modal ── */}
@@ -1613,5 +1614,6 @@ export default function ProductDetailsPage() {
                 clearCartOnSuccess={false}
             />
         )}
+        </>
     );
 }
