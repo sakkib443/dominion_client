@@ -8,8 +8,6 @@ import { logout } from '@/redux/slices/authSlice';
 import {
     FiGrid,
     FiShoppingBag,
-    FiHeart,
-    FiMapPin,
     FiUser,
     FiSettings,
     FiLogOut,
@@ -30,8 +28,6 @@ interface NavItem {
 const navItems: NavItem[] = [
     { label: 'Dashboard', href: '/dashboard/user', icon: FiGrid },
     { label: 'My Orders', href: '/dashboard/user/orders', icon: FiShoppingBag },
-    { label: 'Wishlist', href: '/dashboard/user/wishlist', icon: FiHeart },
-    { label: 'Addresses', href: '/dashboard/user/addresses', icon: FiMapPin },
     { label: 'Profile', href: '/dashboard/user/profile', icon: FiUser },
     { label: 'Settings', href: '/dashboard/user/settings', icon: FiSettings },
 ];

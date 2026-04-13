@@ -5,34 +5,36 @@ import { useAppSelector } from '@/redux/hooks';
 import Link from 'next/link';
 import {
     FiPackage,
-    FiHeart,
-    FiMapPin,
     FiUser,
     FiShoppingBag,
     FiSettings,
-    FiChevronRight,
+    FiArrowRight,
     FiClock,
     FiCheckCircle,
     FiTruck,
     FiDollarSign,
+    FiBox,
 } from 'react-icons/fi';
 import { useGetMyOrdersQuery } from '@/redux/api/orderApi';
-import { useGetWishlistQuery } from '@/redux/api/userApi';
 
 const StatusBadge = ({ status }: { status: string }) => {
-    const config: Record<string, { bg: string; text: string; icon: React.ElementType }> = {
-        pending: { bg: 'bg-amber-50', text: 'text-amber-700', icon: FiClock },
-        confirmed: { bg: 'bg-blue-50', text: 'text-blue-700', icon: FiCheckCircle },
-        processing: { bg: 'bg-purple-50', text: 'text-purple-700', icon: FiPackage },
-        shipped: { bg: 'bg-indigo-50', text: 'text-indigo-700', icon: FiTruck },
-        delivered: { bg: 'bg-emerald-50', text: 'text-emerald-700', icon: FiCheckCircle },
-        cancelled: { bg: 'bg-red-50', text: 'text-red-700', icon: FiPackage },
+    const map: Record<string, { bg: string; color: string; label: string }> = {
+        pending:    { bg: '#FFF8E7', color: '#B45309', label: 'Pending' },
+        confirmed:  { bg: '#EFF6FF', color: '#1D4ED8', label: 'Confirmed' },
+        processing: { bg: '#F5F3FF', color: '#7C3AED', label: 'Processing' },
+        shipped:    { bg: '#EEF2FF', color: '#3730A3', label: 'Shipped' },
+        delivered:  { bg: '#ECFDF5', color: '#065F46', label: 'Delivered' },
+        cancelled:  { bg: '#FEF2F2', color: '#991B1B', label: 'Cancelled' },
     };
-    const { bg, text, icon: Icon } = config[status] || config.pending;
+    const s = map[status] || map.pending;
     return (
-        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-bold capitalize ${bg} ${text}`}>
-            <Icon size={12} />
-            {status}
+        <span style={{
+            display: 'inline-flex', alignItems: 'center', gap: '4px',
+            padding: '3px 10px', borderRadius: '20px',
+            background: s.bg, color: s.color,
+            fontSize: '11px', fontWeight: 700, letterSpacing: '0.3px',
+        }}>
+            {s.label}
         </span>
     );
 };
@@ -40,177 +42,226 @@ const StatusBadge = ({ status }: { status: string }) => {
 const UserDashboard = () => {
     const { user } = useAppSelector((state) => state.auth);
     const { data: ordersData, isLoading: ordersLoading } = useGetMyOrdersQuery({ limit: 5 });
-    const { data: wishlistData, isLoading: wishlistLoading } = useGetWishlistQuery({});
 
     const orders = ordersData?.data || [];
-    const wishlistCount = wishlistData?.data?.length || 0;
     const totalOrders = ordersData?.meta?.total || orders.length || 0;
     const totalSpent = orders.reduce((sum: number, o: any) => sum + (o.total || 0), 0);
+    const delivered = orders.filter((o: any) => o.status === 'delivered').length;
 
-    const menuItems = [
-        {
-            icon: FiShoppingBag,
-            label: 'My Orders',
-            href: '/dashboard/user/orders',
-            description: 'Track, return, or buy things again',
-            color: 'bg-blue-50 text-blue-600',
-            stat: totalOrders,
-        },
-        {
-            icon: FiHeart,
-            label: 'Wishlist',
-            href: '/dashboard/user/wishlist',
-            description: 'Your saved items',
-            color: 'bg-rose-50 text-rose-600',
-            stat: wishlistCount,
-        },
-        {
-            icon: FiMapPin,
-            label: 'Addresses',
-            href: '/dashboard/user/addresses',
-            description: 'Manage your delivery addresses',
-            color: 'bg-green-50 text-green-600',
-        },
-        {
-            icon: FiUser,
-            label: 'Profile Settings',
-            href: '/dashboard/user/profile',
-            description: 'Update your personal information',
-            color: 'bg-orange-50 text-orange-600',
-        },
-        {
-            icon: FiSettings,
-            label: 'Account Settings',
-            href: '/dashboard/user/settings',
-            description: 'Password, notifications & more',
-            color: 'bg-gray-100 text-gray-600',
-        },
-    ];
-
-    const stats = [
-        { label: 'Total Orders', value: totalOrders, color: 'text-[#0B4222]', bg: 'bg-[#0B4222]/5', icon: FiShoppingBag },
-        { label: 'Wishlist', value: wishlistCount, color: 'text-rose-500', bg: 'bg-rose-50', icon: FiHeart },
-        { label: 'Total Spent', value: `৳${totalSpent.toLocaleString()}`, color: 'text-purple-600', bg: 'bg-purple-50', icon: FiDollarSign },
-    ];
+    const firstName = user?.name?.split(' ')[0] || user?.firstName || 'User';
+    const initials = (user?.name || user?.firstName || 'U').charAt(0).toUpperCase();
 
     return (
-        <div className="space-y-6">
-            {/* Welcome Header */}
-            <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-                <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#0B4222] to-[#1a6b3c] flex items-center justify-center text-white text-xl font-bold shadow-lg shadow-[#0B4222]/20">
-                        {user?.name?.charAt(0) || 'U'}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
+
+            {/* ── Welcome Banner ── */}
+            <div style={{
+                background: 'linear-gradient(135deg, #0B4222 0%, #1a6b3c 60%, #0d5229 100%)',
+                borderRadius: '16px', padding: '32px 36px',
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                overflow: 'hidden', position: 'relative',
+            }}>
+                {/* BG decoration */}
+                <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '200px', height: '200px', borderRadius: '50%', background: 'rgba(255,255,255,0.04)' }} />
+                <div style={{ position: 'absolute', bottom: '-60px', right: '120px', width: '150px', height: '150px', borderRadius: '50%', background: 'rgba(255,255,255,0.04)' }} />
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '20px', zIndex: 1 }}>
+                    <div style={{
+                        width: '60px', height: '60px', borderRadius: '50%',
+                        background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(10px)',
+                        border: '2px solid rgba(255,255,255,0.25)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: '22px', fontWeight: 800, color: '#fff',
+                        flexShrink: 0,
+                    }}>
+                        {initials}
                     </div>
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900">
-                            Welcome back, {user?.name?.split(' ')[0] || 'User'}! 👋
+                        <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: '13px', margin: '0 0 4px', letterSpacing: '0.3px' }}>
+                            Welcome back
+                        </p>
+                        <h1 style={{ color: '#fff', fontSize: '24px', fontWeight: 800, margin: 0, letterSpacing: '-0.5px' }}>
+                            {firstName}! 👋
                         </h1>
-                        <p className="text-gray-400 text-sm mt-0.5">Here&apos;s what&apos;s happening with your account</p>
                     </div>
                 </div>
+
+                <Link href="/dashboard/user/orders" style={{
+                    display: 'flex', alignItems: 'center', gap: '8px',
+                    background: 'rgba(255,255,255,0.12)', color: '#fff',
+                    padding: '10px 20px', borderRadius: '10px',
+                    textDecoration: 'none', fontSize: '13px', fontWeight: 700,
+                    border: '1px solid rgba(255,255,255,0.2)',
+                    backdropFilter: 'blur(10px)',
+                    zIndex: 1, whiteSpace: 'nowrap',
+                }}>
+                    My Orders <FiArrowRight size={14} />
+                </Link>
             </div>
 
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {stats.map((stat, i) => (
-                    <div key={i} className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm hover:shadow-md transition-all group">
-                        <div className="flex items-center gap-4">
-                            <div className={`w-12 h-12 rounded-xl ${stat.bg} flex items-center justify-center ${stat.color} group-hover:scale-110 transition-transform`}>
-                                <stat.icon size={22} />
-                            </div>
-                            <div>
-                                <p className={`text-2xl font-bold ${stat.color} leading-none`}>
-                                    {ordersLoading ? '...' : stat.value}
-                                </p>
-                                <p className="text-xs text-gray-400 font-semibold mt-1 uppercase tracking-wider">{stat.label}</p>
-                            </div>
+            {/* ── Stats Row ── */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+                {[
+                    { icon: FiShoppingBag, label: 'Total Orders', value: totalOrders, color: '#0B4222', bg: '#F0F7F3' },
+                    { icon: FiCheckCircle, label: 'Delivered', value: delivered, color: '#1D4ED8', bg: '#EFF6FF' },
+                    { icon: FiDollarSign, label: 'Total Spent', value: `৳${totalSpent.toLocaleString()}`, color: '#7C3AED', bg: '#F5F3FF' },
+                ].map((s, i) => (
+                    <div key={i} style={{
+                        background: '#fff', borderRadius: '14px',
+                        border: '1px solid #f0f0f0', padding: '20px 24px',
+                        display: 'flex', alignItems: 'center', gap: '16px',
+                    }}>
+                        <div style={{
+                            width: '46px', height: '46px', borderRadius: '12px',
+                            background: s.bg, color: s.color,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            flexShrink: 0,
+                        }}>
+                            <s.icon size={20} />
+                        </div>
+                        <div>
+                            <p style={{ fontSize: '22px', fontWeight: 800, color: '#111', margin: 0, lineHeight: 1 }}>
+                                {ordersLoading ? '—' : s.value}
+                            </p>
+                            <p style={{ fontSize: '11px', color: '#999', fontWeight: 600, margin: '5px 0 0', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                {s.label}
+                            </p>
                         </div>
                     </div>
                 ))}
             </div>
 
-            {/* Quick Menu Grid */}
+            {/* ── Quick Actions ── */}
             <div>
-                <h2 className="text-lg font-bold text-gray-800 mb-4">Quick Actions</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {menuItems.map((item) => (
-                        <Link
-                            key={item.label}
-                            href={item.href}
-                            className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md hover:border-gray-200 transition-all group"
-                        >
-                            <div className="flex items-start gap-4">
-                                <div className={`w-12 h-12 rounded-xl ${item.color} flex items-center justify-center group-hover:scale-110 transition-transform`}>
-                                    <item.icon size={22} />
-                                </div>
-                                <div className="flex-1">
-                                    <div className="flex items-center justify-between">
-                                        <h3 className="font-bold text-gray-800 group-hover:text-[#0B4222] transition-colors">
-                                            {item.label}
-                                        </h3>
-                                        {item.stat !== undefined && (
-                                            <span className="text-xs font-bold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
-                                                {item.stat}
-                                            </span>
-                                        )}
-                                    </div>
-                                    <p className="text-sm text-gray-400 mt-1">{item.description}</p>
-                                </div>
-                                <FiChevronRight className="text-gray-200 group-hover:text-[#0B4222] group-hover:translate-x-1 transition-all mt-1" size={18} />
+                <h2 style={{ fontSize: '15px', fontWeight: 800, color: '#111', margin: '0 0 16px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    Quick Actions
+                </h2>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '14px' }}>
+                    {[
+                        {
+                            icon: FiBox,
+                            label: 'My Orders',
+                            desc: 'Track, view and manage your orders',
+                            href: '/dashboard/user/orders',
+                            accentColor: '#0B4222',
+                            accentBg: '#F0F7F3',
+                        },
+                        {
+                            icon: FiUser,
+                            label: 'Profile Settings',
+                            desc: 'Update your name, phone and email',
+                            href: '/dashboard/user/profile',
+                            accentColor: '#B45309',
+                            accentBg: '#FFF8E7',
+                        },
+                        {
+                            icon: FiSettings,
+                            label: 'Account Settings',
+                            desc: 'Password and security options',
+                            href: '/dashboard/user/settings',
+                            accentColor: '#374151',
+                            accentBg: '#F9FAFB',
+                        },
+                    ].map((item) => (
+                        <Link key={item.label} href={item.href} style={{
+                            display: 'flex', alignItems: 'center', gap: '16px',
+                            background: '#fff', borderRadius: '14px',
+                            border: '1px solid #f0f0f0', padding: '20px 22px',
+                            textDecoration: 'none',
+                            transition: 'box-shadow 0.2s, border-color 0.2s',
+                        }}
+                        onMouseEnter={e => {
+                            (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 20px rgba(0,0,0,0.07)';
+                            (e.currentTarget as HTMLElement).style.borderColor = '#e0e0e0';
+                        }}
+                        onMouseLeave={e => {
+                            (e.currentTarget as HTMLElement).style.boxShadow = 'none';
+                            (e.currentTarget as HTMLElement).style.borderColor = '#f0f0f0';
+                        }}>
+                            <div style={{
+                                width: '44px', height: '44px', borderRadius: '12px',
+                                background: item.accentBg, color: item.accentColor,
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                flexShrink: 0,
+                            }}>
+                                <item.icon size={19} />
                             </div>
+                            <div style={{ flex: 1 }}>
+                                <p style={{ fontSize: '14px', fontWeight: 700, color: '#111', margin: '0 0 3px' }}>{item.label}</p>
+                                <p style={{ fontSize: '12px', color: '#999', margin: 0 }}>{item.desc}</p>
+                            </div>
+                            <FiArrowRight size={15} color="#ccc" />
                         </Link>
                     ))}
                 </div>
             </div>
 
-            {/* Recent Orders */}
+            {/* ── Recent Orders ── */}
             <div>
-                <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-lg font-bold text-gray-800">Recent Orders</h2>
-                    <Link href="/dashboard/user/orders" className="text-sm text-[#0B4222] font-semibold hover:underline">
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                    <h2 style={{ fontSize: '15px', fontWeight: 800, color: '#111', margin: 0, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                        Recent Orders
+                    </h2>
+                    <Link href="/dashboard/user/orders" style={{ fontSize: '12px', color: '#0B4222', fontWeight: 700, textDecoration: 'none' }}>
                         View All →
                     </Link>
                 </div>
-                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+
+                <div style={{ background: '#fff', borderRadius: '14px', border: '1px solid #f0f0f0', overflow: 'hidden' }}>
                     {ordersLoading ? (
-                        <div className="p-8 text-center">
-                            <div className="w-8 h-8 border-3 border-[#0B4222]/20 border-t-[#0B4222] rounded-full animate-spin mx-auto"></div>
-                            <p className="text-sm text-gray-400 mt-3">Loading orders...</p>
+                        <div style={{ padding: '48px', textAlign: 'center' }}>
+                            <div style={{ width: '32px', height: '32px', borderRadius: '50%', border: '3px solid #f0f0f0', borderTopColor: '#0B4222', animation: 'spin 0.8s linear infinite', margin: '0 auto' }} />
+                            <p style={{ color: '#bbb', fontSize: '13px', marginTop: '12px' }}>Loading orders...</p>
                         </div>
                     ) : orders.length === 0 ? (
-                        <div className="p-10 text-center">
-                            <FiPackage size={40} className="mx-auto text-gray-200 mb-4" />
-                            <h3 className="font-bold text-gray-600 mb-1">No orders yet</h3>
-                            <p className="text-sm text-gray-400 mb-4">Start shopping to see your orders here</p>
-                            <Link href="/" className="inline-block px-6 py-2.5 bg-[#0B4222] text-white rounded-xl font-semibold text-sm hover:bg-[#093519] transition-all shadow-md shadow-[#0B4222]/20">
-                                Start Shopping
+                        <div style={{ padding: '60px', textAlign: 'center' }}>
+                            <FiPackage size={42} color="#e0e0e0" style={{ display: 'block', margin: '0 auto 16px' }} />
+                            <p style={{ fontWeight: 700, color: '#555', fontSize: '15px', margin: '0 0 6px' }}>No orders yet</p>
+                            <p style={{ color: '#aaa', fontSize: '13px', margin: '0 0 20px' }}>Start shopping to see your orders here</p>
+                            <Link href="/" style={{
+                                display: 'inline-flex', alignItems: 'center', gap: '8px',
+                                padding: '12px 28px', background: '#0B4222', color: '#fff',
+                                borderRadius: '8px', fontWeight: 700, fontSize: '13px',
+                                textDecoration: 'none', letterSpacing: '0.5px',
+                            }}>
+                                Start Shopping <FiArrowRight size={14} />
                             </Link>
                         </div>
                     ) : (
-                        <div className="divide-y divide-gray-50">
-                            {orders.slice(0, 5).map((order: any) => (
-                                <Link
-                                    key={order._id}
-                                    href={`/dashboard/user/orders/${order._id}`}
-                                    className="flex items-center justify-between px-6 py-4 hover:bg-gray-50/50 transition-colors group"
+                        <div>
+                            {orders.slice(0, 5).map((order: any, i: number) => (
+                                <Link key={order._id} href={`/dashboard/user/orders/${order._id}`}
+                                    style={{
+                                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                                        padding: '16px 24px', textDecoration: 'none',
+                                        borderTop: i > 0 ? '1px solid #f8f8f8' : 'none',
+                                    }}
+                                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = '#fafafa'}
+                                    onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}
                                 >
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-10 h-10 bg-gray-50 rounded-lg flex items-center justify-center border border-gray-100">
-                                            <FiPackage size={18} className="text-gray-400" />
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                                        <div style={{
+                                            width: '40px', height: '40px', borderRadius: '10px',
+                                            background: '#F0F7F3', display: 'flex',
+                                            alignItems: 'center', justifyContent: 'center',
+                                        }}>
+                                            <FiPackage size={17} color="#0B4222" />
                                         </div>
                                         <div>
-                                            <p className="text-sm font-bold text-gray-800">{order.orderNumber || `#${order._id?.slice(-8).toUpperCase()}`}</p>
-                                            <p className="text-xs text-gray-400 mt-0.5">
-                                                {order.items?.length || 0} items • {new Date(order.createdAt).toLocaleDateString()}
+                                            <p style={{ fontSize: '13px', fontWeight: 700, color: '#111', margin: '0 0 2px' }}>
+                                                #{order.orderId || order._id?.slice(-8).toUpperCase()}
+                                            </p>
+                                            <p style={{ fontSize: '11px', color: '#bbb', margin: 0 }}>
+                                                {order.items?.length || 0} item{order.items?.length !== 1 ? 's' : ''} · {new Date(order.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
                                             </p>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-4">
-                                        <div className="text-right hidden sm:block">
-                                            <p className="text-sm font-bold text-gray-800">৳{order.total?.toLocaleString()}</p>
-                                        </div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                                        <p style={{ fontSize: '14px', fontWeight: 800, color: '#111', margin: 0 }}>
+                                            ৳{order.total?.toLocaleString()}
+                                        </p>
                                         <StatusBadge status={order.status} />
-                                        <FiChevronRight size={16} className="text-gray-300 group-hover:text-[#0B4222] group-hover:translate-x-1 transition-all" />
+                                        <FiArrowRight size={14} color="#ccc" />
                                     </div>
                                 </Link>
                             ))}
@@ -218,6 +269,7 @@ const UserDashboard = () => {
                     )}
                 </div>
             </div>
+            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
         </div>
     );
 };
