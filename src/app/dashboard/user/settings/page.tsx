@@ -1,31 +1,20 @@
 "use client";
 
 import React, { useState } from 'react';
-import { useAppSelector, useAppDispatch } from '@/redux/hooks';
+import { useAppDispatch } from '@/redux/hooks';
 import { logout } from '@/redux/slices/authSlice';
 import { useRouter } from 'next/navigation';
-import {
-    FiSettings,
-    FiBell,
-    FiShield,
-    FiLogOut,
-    FiToggleLeft,
-    FiToggleRight,
-    FiAlertTriangle,
-    FiTrash2,
-} from 'react-icons/fi';
+import { useUpdatePasswordMutation } from '@/redux/api/authApi';
+import { FiLock, FiEye, FiEyeOff, FiLogOut } from 'react-icons/fi';
+import { toast } from 'react-hot-toast';
 
 export default function SettingsPage() {
-    const { user } = useAppSelector((state) => state.auth);
     const dispatch = useAppDispatch();
     const router = useRouter();
+    const [updatePassword, { isLoading }] = useUpdatePasswordMutation();
 
-    const [notifications, setNotifications] = useState({
-        orderUpdates: true,
-        promotions: false,
-        newsletter: true,
-        sms: false,
-    });
+    const [form, setForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    const [show, setShow] = useState({ current: false, newPw: false, confirm: false });
 
     const handleLogout = () => {
         dispatch(logout());
@@ -33,119 +22,141 @@ export default function SettingsPage() {
         router.push('/');
     };
 
-    const Toggle = ({ enabled, onChange }: { enabled: boolean; onChange: () => void }) => (
-        <button onClick={onChange} className="focus:outline-none">
-            {enabled ? (
-                <FiToggleRight size={28} className="text-[#0B4222]" />
-            ) : (
-                <FiToggleLeft size={28} className="text-gray-300" />
-            )}
-        </button>
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!form.currentPassword || !form.newPassword || !form.confirmPassword) {
+            toast.error('All fields are required.'); return;
+        }
+        if (form.newPassword !== form.confirmPassword) {
+            toast.error('New passwords do not match.'); return;
+        }
+        if (form.newPassword.length < 6) {
+            toast.error('Password must be at least 6 characters.'); return;
+        }
+        try {
+            await updatePassword({ currentPassword: form.currentPassword, newPassword: form.newPassword }).unwrap();
+            toast.success('Password changed successfully!');
+            setForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+        } catch (err: any) {
+            toast.error(err?.data?.message || 'Failed to change password.');
+        }
+    };
+
+    const inputStyle: React.CSSProperties = {
+        width: '100%', padding: '10px 40px 10px 14px',
+        fontSize: '13px', border: '1px solid #e5e7eb',
+        borderRadius: '6px', outline: 'none',
+        boxSizing: 'border-box', fontFamily: 'inherit',
+        color: '#111', background: '#fff',
+        transition: 'border-color 0.2s',
+    };
+
+    const Field = ({
+        label, value, onChange, show: showPw, onToggle,
+    }: {
+        label: string;
+        value: string;
+        onChange: (v: string) => void;
+        show: boolean;
+        onToggle: () => void;
+    }) => (
+        <div>
+            <label style={{ fontSize: '12px', fontWeight: 700, color: '#555', display: 'block', marginBottom: '6px' }}>
+                {label}
+            </label>
+            <div style={{ position: 'relative' }}>
+                <input
+                    type={showPw ? 'text' : 'password'}
+                    value={value}
+                    onChange={(e) => onChange(e.target.value)}
+                    style={inputStyle}
+                    onFocus={(e) => (e.target.style.borderColor = '#555')}
+                    onBlur={(e) => (e.target.style.borderColor = '#e5e7eb')}
+                />
+                <button
+                    type="button"
+                    onClick={onToggle}
+                    style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#aaa', padding: 0 }}
+                >
+                    {showPw ? <FiEyeOff size={15} /> : <FiEye size={15} />}
+                </button>
+            </div>
+        </div>
     );
 
     return (
-        <div className="space-y-6">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '520px' }}>
+
             {/* Header */}
-            <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-                <h1 className="text-2xl font-bold text-gray-900">Account Settings</h1>
-                <p className="text-sm text-gray-400 mt-1">Manage your account preferences</p>
+            <div>
+                <h1 style={{ fontSize: '18px', fontWeight: 800, color: '#111', margin: '0 0 4px', letterSpacing: '-0.3px' }}>
+                    Account Settings
+                </h1>
+                <p style={{ fontSize: '12px', color: '#aaa', margin: 0 }}>Change your password below</p>
             </div>
 
-            {/* Notification Preferences */}
-            <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-                <div className="flex items-center gap-2 mb-5">
-                    <FiBell size={18} className="text-[#0B4222]" />
-                    <h2 className="text-base font-bold text-gray-800">Notification Preferences</h2>
+            {/* Password Change */}
+            <div style={{ background: '#fff', border: '1px solid #f0f0f0', borderRadius: '8px', padding: '24px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
+                    <FiLock size={15} color="#555" />
+                    <h2 style={{ fontSize: '14px', fontWeight: 700, color: '#111', margin: 0 }}>Change Password</h2>
                 </div>
-                <div className="space-y-4">
-                    <div className="flex items-center justify-between py-3 border-b border-gray-50">
-                        <div>
-                            <p className="text-sm font-semibold text-gray-700">Order Updates</p>
-                            <p className="text-xs text-gray-400 mt-0.5">Get notified about your order status</p>
-                        </div>
-                        <Toggle enabled={notifications.orderUpdates} onChange={() => setNotifications(n => ({ ...n, orderUpdates: !n.orderUpdates }))} />
-                    </div>
-                    <div className="flex items-center justify-between py-3 border-b border-gray-50">
-                        <div>
-                            <p className="text-sm font-semibold text-gray-700">Promotions & Deals</p>
-                            <p className="text-xs text-gray-400 mt-0.5">Receive offers and discount notifications</p>
-                        </div>
-                        <Toggle enabled={notifications.promotions} onChange={() => setNotifications(n => ({ ...n, promotions: !n.promotions }))} />
-                    </div>
-                    <div className="flex items-center justify-between py-3 border-b border-gray-50">
-                        <div>
-                            <p className="text-sm font-semibold text-gray-700">Newsletter</p>
-                            <p className="text-xs text-gray-400 mt-0.5">Weekly newsletter with trending products</p>
-                        </div>
-                        <Toggle enabled={notifications.newsletter} onChange={() => setNotifications(n => ({ ...n, newsletter: !n.newsletter }))} />
-                    </div>
-                    <div className="flex items-center justify-between py-3">
-                        <div>
-                            <p className="text-sm font-semibold text-gray-700">SMS Notifications</p>
-                            <p className="text-xs text-gray-400 mt-0.5">Receive updates via SMS</p>
-                        </div>
-                        <Toggle enabled={notifications.sms} onChange={() => setNotifications(n => ({ ...n, sms: !n.sms }))} />
-                    </div>
-                </div>
+
+                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                    <Field
+                        label="Current Password"
+                        value={form.currentPassword}
+                        onChange={(v) => setForm({ ...form, currentPassword: v })}
+                        show={show.current}
+                        onToggle={() => setShow({ ...show, current: !show.current })}
+                    />
+                    <Field
+                        label="New Password"
+                        value={form.newPassword}
+                        onChange={(v) => setForm({ ...form, newPassword: v })}
+                        show={show.newPw}
+                        onToggle={() => setShow({ ...show, newPw: !show.newPw })}
+                    />
+                    <Field
+                        label="Confirm New Password"
+                        value={form.confirmPassword}
+                        onChange={(v) => setForm({ ...form, confirmPassword: v })}
+                        show={show.confirm}
+                        onToggle={() => setShow({ ...show, confirm: !show.confirm })}
+                    />
+
+                    <button
+                        type="submit"
+                        disabled={isLoading}
+                        style={{
+                            marginTop: '6px', padding: '11px', background: isLoading ? '#ccc' : '#222',
+                            color: '#fff', border: 'none', borderRadius: '6px',
+                            fontSize: '13px', fontWeight: 700, cursor: isLoading ? 'not-allowed' : 'pointer',
+                            letterSpacing: '0.5px',
+                        }}
+                    >
+                        {isLoading ? 'Saving...' : 'SAVE PASSWORD'}
+                    </button>
+                </form>
             </div>
 
-            {/* Security */}
-            <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-                <div className="flex items-center gap-2 mb-5">
-                    <FiShield size={18} className="text-[#0B4222]" />
-                    <h2 className="text-base font-bold text-gray-800">Security</h2>
+            {/* Logout */}
+            <div style={{ background: '#fff', border: '1px solid #f0f0f0', borderRadius: '8px', padding: '20px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div>
+                    <p style={{ fontSize: '13px', fontWeight: 700, color: '#111', margin: '0 0 2px' }}>Logout</p>
+                    <p style={{ fontSize: '11px', color: '#aaa', margin: 0 }}>Sign out from your account</p>
                 </div>
-                <div className="space-y-3">
-                    <div className="flex items-center justify-between p-4 bg-gray-50/50 rounded-xl">
-                        <div>
-                            <p className="text-sm font-semibold text-gray-700">Email</p>
-                            <p className="text-xs text-gray-400 mt-0.5">{user?.email}</p>
-                        </div>
-                        <span className="text-xs font-bold text-emerald-500 bg-emerald-50 px-2.5 py-1 rounded-lg">Verified</span>
-                    </div>
-                    <div className="flex items-center justify-between p-4 bg-gray-50/50 rounded-xl">
-                        <div>
-                            <p className="text-sm font-semibold text-gray-700">Password</p>
-                            <p className="text-xs text-gray-400 mt-0.5">Last changed: Unknown</p>
-                        </div>
-                        <a href="/dashboard/user/profile" className="text-xs font-bold text-[#0B4222] hover:underline">
-                            Change
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            {/* Danger Zone */}
-            <div className="bg-white rounded-2xl border border-red-100 p-6 shadow-sm">
-                <div className="flex items-center gap-2 mb-5">
-                    <FiAlertTriangle size={18} className="text-red-500" />
-                    <h2 className="text-base font-bold text-red-600">Danger Zone</h2>
-                </div>
-                <div className="space-y-3">
-                    <div className="flex items-center justify-between p-4 bg-red-50/30 rounded-xl border border-red-50">
-                        <div>
-                            <p className="text-sm font-semibold text-gray-700">Logout</p>
-                            <p className="text-xs text-gray-400 mt-0.5">Sign out from your account</p>
-                        </div>
-                        <button
-                            onClick={handleLogout}
-                            className="px-4 py-2 bg-gray-800 text-white rounded-xl text-sm font-semibold hover:bg-gray-900 transition-all flex items-center gap-2"
-                        >
-                            <FiLogOut size={14} />
-                            Logout
-                        </button>
-                    </div>
-                    <div className="flex items-center justify-between p-4 bg-red-50/30 rounded-xl border border-red-50">
-                        <div>
-                            <p className="text-sm font-semibold text-gray-700">Delete Account</p>
-                            <p className="text-xs text-gray-400 mt-0.5">Permanently delete your account and data</p>
-                        </div>
-                        <button className="px-4 py-2 bg-red-500 text-white rounded-xl text-sm font-semibold hover:bg-red-600 transition-all flex items-center gap-2">
-                            <FiTrash2 size={14} />
-                            Delete
-                        </button>
-                    </div>
-                </div>
+                <button
+                    onClick={handleLogout}
+                    style={{
+                        display: 'flex', alignItems: 'center', gap: '6px',
+                        padding: '8px 16px', background: '#f5f5f5', color: '#333',
+                        border: '1px solid #e5e7eb', borderRadius: '6px',
+                        fontSize: '12px', fontWeight: 700, cursor: 'pointer',
+                    }}
+                >
+                    <FiLogOut size={13} /> Logout
+                </button>
             </div>
         </div>
     );
