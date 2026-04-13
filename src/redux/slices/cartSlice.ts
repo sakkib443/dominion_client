@@ -16,6 +16,39 @@ interface CartState {
     totalPrice: number;
 }
 
+// Load cart from localStorage
+const loadCartFromStorage = (): CartState => {
+    if (typeof window === 'undefined') {
+        return { items: [], totalQuantity: 0, totalPrice: 0 };
+    }
+    try {
+        const stored = localStorage.getItem('dominion_cart');
+        if (stored) {
+            const parsed = JSON.parse(stored);
+            return {
+                items: parsed.items || [],
+                totalQuantity: parsed.totalQuantity || 0,
+                totalPrice: parsed.totalPrice || 0,
+            };
+        }
+    } catch {}
+    return { items: [], totalQuantity: 0, totalPrice: 0 };
+};
+
+// Save cart to localStorage
+const saveCartToStorage = (state: CartState) => {
+    if (typeof window !== 'undefined') {
+        try {
+            localStorage.setItem('dominion_cart', JSON.stringify({
+                items: state.items,
+                totalQuantity: state.totalQuantity,
+                totalPrice: state.totalPrice,
+            }));
+        } catch {}
+    }
+};
+
+// Always start empty for SSR — hydrate from localStorage on client mount
 const initialState: CartState = {
     items: [],
     totalQuantity: 0,
@@ -45,6 +78,7 @@ const cartSlice = createSlice({
             const totals = calculateTotals(state.items);
             state.totalQuantity = totals.totalQuantity;
             state.totalPrice = totals.totalPrice;
+            saveCartToStorage(state);
         },
 
         removeFromCart: (state, action: PayloadAction<string>) => {
@@ -53,6 +87,7 @@ const cartSlice = createSlice({
             const totals = calculateTotals(state.items);
             state.totalQuantity = totals.totalQuantity;
             state.totalPrice = totals.totalPrice;
+            saveCartToStorage(state);
         },
 
         increaseQuantity: (state, action: PayloadAction<string>) => {
@@ -64,6 +99,7 @@ const cartSlice = createSlice({
             const totals = calculateTotals(state.items);
             state.totalQuantity = totals.totalQuantity;
             state.totalPrice = totals.totalPrice;
+            saveCartToStorage(state);
         },
 
         decreaseQuantity: (state, action: PayloadAction<string>) => {
@@ -79,12 +115,14 @@ const cartSlice = createSlice({
             const totals = calculateTotals(state.items);
             state.totalQuantity = totals.totalQuantity;
             state.totalPrice = totals.totalPrice;
+            saveCartToStorage(state);
         },
 
         clearCart: (state) => {
             state.items = [];
             state.totalQuantity = 0;
             state.totalPrice = 0;
+            saveCartToStorage(state);
         },
 
         updateQuantity: (state, action: PayloadAction<{ id: string; quantity: number }>) => {
@@ -96,6 +134,15 @@ const cartSlice = createSlice({
             const totals = calculateTotals(state.items);
             state.totalQuantity = totals.totalQuantity;
             state.totalPrice = totals.totalPrice;
+            saveCartToStorage(state);
+        },
+
+        // Load cart from localStorage (call on app mount)
+        hydrateCart: (state) => {
+            const stored = loadCartFromStorage();
+            state.items = stored.items;
+            state.totalQuantity = stored.totalQuantity;
+            state.totalPrice = stored.totalPrice;
         },
     },
 });
@@ -106,7 +153,9 @@ export const {
     increaseQuantity,
     decreaseQuantity,
     clearCart,
-    updateQuantity
+    updateQuantity,
+    hydrateCart
 } = cartSlice.actions;
 
 export default cartSlice.reducer;
+

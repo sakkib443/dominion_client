@@ -5,6 +5,8 @@ import Link from 'next/link';
 
 import { useGetProductReviewsQuery, usePublicCreateReviewMutation } from '@/redux/api/reviewApi';
 import { useIncrementProductStatMutation } from '@/redux/api/productApi';
+import { useAppDispatch, useAppSelector } from '@/redux';
+import { addToCart } from '@/redux/slices/cartSlice';
 import { FiStar, FiX, FiCopy, FiCheck, FiSend } from 'react-icons/fi';
 import {
     FaFacebookF, FaWhatsapp, FaTelegramPlane,
@@ -55,8 +57,12 @@ const NewProductCard: React.FC<NewProductCardProps> = ({ product }) => {
     const [showShare, setShowShare] = useState(false);
     const [linkCopied, setLinkCopied] = useState(false);
     const [incrementStat] = useIncrementProductStatMutation();
-
+    const dispatch = useAppDispatch();
     const productId = String(product._id || product.id);
+    const cartItems = useAppSelector((state: any) => state.cart.items);
+    const isInCart = cartItems.some((item: any) => item.id === productId);
+    const [cartAnim, setCartAnim] = useState(false);
+
     const productUrl = typeof window !== 'undefined'
         ? `${window.location.origin}/product/${product.slug || product.id}`
         : `/product/${product.slug || product.id}`;
@@ -93,6 +99,26 @@ const NewProductCard: React.FC<NewProductCardProps> = ({ product }) => {
         navigator.clipboard.writeText(productUrl);
         setLinkCopied(true);
         setTimeout(() => setLinkCopied(false), 2000);
+    };
+
+    const handleAddToCart = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (isInCart) {
+            setCartAnim(true);
+            setTimeout(() => setCartAnim(false), 600);
+            return;
+        }
+        dispatch(addToCart({
+            id: productId,
+            name: product.name,
+            price: product.price,
+            mrp: product.originalPrice || product.mrp || product.price,
+            image: product.image,
+            category: product.categoryName || 'General',
+        }));
+        setCartAnim(true);
+        setTimeout(() => setCartAnim(false), 600);
     };
 
     const shareText = `${product.name} - Tk.${product.price}`;
@@ -133,6 +159,14 @@ const NewProductCard: React.FC<NewProductCardProps> = ({ product }) => {
                         {/* Sold count + Cart icon — overlaid on image */}
                         <div className='absolute top-0 left-0 right-0 flex items-center justify-between px-3 py-1.5 z-10'>
                             <span className='text-gray-600 text-xs font-medium'>Sold {formatCount(soldCount)}</span>
+                            <button
+                                onClick={handleAddToCart}
+                                className='relative text-gray-600 hover:text-[#0B4222] transition-all p-2 cart-icon-animate rounded-full bg-[#0B4222]/50 hover:bg-[#0B4222]/60'
+                                title={isInCart ? 'Already in Cart' : 'Add to Cart'}
+                            >
+                                <img src="/ICON/cart.png" alt="Cart" className="w-5 h-5 opacity-70" />
+                                {isInCart && <span className='absolute -top-1 -right-1 w-3 h-3 bg-[#0B4222] rounded-full border border-white flex items-center justify-center text-white text-[7px] font-bold'>✓</span>}
+                            </button>
                         </div>
                         <img
                             src={product.image || 'https://via.placeholder.com/300x300/E8957A/E8957A'}

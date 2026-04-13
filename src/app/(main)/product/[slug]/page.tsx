@@ -107,8 +107,16 @@ export default function ProductDetailsPage() {
         }
     };
 
+    const cartItems = useAppSelector((state: any) => state.cart.items);
+    const isInCart = product ? cartItems.some((item: any) => item.id === product._id) : false;
+
     const handleAddToCart = () => {
         if (!product) return;
+        if (isInCart) {
+            setAddedToCart(true);
+            setTimeout(() => setAddedToCart(false), 2000);
+            return;
+        }
         dispatch(addToCart({
             id: product._id,
             name: product.name,
@@ -875,7 +883,7 @@ export default function ProductDetailsPage() {
                                         textTransform: 'uppercase', whiteSpace: 'nowrap',
                                     }}
                                 >
-                                    {addedToCart ? 'ADDED!' : 'ADD TO CART'}
+                                    {isInCart ? '✓ ALREADY ADDED' : addedToCart ? 'ADDED!' : 'ADD TO CART'}
                                 </button>
                                 <span style={{ color: '#000', fontSize: '13px', paddingRight: '2px' }}>(</span>
                                 <button onClick={(e) => { e.preventDefault(); setQuantity(q => Math.max(1, q - 1)); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#000', fontSize: '15px', fontWeight: 700, padding: '0 3px', lineHeight: 1 }}>-</button>
