@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 
 import { useGetProductReviewsQuery, usePublicCreateReviewMutation } from '@/redux/api/reviewApi';
@@ -56,6 +56,16 @@ const NewProductCard: React.FC<NewProductCardProps> = ({ product }) => {
     const [showComments, setShowComments] = useState(false);
     const [showShare, setShowShare] = useState(false);
     const [linkCopied, setLinkCopied] = useState(false);
+
+    // Lock body scroll when any modal is open
+    useEffect(() => {
+        if (showComments || showShare) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+        return () => { document.body.style.overflow = ''; };
+    }, [showComments, showShare]);
     const [incrementStat] = useIncrementProductStatMutation();
     const dispatch = useAppDispatch();
     const productId = String(product._id || product.id);

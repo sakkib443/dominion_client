@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import {
@@ -66,6 +66,16 @@ export default function ProductDetailsPage() {
     const colorSwatchRef2 = useRef<HTMLDivElement>(null);
     const detailsRef = useRef<HTMLDivElement>(null);
 
+    // Lock body scroll when any modal is open
+    const anyModalOpen = showSharePopup || showCommentsModal || showRatingModal || showBuyNowModal || isFullscreen || showDownloadModal || showInquiryModal;
+    useEffect(() => {
+        if (anyModalOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+        return () => { document.body.style.overflow = ''; };
+    }, [anyModalOpen]);
     const scrollList = (ref: React.RefObject<HTMLDivElement | null>, dir: 'up' | 'down') => {
         if (ref.current) {
             ref.current.scrollBy({ top: dir === 'down' ? 96 : -96, behavior: 'smooth' });
@@ -252,6 +262,14 @@ export default function ProductDetailsPage() {
                         >
                             <FiX size={22} />
                         </button>
+                        {/* Image Counter */}
+                        <div style={{
+                            position: 'absolute', top: '1.2rem', left: '50%', transform: 'translateX(-50%)',
+                            color: '#fff', fontSize: '14px', fontWeight: 600, letterSpacing: '1px',
+                            background: 'rgba(0,0,0,0.5)', padding: '4px 16px', borderRadius: '20px', zIndex: 10,
+                        }}>
+                            {selectedImage + 1} / {allImages.length}
+                        </div>
                         {allImages.length > 1 && (
                             <div className="pd-zoom-thumbs" style={{
                                 position: 'absolute', left: '11rem', top: '50%',
@@ -858,9 +876,9 @@ export default function ProductDetailsPage() {
                         <div className="pd-action-bar" style={{
                             display: 'flex', alignItems: 'center', gap: '100px', justifyContent: 'space-between',
                             height: '30px', flex: '0 0 60%', maxWidth: '60%',
-                            marginTop: '10px', paddingRight: '20px',
+                            marginTop: '25px', paddingRight: '20px',
                         }}>
-                            {/* ADD TO CART with quantity */}
+                            {/* ADD TO CART */}
                             <div
                                 style={{
                                     display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -876,23 +894,18 @@ export default function ProductDetailsPage() {
                                     onClick={handleAddToCart}
                                     disabled={product.stock === 0}
                                     style={{
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
                                         background: 'transparent', border: 'none', color: '#000',
                                         fontWeight: 700, fontSize: '11px', cursor: 'pointer',
-                                        padding: '0 8px', height: '100%', letterSpacing: '0.4px',
-                                        textTransform: 'uppercase', whiteSpace: 'nowrap',
+                                        padding: '0 16px', height: '100%', letterSpacing: '0.4px',
+                                        textTransform: 'uppercase', whiteSpace: 'nowrap', width: '100%',
                                     }}
                                 >
                                     {isInCart ? '✓ ALREADY ADDED' : addedToCart ? 'ADDED!' : 'ADD TO CART'}
                                 </button>
-                                <span style={{ color: '#000', fontSize: '13px', paddingRight: '2px' }}>(</span>
-                                <button onClick={(e) => { e.preventDefault(); setQuantity(q => Math.max(1, q - 1)); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#000', fontSize: '15px', fontWeight: 700, padding: '0 3px', lineHeight: 1 }}>-</button>
-                                <span style={{ fontSize: '11px', fontWeight: 700, color: '#000', minWidth: '20px', textAlign: 'center' }}>{String(quantity).padStart(2, '0')}</span>
-                                <button onClick={(e) => { e.preventDefault(); setQuantity(q => q + 1); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#000', fontSize: '15px', fontWeight: 700, padding: '0 3px', lineHeight: 1 }}>+</button>
-                                <span style={{ color: '#000', fontSize: '13px', paddingLeft: '2px', paddingRight: '8px' }}>)</span>
                             </div>
 
-                            {/* BUY NOW with quantity */}
+                            {/* BUY NOW */}
                             <div
                                 style={{
                                     display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -906,7 +919,6 @@ export default function ProductDetailsPage() {
                             >
                                 <button
                                     onClick={() => {
-                                        // Show order modal directly — no login required, no cart redirect
                                         if (product.stock === 0) return;
                                         setShowBuyNowModal(true);
                                     }}
@@ -915,17 +927,12 @@ export default function ProductDetailsPage() {
                                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                                         background: 'transparent', border: 'none', color: '#000',
                                         fontWeight: 700, fontSize: '11px', cursor: 'pointer',
-                                        padding: '0 8px', height: '100%', letterSpacing: '0.4px',
-                                        textTransform: 'uppercase', whiteSpace: 'nowrap',
+                                        padding: '0 16px', height: '100%', letterSpacing: '0.4px',
+                                        textTransform: 'uppercase', whiteSpace: 'nowrap', width: '100%',
                                     }}
                                 >
                                     BUY NOW
                                 </button>
-                                <span style={{ color: '#000', fontSize: '13px', paddingRight: '2px' }}>(</span>
-                                <button onClick={(e) => { e.preventDefault(); setBuyNowQty(q => Math.max(1, q - 1)); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#000', fontSize: '15px', fontWeight: 700, padding: '0 3px', lineHeight: 1 }}>-</button>
-                                <span style={{ fontSize: '11px', fontWeight: 700, color: '#000', minWidth: '20px', textAlign: 'center' }}>{String(buyNowQty).padStart(2, '0')}</span>
-                                <button onClick={(e) => { e.preventDefault(); setBuyNowQty(q => q + 1); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#000', fontSize: '15px', fontWeight: 700, padding: '0 3px', lineHeight: 1 }}>+</button>
-                                <span style={{ color: '#000', fontSize: '13px', paddingLeft: '2px', paddingRight: '8px' }}>)</span>
                             </div>
 
                             {/* SEND INQUIRY */}
@@ -992,8 +999,8 @@ export default function ProductDetailsPage() {
                                     </Link>
                                 )}
                             </div>
-                            <div className="pd-related-grid grid grid-cols-5 gap-2 overflow-hidden">
-                                {relatedProducts.slice(0, 5).map((item: any) => (
+                            <div className="pd-related-grid grid grid-cols-4 gap-2 overflow-hidden">
+                                {relatedProducts.slice(0, 4).map((item: any) => (
                                     <NewProductCard
                                         key={item._id}
                                         product={{
