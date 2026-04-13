@@ -442,8 +442,10 @@ export default function ProductDetailsPage() {
                         {/* ═══ LEFT SECTION: Color Swatches + Product Image ═══ */}
                         <div style={{
                             display: 'flex', flex: '0 0 60%', maxWidth: '60%',
-                            height: 'clamp(400px, 38vw, 560px)',
+                            minWidth: '320px',
+                            height: 'clamp(300px, 32vw, 480px)',
                             paddingRight: '16px',
+                            overflow: 'visible',
                         }}>
                             <div style={{
                                 width: '82px', display: 'flex', flexDirection: 'column',
@@ -495,18 +497,19 @@ export default function ProductDetailsPage() {
                                 </div>
                             </div>
 
-                            {/* Image Wrapper — arrows float outside via negative offset */}
+                            {/* Image Wrapper — arrows sit INSIDE the image area */}
                             <div style={{
                                 position: 'relative', height: '100%', aspectRatio: '1 / 1',
-                                margin: '0 auto', padding: '30px',
+                                flexShrink: 0,
+                                margin: '0 auto', padding: '16px',
                             }}>
-                                {/* Left Arrow — outside image left edge */}
+                                {/* Left Arrow — inside image, left edge */}
                                 <button
                                     onClick={(e) => { e.stopPropagation(); if (selectedImage > 0) { setSelectedImage(prev => prev - 1); setZoomLevel(1); } }}
                                     style={{
-                                        position: 'absolute', left: '-70px', top: '50%', transform: 'translateY(-50%)',
+                                        position: 'absolute', left: 0, top: '50%', transform: 'translateX(-100%) translateY(-50%)',
                                         background: 'rgba(255,255,255,0.95)', border: '1px solid #ddd', borderRadius: '50%',
-                                        width: '36px', height: '36px', zIndex: 5,
+                                        width: '32px', height: '32px', zIndex: 5,
                                         cursor: selectedImage === 0 ? 'not-allowed' : 'pointer',
                                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                                         boxShadow: '0 2px 8px rgba(0,0,0,0.15)', transition: 'all 0.2s ease',
@@ -515,16 +518,16 @@ export default function ProductDetailsPage() {
                                     onMouseEnter={(e) => { if (selectedImage > 0) { e.currentTarget.style.background = '#fff'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.25)'; } }}
                                     onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.95)'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)'; }}
                                 >
-                                    <FiChevronLeft size={20} color="#333" />
+                                    <FiChevronLeft size={18} color="#333" />
                                 </button>
 
-                                {/* Right Arrow — outside image right edge */}
+                                {/* Right Arrow — inside image, right edge */}
                                 <button
                                     onClick={(e) => { e.stopPropagation(); if (selectedImage < allImages.length - 1) { setSelectedImage(prev => prev + 1); setZoomLevel(1); } }}
                                     style={{
-                                        position: 'absolute', right: '-70px', top: '50%', transform: 'translateY(-50%)',
+                                        position: 'absolute', right: 0, top: '50%', transform: 'translateX(100%) translateY(-50%)',
                                         background: 'rgba(255,255,255,0.95)', border: '1px solid #ddd', borderRadius: '50%',
-                                        width: '36px', height: '36px', zIndex: 5,
+                                        width: '32px', height: '32px', zIndex: 5,
                                         cursor: selectedImage >= allImages.length - 1 ? 'not-allowed' : 'pointer',
                                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                                         boxShadow: '0 2px 8px rgba(0,0,0,0.15)', transition: 'all 0.2s ease',
@@ -533,7 +536,7 @@ export default function ProductDetailsPage() {
                                     onMouseEnter={(e) => { if (selectedImage < allImages.length - 1) { e.currentTarget.style.background = '#fff'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.25)'; } }}
                                     onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.95)'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)'; }}
                                 >
-                                    <FiChevronRight size={20} color="#333" />
+                                    <FiChevronRight size={18} color="#333" />
                                 </button>
 
                                 {/* Actual image */}
@@ -595,7 +598,7 @@ export default function ProductDetailsPage() {
 
                             {/* Size Swatches Column (RIGHT of image) */}
                             <div style={{
-                                width: '56px', display: 'flex', flexDirection: 'column',
+                                width: 'clamp(44px, 5vw, 56px)', display: 'flex', flexDirection: 'column',
                                 alignItems: 'center', padding: '8px 0',
                                 flexShrink: 0, gap: '4px',
                             }}>
@@ -609,7 +612,7 @@ export default function ProductDetailsPage() {
                                             key={idx}
                                             onClick={() => setSelectedSize(selectedSize === size ? '' : size)}
                                             style={{
-                                                width: '48px', height: '48px', flexShrink: 0,
+                                                width: 'clamp(36px, 4vw, 48px)', height: 'clamp(36px, 4vw, 48px)', flexShrink: 0,
                                                 background: selectedSize === size ? '#0B4222' : '#fff',
                                                 color: selectedSize === size ? '#fff' : '#333',
                                                 border: selectedSize === size ? '2px solid #0B4222' : '2px solid #e0e0e0',
@@ -632,7 +635,7 @@ export default function ProductDetailsPage() {
 
                             {/* Color Label Column (RIGHT of image) */}
                             <div style={{
-                                width: '56px', display: 'flex', flexDirection: 'column',
+                                width: 'clamp(44px, 5vw, 56px)', display: 'flex', flexDirection: 'column',
                                 alignItems: 'center', padding: '8px 0',
                                 flexShrink: 0, gap: '4px',
                             }}>
@@ -647,7 +650,7 @@ export default function ProductDetailsPage() {
                                             onClick={() => setSelectedColor(selectedColor === color.name ? '' : color.name)}
                                             title={color.name}
                                             style={{
-                                                width: '48px', height: '48px', flexShrink: 0,
+                                                width: 'clamp(36px, 4vw, 48px)', height: 'clamp(36px, 4vw, 48px)', flexShrink: 0,
                                                 background: getColorHex(color.hex || color.name),
                                                 border: selectedColor === color.name
                                                     ? '3px solid #0B4222'
@@ -675,7 +678,7 @@ export default function ProductDetailsPage() {
                             paddingLeft: '4px',
                             display: 'flex', flexDirection: 'column',
                             position: 'relative',
-                            height: 'clamp(400px, 38vw, 560px)',
+                            height: 'clamp(300px, 32vw, 480px)',
                             borderLeft: '1px solid #e5e7eb',
                         }}>
                             {/* Up Scroll Arrow for details */}
