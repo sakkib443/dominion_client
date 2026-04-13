@@ -99,7 +99,7 @@ h6 {
 /* ===== Container ===== */
 .container {
   width: 100%;
-  max-width: 1600px;
+  max-width: 1500px;
   margin-left: auto;
   margin-right: auto;
   padding-left: 1rem;
@@ -278,6 +278,7 @@ h6 {
   0% {
     transform: translateX(0);
   }
+
   100% {
     transform: translateX(-33.33%);
   }
@@ -347,60 +348,145 @@ h6 {
 
 /* ===== Preloader Animations ===== */
 @keyframes preloaderSpin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes preloaderSpinSlow {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes preloaderSpinReverse {
-  from { transform: rotate(360deg); }
-  to { transform: rotate(0deg); }
+  from {
+    transform: rotate(360deg);
+  }
+
+  to {
+    transform: rotate(0deg);
+  }
 }
 
 @keyframes preloaderFloat {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(30px, -30px) scale(1.05); }
-  66% { transform: translate(-20px, 20px) scale(0.95); }
+
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  33% {
+    transform: translate(30px, -30px) scale(1.05);
+  }
+
+  66% {
+    transform: translate(-20px, 20px) scale(0.95);
+  }
 }
 
 @keyframes preloaderFloatReverse {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(-30px, 30px) scale(0.95); }
-  66% { transform: translate(20px, -20px) scale(1.05); }
+
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  33% {
+    transform: translate(-30px, 30px) scale(0.95);
+  }
+
+  66% {
+    transform: translate(20px, -20px) scale(1.05);
+  }
 }
 
 @keyframes preloaderPulseSlow {
-  0%, 100% { opacity: 0.2; transform: translate(-50%, -50%) scale(1); }
-  50% { opacity: 0.4; transform: translate(-50%, -50%) scale(1.1); }
+
+  0%,
+  100% {
+    opacity: 0.2;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  50% {
+    opacity: 0.4;
+    transform: translate(-50%, -50%) scale(1.1);
+  }
 }
 
 @keyframes preloaderPulseGlow {
-  0%, 100% { box-shadow: 0 0 20px rgba(110, 231, 183, 0.1); }
-  50% { box-shadow: 0 0 40px rgba(110, 231, 183, 0.25); }
+
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(110, 231, 183, 0.1);
+  }
+
+  50% {
+    box-shadow: 0 0 40px rgba(110, 231, 183, 0.25);
+  }
 }
 
 @keyframes preloaderTextReveal {
-  0% { opacity: 0; letter-spacing: 0.8em; filter: blur(8px); }
-  100% { opacity: 1; letter-spacing: 0.2em; filter: blur(0); }
+  0% {
+    opacity: 0;
+    letter-spacing: 0.8em;
+    filter: blur(8px);
+  }
+
+  100% {
+    opacity: 1;
+    letter-spacing: 0.2em;
+    filter: blur(0);
+  }
 }
 
 @keyframes preloaderLineExpand {
-  0% { width: 0; opacity: 0; }
-  100% { width: 100%; opacity: 1; }
+  0% {
+    width: 0;
+    opacity: 0;
+  }
+
+  100% {
+    width: 100%;
+    opacity: 1;
+  }
 }
 
 @keyframes preloaderFadeInDelay {
-  0%, 50% { opacity: 0; transform: translateY(8px); }
-  100% { opacity: 1; transform: translateY(0); }
+
+  0%,
+  50% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes preloaderParticle {
-  0%, 100% { opacity: 0; transform: translateY(0) scale(0.5); }
-  50% { opacity: 1; transform: translateY(-30px) scale(1); }
+
+  0%,
+  100% {
+    opacity: 0;
+    transform: translateY(0) scale(0.5);
+  }
+
+  50% {
+    opacity: 1;
+    transform: translateY(-30px) scale(1);
+  }
 }
 
 .preloader-spin {
@@ -446,9 +532,12 @@ h6 {
 
 /* ===== Cart Icon Glow Animation ===== */
 @keyframes cartGlowPulse {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow: 0 0 0px rgba(11, 66, 34, 0.3);
   }
+
   50% {
     box-shadow: 0 0 14px rgba(11, 66, 34, 0.6), 0 0 28px rgba(11, 66, 34, 0.25);
   }
@@ -515,10 +604,43 @@ h6 {
   color: #0B4222;
 }
 
-.product-editor-wrapper .ql-editor h1 { font-size: 24px; font-weight: 700; margin-bottom: 12px; }
-.product-editor-wrapper .ql-editor h2 { font-size: 20px; font-weight: 700; margin-bottom: 10px; }
-.product-editor-wrapper .ql-editor h3 { font-size: 17px; font-weight: 600; margin-bottom: 8px; }
-.product-editor-wrapper .ql-editor p { margin-bottom: 8px; }
-.product-editor-wrapper .ql-editor ul, .product-editor-wrapper .ql-editor ol { padding-left: 24px; margin-bottom: 8px; }
-.product-editor-wrapper .ql-editor blockquote { border-left: 4px solid #0B4222; padding-left: 16px; color: #555; margin: 12px 0; }
-.product-editor-wrapper .ql-editor img { max-width: 100%; border-radius: 4px; margin: 8px 0; }
+.product-editor-wrapper .ql-editor h1 {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.product-editor-wrapper .ql-editor h2 {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.product-editor-wrapper .ql-editor h3 {
+  font-size: 17px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.product-editor-wrapper .ql-editor p {
+  margin-bottom: 8px;
+}
+
+.product-editor-wrapper .ql-editor ul,
+.product-editor-wrapper .ql-editor ol {
+  padding-left: 24px;
+  margin-bottom: 8px;
+}
+
+.product-editor-wrapper .ql-editor blockquote {
+  border-left: 4px solid #0B4222;
+  padding-left: 16px;
+  color: #555;
+  margin: 12px 0;
+}
+
+.product-editor-wrapper .ql-editor img {
+  max-width: 100%;
+  border-radius: 4px;
+  margin: 8px 0;
+}

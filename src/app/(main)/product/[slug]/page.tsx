@@ -507,7 +507,7 @@ export default function ProductDetailsPage() {
                                 <button
                                     onClick={(e) => { e.stopPropagation(); if (selectedImage > 0) { setSelectedImage(prev => prev - 1); setZoomLevel(1); } }}
                                     style={{
-                                        position: 'absolute', left: '-18px', top: '50%', transform: 'translateY(-50%)',
+                                        position: 'absolute', left: '-6px', top: '50%', transform: 'translateY(-50%)',
                                         background: 'rgba(255,255,255,0.95)', border: '1px solid #ddd', borderRadius: '50%',
                                         width: '32px', height: '32px', zIndex: 5,
                                         cursor: selectedImage === 0 ? 'not-allowed' : 'pointer',
@@ -525,7 +525,7 @@ export default function ProductDetailsPage() {
                                 <button
                                     onClick={(e) => { e.stopPropagation(); if (selectedImage < allImages.length - 1) { setSelectedImage(prev => prev + 1); setZoomLevel(1); } }}
                                     style={{
-                                        position: 'absolute', right: '-18px', top: '50%', transform: 'translateY(-50%)',
+                                        position: 'absolute', right: '-6px', top: '50%', transform: 'translateY(-50%)',
                                         background: 'rgba(255,255,255,0.95)', border: '1px solid #ddd', borderRadius: '50%',
                                         width: '32px', height: '32px', zIndex: 5,
                                         cursor: selectedImage >= allImages.length - 1 ? 'not-allowed' : 'pointer',
