@@ -931,7 +931,7 @@ export default function ProductDetailsPage() {
                                 {/* Info bar at bottom of right section */}
                                 <div className="pd-info-bar" style={{
                                     display: 'flex', alignItems: 'center', gap: '32px',
-                                    padding: '0 8px', height: '30px', marginTop: 'auto',
+                                    padding: '0 8px 0 16px', height: '30px', marginTop: 'auto',
                                 }}>
                                     <button onClick={() => setActiveInfoPanel(activeInfoPanel === 'delivery' ? null : 'delivery')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '14px', fontWeight: 600, color: activeInfoPanel === 'delivery' ? '#0B4222' : '#333', whiteSpace: 'nowrap', borderBottom: activeInfoPanel === 'delivery' ? '2px solid #0B4222' : '2px solid transparent', paddingBottom: '2px', transition: 'all 0.2s ease' }}>Delivery</button>
                                     <button onClick={() => setActiveInfoPanel(activeInfoPanel === 'payment' ? null : 'payment')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '14px', fontWeight: 600, color: activeInfoPanel === 'payment' ? '#0B4222' : '#333', whiteSpace: 'nowrap', borderBottom: activeInfoPanel === 'payment' ? '2px solid #0B4222' : '2px solid transparent', paddingBottom: '2px', transition: 'all 0.2s ease' }}>Payment</button>
