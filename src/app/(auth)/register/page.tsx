@@ -12,28 +12,19 @@ import { FiUser, FiLock, FiEye, FiEyeOff, FiArrowRight, FiMapPin } from 'react-i
 const RegisterPageInner = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [focused, setFocused] = useState<string | null>(null);
-    const [formData, setFormData] = useState({
-        name: '',
-        emailOrPhone: '',
-        location: '',
-        password: '',
-    });
+    const [formData, setFormData] = useState({ name: '', emailOrPhone: '', location: '', password: '' });
 
     const router = useRouter();
     const searchParams = useSearchParams();
     const dispatch = useAppDispatch();
     const [register, { isLoading }] = useRegisterMutation();
-
     const redirectPath = searchParams.get('redirect');
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) =>
         setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
-        // Detect email or phone
         const isPhone = /^[0-9+\-\s()]{7,}$/.test(formData.emailOrPhone.trim());
         const payload = {
             name: formData.name.trim(),
@@ -41,28 +32,18 @@ const RegisterPageInner = () => {
             lastName: formData.name.trim().split(' ').slice(1).join(' ') || '',
             ...(isPhone
                 ? { phone: formData.emailOrPhone.trim() }
-                : { email: formData.emailOrPhone.trim() }
-            ),
+                : { email: formData.emailOrPhone.trim() }),
             location: formData.location.trim(),
             password: formData.password,
         };
-
         try {
             const res = await register(payload).unwrap();
-
-            // Auto-login
-            dispatch(loginSuccess({
-                user: res.data.user,
-                token: res.data.tokens.accessToken
-            }));
+            dispatch(loginSuccess({ user: res.data.user, token: res.data.tokens.accessToken }));
             localStorage.setItem('token', res.data.tokens.accessToken);
-
-            toast.success('অ্যাকাউন্ট তৈরি হয়েছে! স্বাগতম 🎉', {
+            toast.success('Account created! Welcome 🎉', {
                 duration: 4000,
                 style: { borderRadius: '10px', background: '#0B4222', color: '#fff' },
             });
-
-            // Redirect back to where user came from
             if (redirectPath) {
                 router.push(redirectPath);
             } else if (res.data.user.role === 'admin') {
@@ -71,7 +52,7 @@ const RegisterPageInner = () => {
                 router.push('/dashboard/user');
             }
         } catch (err: any) {
-            toast.error(err?.data?.message || 'রেজিস্ট্রেশন ব্যর্থ হয়েছে। আবার চেষ্টা করুন।', { duration: 4000 });
+            toast.error(err?.data?.message || 'Registration failed. Please try again.', { duration: 4000 });
         }
     };
 
@@ -84,167 +65,102 @@ const RegisterPageInner = () => {
     });
 
     const iconStyle: React.CSSProperties = {
-        position: 'absolute', top: '50%', left: '14px',
-        transform: 'translateY(-50%)', transition: 'color 0.2s',
+        position: 'absolute', top: '50%', left: '14px', transform: 'translateY(-50%)', transition: 'color 0.2s',
     };
 
     return (
         <div style={{ background: '#fff', borderRadius: '20px', padding: '44px 40px', boxShadow: '0 4px 40px rgba(0,0,0,0.08)', border: '1px solid #f0f0f0' }}>
+
             <div style={{ marginBottom: '32px' }}>
                 <h1 style={{ fontSize: '28px', fontWeight: 900, color: '#0B4222', margin: '0 0 6px', letterSpacing: '-0.5px' }}>Create Account</h1>
-                <p style={{ fontSize: '14px', color: '#6b7280', margin: 0, fontWeight: 500 }}>Dominion-এ যোগ দিন এবং কেনাকাটা শুরু করুন</p>
+                <p style={{ fontSize: '14px', color: '#6b7280', margin: 0, fontWeight: 500 }}>Join Dominion for a better shopping experience</p>
             </div>
 
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
 
-                {/* Name */}
+                {/* Full Name */}
                 <div>
-                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#374151', marginBottom: '7px' }}>
-                        আপনার নাম
-                    </label>
+                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#374151', marginBottom: '7px' }}>Full Name</label>
                     <div style={{ position: 'relative' }}>
-                        <div style={{ ...iconStyle, color: focused === 'name' ? '#0B4222' : '#9ca3af' }}>
-                            <FiUser size={17} />
-                        </div>
-                        <input
-                            type="text"
-                            name="name"
-                            required
-                            value={formData.name}
-                            onChange={handleChange}
-                            onFocus={() => setFocused('name')}
-                            onBlur={() => setFocused(null)}
-                            style={inputStyle('name')}
-                            placeholder="আপনার পুরো নাম লিখুন"
-                            autoComplete="name"
-                        />
+                        <div style={{ ...iconStyle, color: focused === 'name' ? '#0B4222' : '#9ca3af' }}><FiUser size={17} /></div>
+                        <input type="text" name="name" required value={formData.name}
+                            onChange={handleChange} onFocus={() => setFocused('name')} onBlur={() => setFocused(null)}
+                            style={inputStyle('name')} placeholder="Enter your full name" autoComplete="name" />
                     </div>
                 </div>
 
                 {/* Email or Phone */}
                 <div>
-                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#374151', marginBottom: '7px' }}>
-                        Email বা Phone Number
-                    </label>
+                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#374151', marginBottom: '7px' }}>Email or Phone Number</label>
                     <div style={{ position: 'relative' }}>
-                        <div style={{ ...iconStyle, color: focused === 'ep' ? '#0B4222' : '#9ca3af' }}>
-                            <FiUser size={17} />
-                        </div>
-                        <input
-                            type="text"
-                            name="emailOrPhone"
-                            required
-                            value={formData.emailOrPhone}
-                            onChange={handleChange}
-                            onFocus={() => setFocused('ep')}
-                            onBlur={() => setFocused(null)}
-                            style={inputStyle('ep')}
-                            placeholder="example@email.com বা 01XXXXXXXXX"
-                            autoComplete="email"
-                        />
+                        <div style={{ ...iconStyle, color: focused === 'ep' ? '#0B4222' : '#9ca3af' }}><FiUser size={17} /></div>
+                        <input type="text" name="emailOrPhone" required value={formData.emailOrPhone}
+                            onChange={handleChange} onFocus={() => setFocused('ep')} onBlur={() => setFocused(null)}
+                            style={inputStyle('ep')} placeholder="name@example.com or 01XXXXXXXXX" autoComplete="email" />
                     </div>
                 </div>
 
                 {/* Location */}
                 <div>
-                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#374151', marginBottom: '7px' }}>
-                        আপনার লোকেশন
-                    </label>
+                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#374151', marginBottom: '7px' }}>Location</label>
                     <div style={{ position: 'relative' }}>
-                        <div style={{ ...iconStyle, color: focused === 'loc' ? '#0B4222' : '#9ca3af' }}>
-                            <FiMapPin size={17} />
-                        </div>
-                        <input
-                            type="text"
-                            name="location"
-                            required
-                            value={formData.location}
-                            onChange={handleChange}
-                            onFocus={() => setFocused('loc')}
-                            onBlur={() => setFocused(null)}
-                            style={inputStyle('loc')}
-                            placeholder="যেমন: ঢাকা, মিরপুর / Dhaka, Mirpur"
-                            autoComplete="address-level2"
-                        />
+                        <div style={{ ...iconStyle, color: focused === 'loc' ? '#0B4222' : '#9ca3af' }}><FiMapPin size={17} /></div>
+                        <input type="text" name="location" required value={formData.location}
+                            onChange={handleChange} onFocus={() => setFocused('loc')} onBlur={() => setFocused(null)}
+                            style={inputStyle('loc')} placeholder="e.g. Dhaka, Mirpur" autoComplete="address-level2" />
                     </div>
                 </div>
 
                 {/* Password */}
                 <div>
-                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#374151', marginBottom: '7px' }}>
-                        Password
-                    </label>
+                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#374151', marginBottom: '7px' }}>Password</label>
                     <div style={{ position: 'relative' }}>
-                        <div style={{ ...iconStyle, color: focused === 'pw' ? '#0B4222' : '#9ca3af' }}>
-                            <FiLock size={17} />
-                        </div>
-                        <input
-                            type={showPassword ? 'text' : 'password'}
-                            name="password"
-                            required
-                            minLength={6}
-                            value={formData.password}
-                            onChange={handleChange}
-                            onFocus={() => setFocused('pw')}
-                            onBlur={() => setFocused(null)}
+                        <div style={{ ...iconStyle, color: focused === 'pw' ? '#0B4222' : '#9ca3af' }}><FiLock size={17} /></div>
+                        <input type={showPassword ? 'text' : 'password'} name="password" required minLength={6}
+                            value={formData.password} onChange={handleChange}
+                            onFocus={() => setFocused('pw')} onBlur={() => setFocused(null)}
                             style={{ ...inputStyle('pw'), paddingRight: '44px' }}
-                            placeholder="কমপক্ষে ৬ অক্ষর"
-                            autoComplete="new-password"
-                        />
-                        <button
-                            type="button"
-                            onClick={() => setShowPassword(!showPassword)}
-                            style={{ position: 'absolute', top: '50%', right: '14px', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', display: 'flex', alignItems: 'center', padding: 0 }}
-                        >
+                            placeholder="At least 6 characters" autoComplete="new-password" />
+                        <button type="button" onClick={() => setShowPassword(!showPassword)}
+                            style={{ position: 'absolute', top: '50%', right: '14px', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', display: 'flex', alignItems: 'center', padding: 0 }}>
                             {showPassword ? <FiEyeOff size={17} /> : <FiEye size={17} />}
                         </button>
                     </div>
                 </div>
 
                 {/* Submit */}
-                <button
-                    type="submit"
-                    disabled={isLoading}
+                <button type="submit" disabled={isLoading}
                     style={{
                         width: '100%', padding: '15px', marginTop: '6px',
                         background: isLoading ? '#5a8a6e' : 'linear-gradient(135deg, #0B4222 0%, #0d5229 100%)',
-                        color: '#fff', border: 'none', borderRadius: '12px',
-                        fontSize: '15px', fontWeight: 800, cursor: isLoading ? 'not-allowed' : 'pointer',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                        transition: 'all 0.2s ease', letterSpacing: '0.3px', fontFamily: 'inherit',
+                        color: '#fff', border: 'none', borderRadius: '12px', fontSize: '15px', fontWeight: 800,
+                        cursor: isLoading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center',
+                        justifyContent: 'center', gap: '8px', transition: 'all 0.2s ease', letterSpacing: '0.3px', fontFamily: 'inherit',
                     }}
                     onMouseEnter={e => { if (!isLoading) (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-1px)'; }}
-                    onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(0)'; }}
-                >
+                    onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(0)'; }}>
                     {isLoading ? (
                         <>
                             <div style={{ width: '18px', height: '18px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'authSpin 0.8s linear infinite' }} />
-                            অ্যাকাউন্ট তৈরি হচ্ছে...
+                            Creating Account...
                         </>
                     ) : (
-                        <>
-                            রেজিস্ট্রেশন করুন
-                            <FiArrowRight size={17} />
-                        </>
+                        <>Create Account <FiArrowRight size={17} /></>
                     )}
                 </button>
             </form>
 
             <div style={{ marginTop: '24px', paddingTop: '20px', borderTop: '1px solid #f3f4f6', textAlign: 'center' }}>
                 <p style={{ fontSize: '13px', color: '#6b7280', margin: 0, fontWeight: 500 }}>
-                    আগে থেকে অ্যাকাউন্ট আছে?{' '}
-                    <Link
-                        href={redirectPath ? `/login?redirect=${encodeURIComponent(redirectPath)}` : '/login'}
-                        style={{ color: '#0B4222', fontWeight: 800, textDecoration: 'none' }}
-                    >
-                        লগইন করুন →
+                    Already have an account?{' '}
+                    <Link href={redirectPath ? `/login?redirect=${encodeURIComponent(redirectPath)}` : '/login'}
+                        style={{ color: '#0B4222', fontWeight: 800, textDecoration: 'none' }}>
+                        Sign In &rarr;
                     </Link>
                 </p>
             </div>
 
-            <style>{`
-                @keyframes authSpin { to { transform: rotate(360deg); } }
-            `}</style>
+            <style>{`@keyframes authSpin { to { transform: rotate(360deg); } }`}</style>
         </div>
     );
 };

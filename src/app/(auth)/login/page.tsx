@@ -11,7 +11,7 @@ import { FiLock, FiEye, FiEyeOff, FiArrowRight, FiAlertCircle, FiUser } from 're
 
 const LoginPageInner = () => {
     const [showPassword, setShowPassword] = useState(false);
-    const [identifier, setIdentifier] = useState(''); // email OR phone
+    const [identifier, setIdentifier] = useState('');
     const [password, setPassword] = useState('');
     const [focused, setFocused] = useState<string | null>(null);
 
@@ -25,8 +25,6 @@ const LoginPageInner = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
-        // Detect if email or phone
         const isPhone = /^[0-9+\-\s()]{7,}$/.test(identifier.trim());
         const credentials = isPhone
             ? { phone: identifier.trim(), password }
@@ -34,18 +32,12 @@ const LoginPageInner = () => {
 
         try {
             const res = await login(credentials).unwrap();
-
-            dispatch(loginSuccess({
-                user: res.data.user,
-                token: res.data.tokens.accessToken
-            }));
+            dispatch(loginSuccess({ user: res.data.user, token: res.data.tokens.accessToken }));
             localStorage.setItem('token', res.data.tokens.accessToken);
-
-            toast.success('স্বাগতম! লগইন সফল হয়েছে।', {
+            toast.success('Welcome back! Login successful.', {
                 style: { borderRadius: '10px', background: '#0B4222', color: '#fff' },
                 icon: '✅',
             });
-
             if (redirectPath) {
                 router.push(redirectPath);
             } else if (res.data.user.role === 'admin') {
@@ -54,7 +46,7 @@ const LoginPageInner = () => {
                 router.push('/dashboard/user');
             }
         } catch (err: any) {
-            toast.error(err?.data?.message || 'Email/Phone বা Password ভুল হয়েছে।', { duration: 4000 });
+            toast.error(err?.data?.message || 'Invalid email/phone or password.', { duration: 4000 });
         }
     };
 
@@ -68,28 +60,29 @@ const LoginPageInner = () => {
 
     return (
         <div style={{ background: '#fff', borderRadius: '20px', padding: '44px 40px', boxShadow: '0 4px 40px rgba(0,0,0,0.08)', border: '1px solid #f0f0f0' }}>
+
             {/* Session Expired */}
             {isExpired && (
                 <div style={{ marginBottom: '24px', padding: '14px 16px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <FiAlertCircle size={18} color="#ef4444" />
                     <div>
                         <p style={{ fontSize: '13px', fontWeight: 700, color: '#b91c1c', margin: 0 }}>Session Expired</p>
-                        <p style={{ fontSize: '12px', color: '#dc2626', margin: 0 }}>আবার লগইন করুন।</p>
+                        <p style={{ fontSize: '12px', color: '#dc2626', margin: 0 }}>Please login again to continue.</p>
                     </div>
                 </div>
             )}
 
             <div style={{ marginBottom: '36px' }}>
                 <h1 style={{ fontSize: '28px', fontWeight: 900, color: '#0B4222', margin: '0 0 6px', letterSpacing: '-0.5px' }}>Welcome Back</h1>
-                <p style={{ fontSize: '14px', color: '#6b7280', margin: 0, fontWeight: 500 }}>আপনার অ্যাকাউন্টে লগইন করুন</p>
+                <p style={{ fontSize: '14px', color: '#6b7280', margin: 0, fontWeight: 500 }}>Please enter your credentials to sign in</p>
             </div>
 
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
-                {/* Identifier (Email OR Phone) */}
+                {/* Email or Phone */}
                 <div>
                     <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#374151', marginBottom: '8px' }}>
-                        Email বা Phone Number
+                        Email or Phone Number
                     </label>
                     <div style={{ position: 'relative' }}>
                         <div style={{ position: 'absolute', top: '50%', left: '14px', transform: 'translateY(-50%)', color: focused === 'id' ? '#0B4222' : '#9ca3af', transition: 'color 0.2s' }}>
@@ -103,7 +96,7 @@ const LoginPageInner = () => {
                             onFocus={() => setFocused('id')}
                             onBlur={() => setFocused(null)}
                             style={inputStyle('id')}
-                            placeholder="example@email.com বা 01XXXXXXXXX"
+                            placeholder="name@example.com or 01XXXXXXXXX"
                             autoComplete="username"
                         />
                     </div>
@@ -126,7 +119,7 @@ const LoginPageInner = () => {
                             onFocus={() => setFocused('pw')}
                             onBlur={() => setFocused(null)}
                             style={{ ...inputStyle('pw'), paddingRight: '44px' }}
-                            placeholder="আপনার পাসওয়ার্ড দিন"
+                            placeholder="Enter your password"
                             autoComplete="current-password"
                         />
                         <button
@@ -157,7 +150,7 @@ const LoginPageInner = () => {
                     {isLoading ? (
                         <>
                             <div style={{ width: '18px', height: '18px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'authSpin 0.8s linear infinite' }} />
-                            লগইন হচ্ছে...
+                            Signing In...
                         </>
                     ) : (
                         <>
@@ -170,19 +163,17 @@ const LoginPageInner = () => {
 
             <div style={{ marginTop: '28px', paddingTop: '24px', borderTop: '1px solid #f3f4f6', textAlign: 'center' }}>
                 <p style={{ fontSize: '13px', color: '#6b7280', margin: 0, fontWeight: 500 }}>
-                    অ্যাকাউন্ট নেই?{' '}
+                    {"Don't have an account? "}
                     <Link
                         href={redirectPath ? `/register?redirect=${encodeURIComponent(redirectPath)}` : '/register'}
                         style={{ color: '#0B4222', fontWeight: 800, textDecoration: 'none' }}
                     >
-                        রেজিস্ট্রেশন করুন →
+                        Create Account &rarr;
                     </Link>
                 </p>
             </div>
 
-            <style>{`
-                @keyframes authSpin { to { transform: rotate(360deg); } }
-            `}</style>
+            <style>{`@keyframes authSpin { to { transform: rotate(360deg); } }`}</style>
         </div>
     );
 };

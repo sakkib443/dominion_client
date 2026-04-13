@@ -27,7 +27,7 @@ export default function AuthLayout({
                             <span style={{ fontSize: '36px', fontWeight: 900, color: '#fff', letterSpacing: '-1px' }}>DOMINION</span>
                         </div>
                         <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)', letterSpacing: '4px', textTransform: 'uppercase', marginBottom: '48px' }}>
-                            ডমিনিয়ন ডট কম
+                            DOMINION.COM
                         </div>
                     </Link>
 
@@ -37,7 +37,7 @@ export default function AuthLayout({
                         Premium Shopping<br />Experience Awaits
                     </h2>
                     <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.6)', lineHeight: 1.8, marginBottom: '48px' }}>
-                        হাজারো পণ্য, সেরা দাম, দ্রুত ডেলিভারি।<br />আজই যোগ দিন।
+                        Thousands of products, best prices,<br />fast delivery across Bangladesh.
                     </p>
 
                     {/* Features */}
