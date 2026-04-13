@@ -723,7 +723,7 @@ export default function ProductDetailsPage() {
                                 </div>{/* end image area row */}
                                 {/* ═══ ACTION BAR at bottom of left section ═══ */}
                                 <div className="pd-action-bar" style={{
-                                    display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'space-between',
+                                    display: 'flex', alignItems: 'center', gap: '100px', justifyContent: 'space-between',
                                     paddingRight: '4px', height: '30px', marginTop: '15px',
                                 }}>
                                     {/* ADD TO CART */}
