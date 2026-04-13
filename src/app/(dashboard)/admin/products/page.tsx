@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { FiPlus, FiSearch, FiFilter, FiEdit2, FiTrash2, FiEye, FiMoreVertical } from 'react-icons/fi';
 
 // Demo products
@@ -33,10 +34,10 @@ export default function ProductsPage() {
                     <h1 className="text-2xl font-bold text-gray-800">Products</h1>
                     <p className="text-gray-500">Manage your product inventory</p>
                 </div>
-                <button className="flex items-center gap-2 px-4 py-2 bg-[#0B4222] text-white rounded-lg font-medium hover:opacity-90">
+                <Link href="/dashboard/admin/products/new" className="flex items-center gap-2 px-4 py-2 bg-[#0B4222] text-white rounded-lg font-medium hover:opacity-90" style={{ textDecoration: 'none' }}>
                     <FiPlus size={20} />
                     Add Product
-                </button>
+                </Link>
             </div>
 
             {/* Filters */}
