@@ -57,7 +57,7 @@ const UserDashboard = () => {
             {/* ── Welcome Banner ── */}
             <div style={{
                 background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 60%, #1a1a1a 100%)',
-                borderRadius: '16px', padding: '32px 36px',
+                borderRadius: '8px', padding: '32px 36px',
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                 overflow: 'hidden', position: 'relative',
             }}>
@@ -107,7 +107,7 @@ const UserDashboard = () => {
                     { icon: FiDollarSign, label: 'Total Spent', value: `৳${totalSpent.toLocaleString()}`, color: '#444', bg: '#f5f5f5' },
                 ].map((s, i) => (
                     <div key={i} style={{
-                        background: '#fff', borderRadius: '14px',
+                        background: '#fff', borderRadius: '8px',
                         border: '1px solid #f0f0f0', padding: '20px 24px',
                         display: 'flex', alignItems: 'center', gap: '16px',
                     }}>
@@ -165,7 +165,7 @@ const UserDashboard = () => {
                     ].map((item) => (
                         <Link key={item.label} href={item.href} style={{
                             display: 'flex', alignItems: 'center', gap: '16px',
-                            background: '#fff', borderRadius: '14px',
+                            background: '#fff', borderRadius: '8px',
                             border: '1px solid #f0f0f0', padding: '20px 22px',
                             textDecoration: 'none',
                             transition: 'box-shadow 0.2s, border-color 0.2s',
@@ -207,7 +207,7 @@ const UserDashboard = () => {
                     </Link>
                 </div>
 
-                <div style={{ background: '#fff', borderRadius: '14px', border: '1px solid #f0f0f0', overflow: 'hidden' }}>
+                <div style={{ background: '#fff', borderRadius: '8px', border: '1px solid #f0f0f0', overflow: 'hidden' }}>
                     {ordersLoading ? (
                         <div style={{ padding: '48px', textAlign: 'center' }}>
                             <div style={{ width: '32px', height: '32px', borderRadius: '50%', border: '3px solid #f0f0f0', borderTopColor: '#0B4222', animation: 'spin 0.8s linear infinite', margin: '0 auto' }} />

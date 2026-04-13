@@ -123,7 +123,7 @@ const UserLayout = ({ children }: { children: React.ReactNode }) => {
                     <aside className="hidden lg:block w-64 flex-shrink-0">
                         <div className="sticky top-24">
                             {/* User Card */}
-                            <div className="bg-white rounded-2xl border border-gray-100 p-5 mb-4 shadow-sm">
+                            <div className="bg-white rounded-md border border-gray-100 p-5 mb-4 shadow-sm">
                                 <div className="flex items-center gap-3 mb-4">
                                     <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#0B4222] to-[#1a6b3c] flex items-center justify-center text-white font-bold text-lg shadow-md shadow-[#0B4222]/20">
                                         {getInitials()}
@@ -138,16 +138,16 @@ const UserLayout = ({ children }: { children: React.ReactNode }) => {
                             </div>
 
                             {/* Navigation */}
-                            <nav className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
+                            <nav className="bg-white rounded-md border border-gray-100 overflow-hidden shadow-sm">
                                 <div className="p-2">
                                     {navItems.map((item) => (
                                         <Link
                                             key={item.href}
                                             href={item.href}
-                                            className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all group ${
+                                            className={`flex items-center gap-3 px-4 py-3 rounded-md text-sm font-semibold transition-all ${
                                                 isActive(item.href)
-                                                    ? 'bg-[#222] text-white'
-                                                    : 'text-gray-500 hover:bg-gray-100 hover:text-gray-800'
+                                                    ? 'bg-[#ebebeb] text-[#111]'
+                                                    : 'text-gray-500 hover:bg-[#f5f5f5] hover:text-gray-800'
                                             }`}
                                         >
                                             <item.icon size={18} className={isActive(item.href) ? '' : 'group-hover:text-[#0B4222]'} />
@@ -203,10 +203,10 @@ const UserLayout = ({ children }: { children: React.ReactNode }) => {
                                             key={item.href}
                                             href={item.href}
                                             onClick={() => setMobileMenuOpen(false)}
-                                            className={`flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-medium transition-all mb-1 ${
+                                            className={`flex items-center gap-3 px-4 py-3.5 rounded-md text-sm font-semibold transition-all mb-1 ${
                                                 isActive(item.href)
-                                                    ? 'bg-[#222] text-white'
-                                                    : 'text-gray-600 hover:bg-gray-100'
+                                                    ? 'bg-[#ebebeb] text-[#111]'
+                                                    : 'text-gray-600 hover:bg-[#f5f5f5]'
                                             }`}
                                         >
                                             <item.icon size={18} />
