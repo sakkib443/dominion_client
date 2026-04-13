@@ -11,7 +11,7 @@ import {
 } from 'react-icons/fi';
 import { useGetProductBySlugQuery, useGetRelatedProductsQuery } from '@/redux/api/productApi';
 import { useGetProductReviewsQuery, usePublicCreateReviewMutation } from '@/redux/api/reviewApi';
-import { useAppDispatch } from '@/redux';
+import { useAppDispatch, useAppSelector } from '@/redux';
 import { addToCart } from '@/redux/slices/cartSlice';
 import { useCreateInquiryMutation } from '@/redux/api/inquiryApi';
 import NewProductCard from '@/components/shared/NewProductCard';
@@ -26,6 +26,7 @@ export default function ProductDetailsPage() {
     const { slug } = useParams();
     const router = useRouter();
     const dispatch = useAppDispatch();
+    const { isAuthenticated } = useAppSelector((state: any) => state.auth);
     const [createInquiry] = useCreateInquiryMutation();
     const [quantity, setQuantity] = useState(1);
     const [buyNowQty, setBuyNowQty] = useState(1);
@@ -887,6 +888,11 @@ export default function ProductDetailsPage() {
                             >
                                 <button
                                     onClick={() => {
+                                        // Auth check — login required for Buy Now
+                                        if (!isAuthenticated) {
+                                            router.push(`/login?redirect=/product/${slug}`);
+                                            return;
+                                        }
                                         dispatch(addToCart({
                                             id: product._id,
                                             name: product.name,

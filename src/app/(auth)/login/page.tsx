@@ -7,14 +7,13 @@ import { useAppDispatch } from '@/redux/hooks';
 import { loginSuccess } from '@/redux/slices/authSlice';
 import { useLoginMutation } from '@/redux/api/authApi';
 import { toast } from 'react-hot-toast';
-import { FiMail, FiLock, FiEye, FiEyeOff, FiArrowRight, FiAlertCircle } from 'react-icons/fi';
+import { FiLock, FiEye, FiEyeOff, FiArrowRight, FiAlertCircle, FiUser } from 'react-icons/fi';
 
 const LoginPageInner = () => {
     const [showPassword, setShowPassword] = useState(false);
-    const [formData, setFormData] = useState({
-        email: '',
-        password: '',
-    });
+    const [identifier, setIdentifier] = useState(''); // email OR phone
+    const [password, setPassword] = useState('');
+    const [focused, setFocused] = useState<string | null>(null);
 
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -24,34 +23,29 @@ const LoginPageInner = () => {
     const isExpired = searchParams.get('expired') === 'true';
     const redirectPath = searchParams.get('redirect');
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        try {
-            const res = await login(formData).unwrap();
+        // Detect if email or phone
+        const isPhone = /^[0-9+\-\s()]{7,}$/.test(identifier.trim());
+        const credentials = isPhone
+            ? { phone: identifier.trim(), password }
+            : { email: identifier.trim(), password };
 
-            // Save to Redux
+        try {
+            const res = await login(credentials).unwrap();
+
             dispatch(loginSuccess({
                 user: res.data.user,
                 token: res.data.tokens.accessToken
             }));
-
-            // Save to LocalStorage
             localStorage.setItem('token', res.data.tokens.accessToken);
 
-            toast.success('Login Successful! Welcome back.', {
-                style: {
-                    borderRadius: '10px',
-                    background: '#333',
-                    color: '#fff',
-                },
+            toast.success('স্বাগতম! লগইন সফল হয়েছে।', {
+                style: { borderRadius: '10px', background: '#0B4222', color: '#fff' },
+                icon: '✅',
             });
 
-            // Redirect to saved path or based on role
             if (redirectPath) {
                 router.push(redirectPath);
             } else if (res.data.user.role === 'admin') {
@@ -60,129 +54,143 @@ const LoginPageInner = () => {
                 router.push('/dashboard/user');
             }
         } catch (err: any) {
-            toast.error(err?.data?.message || 'Login failed. Please check credentials.', {
-                duration: 4000
-            });
+            toast.error(err?.data?.message || 'Email/Phone বা Password ভুল হয়েছে।', { duration: 4000 });
         }
     };
 
+    const inputStyle = (name: string): React.CSSProperties => ({
+        width: '100%', padding: '14px 16px 14px 44px',
+        border: `1.5px solid ${focused === name ? '#0B4222' : '#e5e7eb'}`,
+        borderRadius: '10px', fontSize: '14px', fontFamily: 'inherit',
+        background: '#fff', outline: 'none', transition: 'border-color 0.2s ease',
+        boxSizing: 'border-box', color: '#111',
+    });
+
     return (
-        <div className="bg-white p-8 rounded-md shadow-2xl shadow-gray-200 border border-gray-100">
-            {/* Session Expired Warning */}
+        <div style={{ background: '#fff', borderRadius: '20px', padding: '44px 40px', boxShadow: '0 4px 40px rgba(0,0,0,0.08)', border: '1px solid #f0f0f0' }}>
+            {/* Session Expired */}
             {isExpired && (
-                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-md flex items-center gap-3">
-                    <FiAlertCircle size={20} className="text-red-500 flex-shrink-0" />
+                <div style={{ marginBottom: '24px', padding: '14px 16px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <FiAlertCircle size={18} color="#ef4444" />
                     <div>
-                        <p className="text-sm font-bold text-red-700">Session Expired</p>
-                        <p className="text-xs text-red-600">Your session has expired. Please login again to continue.</p>
+                        <p style={{ fontSize: '13px', fontWeight: 700, color: '#b91c1c', margin: 0 }}>Session Expired</p>
+                        <p style={{ fontSize: '12px', color: '#dc2626', margin: 0 }}>আবার লগইন করুন।</p>
                     </div>
                 </div>
             )}
 
-            <div className="text-center mb-10">
-                <h1 className="text-3xl font-black text-gray-900 mb-2">Welcome Back</h1>
-                <p className="text-gray-500 font-medium">Please enter your details to sign in</p>
+            <div style={{ marginBottom: '36px' }}>
+                <h1 style={{ fontSize: '28px', fontWeight: 900, color: '#0B4222', margin: '0 0 6px', letterSpacing: '-0.5px' }}>Welcome Back</h1>
+                <p style={{ fontSize: '14px', color: '#6b7280', margin: 0, fontWeight: 500 }}>আপনার অ্যাকাউন্টে লগইন করুন</p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+
+                {/* Identifier (Email OR Phone) */}
                 <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2 px-1">Email Address</label>
-                    <div className="relative group">
-                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-[var(--color-primary)] transition-colors">
-                            <FiMail size={18} />
+                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#374151', marginBottom: '8px' }}>
+                        Email বা Phone Number
+                    </label>
+                    <div style={{ position: 'relative' }}>
+                        <div style={{ position: 'absolute', top: '50%', left: '14px', transform: 'translateY(-50%)', color: focused === 'id' ? '#0B4222' : '#9ca3af', transition: 'color 0.2s' }}>
+                            <FiUser size={17} />
                         </div>
                         <input
-                            type="email"
-                            name="email"
+                            type="text"
                             required
-                            value={formData.email}
-                            onChange={handleChange}
-                            className="block w-full pl-11 pr-4 py-3.5 bg-gray-50 border border-gray-200 rounded-md text-gray-900 text-sm focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-all outline-none"
-                            placeholder="name@example.com"
+                            value={identifier}
+                            onChange={e => setIdentifier(e.target.value)}
+                            onFocus={() => setFocused('id')}
+                            onBlur={() => setFocused(null)}
+                            style={inputStyle('id')}
+                            placeholder="example@email.com বা 01XXXXXXXXX"
+                            autoComplete="username"
                         />
                     </div>
                 </div>
 
+                {/* Password */}
                 <div>
-                    <div className="flex items-center justify-between mb-2 px-1">
-                        <label className="block text-sm font-bold text-gray-700">Password</label>
-                        <Link href="/forgot-password" title="Forgot Password" className="text-xs font-bold text-[var(--color-primary)] hover:underline">
-                            Forgot Password?
-                        </Link>
-                    </div>
-                    <div className="relative group">
-                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-[var(--color-primary)] transition-colors">
-                            <FiLock size={18} />
+                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#374151', marginBottom: '8px' }}>
+                        Password
+                    </label>
+                    <div style={{ position: 'relative' }}>
+                        <div style={{ position: 'absolute', top: '50%', left: '14px', transform: 'translateY(-50%)', color: focused === 'pw' ? '#0B4222' : '#9ca3af', transition: 'color 0.2s' }}>
+                            <FiLock size={17} />
                         </div>
                         <input
-                            type={showPassword ? "text" : "password"}
-                            name="password"
+                            type={showPassword ? 'text' : 'password'}
                             required
-                            value={formData.password}
-                            onChange={handleChange}
-                            className="block w-full pl-11 pr-12 py-3.5 bg-gray-50 border border-gray-200 rounded-md text-gray-900 text-sm focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-all outline-none"
-                            placeholder="••••••••"
+                            value={password}
+                            onChange={e => setPassword(e.target.value)}
+                            onFocus={() => setFocused('pw')}
+                            onBlur={() => setFocused(null)}
+                            style={{ ...inputStyle('pw'), paddingRight: '44px' }}
+                            placeholder="আপনার পাসওয়ার্ড দিন"
+                            autoComplete="current-password"
                         />
                         <button
                             type="button"
                             onClick={() => setShowPassword(!showPassword)}
-                            className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+                            style={{ position: 'absolute', top: '50%', right: '14px', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', display: 'flex', alignItems: 'center', padding: 0 }}
                         >
-                            {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                            {showPassword ? <FiEyeOff size={17} /> : <FiEye size={17} />}
                         </button>
                     </div>
                 </div>
 
-                <div className="flex items-center">
-                    <input
-                        id="remember-me"
-                        name="remember-me"
-                        type="checkbox"
-                        className="h-4 w-4 text-[var(--color-primary)] focus:ring-[var(--color-primary)] border-gray-300 rounded cursor-pointer"
-                    />
-                    <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-600 font-medium cursor-pointer">
-                        Remember me for 30 days
-                    </label>
-                </div>
-
+                {/* Submit */}
                 <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full flex items-center justify-center gap-2 py-4 bg-gradient-to-r from-gray-900 to-gray-800 text-white rounded-md font-bold shadow-xl hover:shadow-gray-200 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-70 disabled:cursor-not-allowed group"
+                    style={{
+                        width: '100%', padding: '15px', marginTop: '4px',
+                        background: isLoading ? '#5a8a6e' : 'linear-gradient(135deg, #0B4222 0%, #0d5229 100%)',
+                        color: '#fff', border: 'none', borderRadius: '12px',
+                        fontSize: '15px', fontWeight: 800, cursor: isLoading ? 'not-allowed' : 'pointer',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                        transition: 'all 0.2s ease', letterSpacing: '0.3px', fontFamily: 'inherit',
+                    }}
+                    onMouseEnter={e => { if (!isLoading) (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-1px)'; }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(0)'; }}
                 >
                     {isLoading ? (
                         <>
-                            <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
-                            Signing In...
+                            <div style={{ width: '18px', height: '18px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'authSpin 0.8s linear infinite' }} />
+                            লগইন হচ্ছে...
                         </>
                     ) : (
                         <>
                             Sign In
-                            <FiArrowRight className="group-hover:translate-x-1 transition-transform" />
+                            <FiArrowRight size={17} />
                         </>
                     )}
                 </button>
             </form>
 
-            <div className="mt-8 pt-8 border-t border-gray-50 text-center">
-                <p className="text-sm text-gray-500 font-medium">
-                    Don't have an account?{' '}
-                    <Link href="/register" className="text-[var(--color-primary)] font-bold hover:underline">
-                        Create Account
+            <div style={{ marginTop: '28px', paddingTop: '24px', borderTop: '1px solid #f3f4f6', textAlign: 'center' }}>
+                <p style={{ fontSize: '13px', color: '#6b7280', margin: 0, fontWeight: 500 }}>
+                    অ্যাকাউন্ট নেই?{' '}
+                    <Link
+                        href={redirectPath ? `/register?redirect=${encodeURIComponent(redirectPath)}` : '/register'}
+                        style={{ color: '#0B4222', fontWeight: 800, textDecoration: 'none' }}
+                    >
+                        রেজিস্ট্রেশন করুন →
                     </Link>
                 </p>
             </div>
+
+            <style>{`
+                @keyframes authSpin { to { transform: rotate(360deg); } }
+            `}</style>
         </div>
     );
 };
 
-// Wrap with Suspense for useSearchParams
-const LoginPage = () => {
-    return (
-        <Suspense fallback={<div className="p-8 text-center">Loading...</div>}>
-            <LoginPageInner />
-        </Suspense>
-    );
-};
+const LoginPage = () => (
+    <Suspense fallback={<div style={{ padding: '40px', textAlign: 'center', color: '#0B4222' }}>Loading...</div>}>
+        <LoginPageInner />
+    </Suspense>
+);
 
 export default LoginPage;
