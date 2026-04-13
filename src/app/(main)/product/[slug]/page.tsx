@@ -15,6 +15,7 @@ import { useAppDispatch, useAppSelector } from '@/redux';
 import { addToCart } from '@/redux/slices/cartSlice';
 import { useCreateInquiryMutation } from '@/redux/api/inquiryApi';
 import NewProductCard from '@/components/shared/NewProductCard';
+import OrderModal from '@/components/shared/OrderModal';
 import { FiSend } from 'react-icons/fi';
 import {
     FaFacebookF, FaWhatsapp, FaTelegramPlane,
@@ -42,6 +43,7 @@ export default function ProductDetailsPage() {
     const [activeInfoPanel, setActiveInfoPanel] = useState<'delivery' | 'payment' | 'terms' | null>(null);
     const [showRatingModal, setShowRatingModal] = useState(false);
     const [showSharePopup, setShowSharePopup] = useState(false);
+    const [showBuyNowModal, setShowBuyNowModal] = useState(false);
     const [shareLinkCopied, setShareLinkCopied] = useState(false);
     const [showCommentsModal, setShowCommentsModal] = useState(false);
     const [cmtUserName, setCmtUserName] = useState('');
@@ -888,21 +890,9 @@ export default function ProductDetailsPage() {
                             >
                                 <button
                                     onClick={() => {
-                                        // Auth check — login required for Buy Now
-                                        if (!isAuthenticated) {
-                                            router.push(`/login?redirect=/product/${slug}`);
-                                            return;
-                                        }
-                                        dispatch(addToCart({
-                                            id: product._id,
-                                            name: product.name,
-                                            price: discountedPrice,
-                                            mrp: product.originalPrice || product.price,
-                                            image: product.thumbnail,
-                                            category: product.category?.name || 'General',
-                                            quantity: buyNowQty,
-                                        }));
-                                        router.push('/cart');
+                                        // Show order modal directly — no login required, no cart redirect
+                                        if (product.stock === 0) return;
+                                        setShowBuyNowModal(true);
                                     }}
                                     disabled={product.stock === 0}
                                     style={{
@@ -1612,5 +1602,16 @@ export default function ProductDetailsPage() {
                 )}
             </div>
         </div>
+
+        {/* ═══ BUY NOW ORDER MODAL ═══ */}
+        {product && (
+            <OrderModal
+                isOpen={showBuyNowModal}
+                onClose={() => setShowBuyNowModal(false)}
+                items={[{ product: product._id, quantity: buyNowQty }]}
+                totalPrice={discountedPrice * buyNowQty}
+                clearCartOnSuccess={false}
+            />
+        )}
     );
 }

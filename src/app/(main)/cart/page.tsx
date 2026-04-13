@@ -3,19 +3,10 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useAppDispatch, useAppSelector } from '@/redux';
-import {
-    removeFromCart,
-    increaseQuantity,
-    decreaseQuantity,
-    clearCart
-} from '@/redux/slices/cartSlice';
-import { useGuestCheckoutMutation } from '@/redux/api/orderApi';
-import {
-    FiTrash2,
-    FiChevronLeft,
-    FiX
-} from 'react-icons/fi';
+import { removeFromCart, increaseQuantity, decreaseQuantity, clearCart } from '@/redux/slices/cartSlice';
+import { FiTrash2, FiChevronLeft } from 'react-icons/fi';
 import EmptyState from '@/components/shared/EmptyState';
+import OrderModal from '@/components/shared/OrderModal';
 import { toast } from 'react-hot-toast';
 
 const numberToWords = (num: number): string => {
@@ -37,17 +28,8 @@ const numberToWords = (num: number): string => {
 const CartPage = () => {
     const { items, totalPrice } = useAppSelector((state) => state.cart);
     const dispatch = useAppDispatch();
-    const [guestCheckout, { isLoading: isOrdering }] = useGuestCheckoutMutation();
     const [showOrderModal, setShowOrderModal] = useState(false);
     const [orderSuccess, setOrderSuccess] = useState(false);
-    const [formData, setFormData] = useState({
-        name: '',
-        contact: '',      // email or phone
-        location: '',
-        query: '',        // optional note/message
-        password: '',     // optional - for account creation
-    });
-    const [showPassword, setShowPassword] = useState(false);
 
     if (items.length === 0 && !orderSuccess) {
         return (
@@ -66,63 +48,6 @@ const CartPage = () => {
         if (window.confirm('Are you sure you want to clear your cart?')) {
             dispatch(clearCart());
             toast.success('Cart cleared successfully');
-        }
-    };
-
-    const handleSubmitOrder = async () => {
-        // ── Client-side validation ──
-        if (!formData.name.trim()) {
-            toast.error('Name is required.'); return;
-        }
-        if (!formData.contact.trim()) {
-            toast.error('Phone or Email is required.'); return;
-        }
-        if (!formData.location.trim()) {
-            toast.error('Delivery Location is required.'); return;
-        }
-
-        // Detect email vs phone
-        const isEmail = formData.contact.includes('@');
-        const phone = isEmail ? '' : formData.contact.trim();
-        const email = isEmail ? formData.contact.trim() : `${formData.contact.trim().replace(/\s+/g, '')}@guest.dominion.com`;
-
-        try {
-            const orderData = {
-                shippingAddress: {
-                    fullName: formData.name,
-                    phone: phone || formData.contact.trim(),
-                    email,
-                    address: formData.location,
-                    city: '',
-                    area: '',
-                },
-                items: items.map(item => ({
-                    product: item.id,
-                    quantity: item.quantity,
-                })),
-                paymentMethod: 'cod',
-                note: formData.query || '',
-                password: formData.password || undefined,
-            };
-            await guestCheckout(orderData).unwrap();
-            setShowOrderModal(false);
-            setOrderSuccess(true);
-            dispatch(clearCart());
-            setFormData({ name: '', contact: '', location: '', query: '', password: '' });
-            toast.success('Order placed successfully!');
-        } catch (err: any) {
-            const data = err?.data;
-            if (data?.errors) {
-                if (Array.isArray(data.errors)) {
-                    toast.error(data.errors.map((e: any) => typeof e === 'string' ? e : (e.message || e.msg)).join('\n'), { duration: 5000 });
-                } else if (typeof data.errors === 'object') {
-                    toast.error(Object.values(data.errors).map((e: any) => e?.message || String(e)).join('\n'), { duration: 5000 });
-                } else {
-                    toast.error(String(data.errors), { duration: 5000 });
-                }
-            } else {
-                toast.error(data?.message || 'Failed to place order. Please try again.', { duration: 4000 });
-            }
         }
     };
 
@@ -287,151 +212,16 @@ const CartPage = () => {
                     </button>
                 </div>
 
-                {/* ═══ ORDER CONFIRMATION POPUP ═══ */}
-                {showOrderModal && (
-                    <div style={{
-                        position: 'fixed', inset: 0, zIndex: 9999,
-                        background: 'rgba(0,0,0,0.5)', display: 'flex',
-                        alignItems: 'center', justifyContent: 'center',
-                        animation: 'fadeIn 0.2s ease-out',
-                    }} onClick={() => setShowOrderModal(false)}>
-                        <div
-                            onClick={(e) => e.stopPropagation()}
-                            style={{
-                                background: '#fff', borderRadius: '8px',
-                                width: '100%', maxWidth: '440px',
-                                padding: '32px', position: 'relative',
-                                boxShadow: '0 25px 50px rgba(0,0,0,0.2)',
-                            }}
-                        >
-                            {/* Close Button */}
-                            <button
-                                onClick={() => setShowOrderModal(false)}
-                                style={{
-                                    position: 'absolute', top: '12px', right: '12px',
-                                    width: '32px', height: '32px', borderRadius: '50%',
-                                    background: '#f3f4f6', border: 'none', cursor: 'pointer',
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    color: '#666',
-                                }}
-                            >
-                                <FiX size={16} />
-                            </button>
+                {/* ═══ ORDER MODAL ═══ */}
+                <OrderModal
+                    isOpen={showOrderModal}
+                    onClose={() => setShowOrderModal(false)}
+                    items={items.map(item => ({ product: item.id, quantity: item.quantity }))}
+                    totalPrice={totalPrice}
+                    clearCartOnSuccess={true}
+                    onSuccess={() => setOrderSuccess(true)}
+                />
 
-                            <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#1a1a1a', margin: '0 0 6px 0' }}>Confirm Your Order</h2>
-                            <p style={{ fontSize: '12px', color: '#888', margin: '0 0 24px 0' }}>Please fill in your details to place the order</p>
-
-                            {/* Form Fields */}
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-
-                                {/* Name */}
-                                <div>
-                                    <label style={{ fontSize: '12px', fontWeight: 700, color: '#555', display: 'block', marginBottom: '4px' }}>Full Name *</label>
-                                    <input
-                                        type="text"
-                                        value={formData.name}
-                                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                        placeholder="Enter your full name"
-                                        style={{ width: '100%', padding: '10px 14px', fontSize: '13px', border: '1px solid #e5e7eb', borderRadius: '6px', outline: 'none', transition: 'border-color 0.2s', boxSizing: 'border-box' }}
-                                        onFocus={(e) => e.target.style.borderColor = '#0B4222'}
-                                        onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
-                                    />
-                                </div>
-
-                                {/* Phone or Email */}
-                                <div>
-                                    <label style={{ fontSize: '12px', fontWeight: 700, color: '#555', display: 'block', marginBottom: '4px' }}>Phone or Email *</label>
-                                    <input
-                                        type="text"
-                                        value={formData.contact}
-                                        onChange={(e) => setFormData({ ...formData, contact: e.target.value })}
-                                        placeholder="01XXXXXXXXX or name@email.com"
-                                        style={{ width: '100%', padding: '10px 14px', fontSize: '13px', border: '1px solid #e5e7eb', borderRadius: '6px', outline: 'none', transition: 'border-color 0.2s', boxSizing: 'border-box' }}
-                                        onFocus={(e) => e.target.style.borderColor = '#0B4222'}
-                                        onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
-                                    />
-                                </div>
-
-                                {/* Delivery Location */}
-                                <div>
-                                    <label style={{ fontSize: '12px', fontWeight: 700, color: '#555', display: 'block', marginBottom: '4px' }}>Delivery Location *</label>
-                                    <textarea
-                                        value={formData.location}
-                                        onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                                        placeholder="Enter your full delivery address"
-                                        rows={2}
-                                        style={{ width: '100%', padding: '10px 14px', fontSize: '13px', border: '1px solid #e5e7eb', borderRadius: '6px', outline: 'none', transition: 'border-color 0.2s', resize: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }}
-                                        onFocus={(e) => e.target.style.borderColor = '#0B4222'}
-                                        onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
-                                    />
-                                </div>
-
-                                {/* Query (optional) */}
-                                <div>
-                                    <label style={{ fontSize: '12px', fontWeight: 700, color: '#555', display: 'block', marginBottom: '4px' }}>Query / Note <span style={{ color: '#aaa', fontWeight: 400 }}>(optional)</span></label>
-                                    <input
-                                        type="text"
-                                        value={formData.query}
-                                        onChange={(e) => setFormData({ ...formData, query: e.target.value })}
-                                        placeholder="Any special instructions or questions?"
-                                        style={{ width: '100%', padding: '10px 14px', fontSize: '13px', border: '1px solid #e5e7eb', borderRadius: '6px', outline: 'none', transition: 'border-color 0.2s', boxSizing: 'border-box' }}
-                                        onFocus={(e) => e.target.style.borderColor = '#0B4222'}
-                                        onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
-                                    />
-                                </div>
-
-                                {/* Password (optional) */}
-                                <div>
-                                    <label style={{ fontSize: '12px', fontWeight: 700, color: '#555', display: 'block', marginBottom: '4px' }}>
-                                        Password <span style={{ color: '#aaa', fontWeight: 400 }}>(optional — to login later)</span>
-                                    </label>
-                                    <div style={{ position: 'relative' }}>
-                                        <input
-                                            type={showPassword ? 'text' : 'password'}
-                                            value={formData.password}
-                                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                            placeholder="Set a password for your account"
-                                            style={{ width: '100%', padding: '10px 40px 10px 14px', fontSize: '13px', border: '1px solid #e5e7eb', borderRadius: '6px', outline: 'none', transition: 'border-color 0.2s', boxSizing: 'border-box' }}
-                                            onFocus={(e) => e.target.style.borderColor = '#0B4222'}
-                                            onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
-                                        />
-                                        <button type="button" onClick={() => setShowPassword(!showPassword)}
-                                            style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#aaa', fontSize: '12px', padding: 0 }}>
-                                            {showPassword ? 'Hide' : 'Show'}
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Order Summary in Modal */}
-                            <div style={{
-                                marginTop: '20px', padding: '12px', background: '#f9fafb',
-                                borderRadius: '6px', border: '1px solid #e5e7eb',
-                            }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#555' }}>
-                                    <span>Total Items: <strong>{items.length}</strong></span>
-                                    <span>Total: <strong style={{ color: '#1a1a1a', fontSize: '15px' }}>৳{totalPrice.toLocaleString()}</strong></span>
-                                </div>
-                            </div>
-
-                            {/* Submit Button */}
-                            <button
-                                onClick={handleSubmitOrder}
-                                disabled={isOrdering}
-                                style={{
-                                    width: '100%', marginTop: '20px', padding: '14px',
-                                    background: isOrdering ? '#999' : '#0B4222', color: '#fff',
-                                    fontSize: '14px', fontWeight: 800, letterSpacing: '1px',
-                                    textTransform: 'uppercase', border: 'none', borderRadius: '6px',
-                                    cursor: isOrdering ? 'not-allowed' : 'pointer',
-                                    transition: 'all 0.2s ease',
-                                }}
-                            >
-                                {isOrdering ? 'PLACING ORDER...' : 'SUBMIT ORDER'}
-                            </button>
-                        </div>
-                    </div>
-                )}
 
                 {/* ═══ ORDER SUCCESS MESSAGE ═══ */}
                 {orderSuccess && (
