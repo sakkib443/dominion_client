@@ -52,8 +52,8 @@ const CartPage = () => {
     };
 
     return (
-        <div style={{ minHeight: '100vh', paddingBottom: '60px', background: '#fff' }}>
-            <div className="container" style={{ padding: '0 1rem' }}>
+        <div style={{ minHeight: '100vh', paddingBottom: '60px', background: '#f3f4f6' }}>
+            <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '0 1rem' }}>
                 {/* Back Button */}
                 <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: 700, color: '#888', textDecoration: 'none', padding: '16px 0', transition: 'color 0.2s' }}>
                     <FiChevronLeft /> Back to Shopping
