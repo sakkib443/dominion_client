@@ -56,7 +56,7 @@ const UserDashboard = () => {
 
             {/* ── Welcome Banner ── */}
             <div style={{
-                background: 'linear-gradient(135deg, #0B4222 0%, #1a6b3c 60%, #0d5229 100%)',
+                background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 60%, #1a1a1a 100%)',
                 borderRadius: '16px', padding: '32px 36px',
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                 overflow: 'hidden', position: 'relative',
@@ -102,9 +102,9 @@ const UserDashboard = () => {
             {/* ── Stats Row ── */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
                 {[
-                    { icon: FiShoppingBag, label: 'Total Orders', value: totalOrders, color: '#0B4222', bg: '#F0F7F3' },
-                    { icon: FiCheckCircle, label: 'Delivered', value: delivered, color: '#1D4ED8', bg: '#EFF6FF' },
-                    { icon: FiDollarSign, label: 'Total Spent', value: `৳${totalSpent.toLocaleString()}`, color: '#7C3AED', bg: '#F5F3FF' },
+                    { icon: FiShoppingBag, label: 'Total Orders', value: totalOrders, color: '#444', bg: '#f5f5f5' },
+                    { icon: FiCheckCircle, label: 'Delivered', value: delivered, color: '#444', bg: '#f5f5f5' },
+                    { icon: FiDollarSign, label: 'Total Spent', value: `৳${totalSpent.toLocaleString()}`, color: '#444', bg: '#f5f5f5' },
                 ].map((s, i) => (
                     <div key={i} style={{
                         background: '#fff', borderRadius: '14px',
@@ -143,24 +143,24 @@ const UserDashboard = () => {
                             label: 'My Orders',
                             desc: 'Track, view and manage your orders',
                             href: '/dashboard/user/orders',
-                            accentColor: '#0B4222',
-                            accentBg: '#F0F7F3',
+                            accentColor: '#444',
+                            accentBg: '#f5f5f5',
                         },
                         {
                             icon: FiUser,
                             label: 'Profile Settings',
                             desc: 'Update your name, phone and email',
                             href: '/dashboard/user/profile',
-                            accentColor: '#B45309',
-                            accentBg: '#FFF8E7',
+                            accentColor: '#444',
+                            accentBg: '#f5f5f5',
                         },
                         {
                             icon: FiSettings,
                             label: 'Account Settings',
                             desc: 'Password and security options',
                             href: '/dashboard/user/settings',
-                            accentColor: '#374151',
-                            accentBg: '#F9FAFB',
+                            accentColor: '#444',
+                            accentBg: '#f5f5f5',
                         },
                     ].map((item) => (
                         <Link key={item.label} href={item.href} style={{

@@ -146,8 +146,8 @@ const UserLayout = ({ children }: { children: React.ReactNode }) => {
                                             href={item.href}
                                             className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all group ${
                                                 isActive(item.href)
-                                                    ? 'bg-[#0B4222] text-white shadow-md shadow-[#0B4222]/20'
-                                                    : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800'
+                                                    ? 'bg-[#222] text-white'
+                                                    : 'text-gray-500 hover:bg-gray-100 hover:text-gray-800'
                                             }`}
                                         >
                                             <item.icon size={18} className={isActive(item.href) ? '' : 'group-hover:text-[#0B4222]'} />
@@ -205,8 +205,8 @@ const UserLayout = ({ children }: { children: React.ReactNode }) => {
                                             onClick={() => setMobileMenuOpen(false)}
                                             className={`flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-medium transition-all mb-1 ${
                                                 isActive(item.href)
-                                                    ? 'bg-[#0B4222] text-white shadow-md'
-                                                    : 'text-gray-600 hover:bg-gray-50'
+                                                    ? 'bg-[#222] text-white'
+                                                    : 'text-gray-600 hover:bg-gray-100'
                                             }`}
                                         >
                                             <item.icon size={18} />
