@@ -386,7 +386,7 @@ export default function ProductDetailsPage() {
                             {/* Stats Row */}
                             <div className="pd-stats-row" style={{
                                 display: 'flex', alignItems: 'center', gap: '40px',
-                                flexWrap: 'wrap', fontSize: '14px', color: '#555',
+                                flexWrap: 'wrap', fontSize: '14px', color: '#666',
                                 marginTop: '14px'
                             }}>
                                 {/* Sold */}
@@ -400,12 +400,12 @@ export default function ProductDetailsPage() {
                                     style={{
                                         display: 'flex', alignItems: 'center', gap: '6px',
                                         background: 'none', border: 'none', cursor: 'pointer',
-                                        color: '#555', fontSize: '14px'
+                                        color: '#666', fontSize: '14px'
                                     }}
                                 >
-                                    <FiStar size={15} style={{ color: '#555' }} />
+                                    <FiStar size={15} style={{ color: '#666' }} />
                                     <span style={{ fontWeight: 400 }}>{product.rating?.toFixed(1) || '0.0'}</span>
-                                    <span style={{ color: '#888' }}>({product.reviewCount || 0} Ratings)</span>
+                                    <span style={{ color: '#666' }}>({product.reviewCount || 0} Ratings)</span>
                                 </button>
 
                                 {/* Like / Heart */}
@@ -420,28 +420,28 @@ export default function ProductDetailsPage() {
                                     style={{
                                         display: 'flex', alignItems: 'center', gap: '6px',
                                         background: 'none', border: 'none', cursor: 'pointer',
-                                        color: '#555', fontSize: '14px'
+                                        color: '#666', fontSize: '14px'
                                     }}
                                 >
-                                    <img src="/ICON/like.png" alt="Like" style={{ width: '16px', height: '16px', opacity: isLiked ? 1 : 0.6 }} />
+                                    <img src="/ICON/like.png" alt="Like" style={{ width: '16px', height: '16px', opacity: isLiked ? 1 : 0.7 }} />
                                     <span style={{ fontWeight: 400, color: isLiked ? '#E4525C' : undefined }}>{(product.likeCount || 0) + likeCount}</span>
                                 </button>
 
                                 {/* Comments */}
                                 <div onClick={() => setShowCommentsModal(true)} style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
-                                    <img src="/ICON/comments.png" alt="Comments" style={{ width: '16px', height: '16px', opacity: 0.6 }} />
+                                    <img src="/ICON/comments.png" alt="Comments" style={{ width: '16px', height: '16px', opacity: 0.7 }} />
                                     <span style={{ fontWeight: 400 }}>{product.commentCount || product.reviewCount || 0}</span>
                                 </div>
 
                                 {/* Share */}
                                 <div onClick={() => { setShowSharePopup(true); if (product?._id) incrementStat({ id: product._id, field: 'shareCount' }); }} style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
-                                    <img src="/ICON/share.png" alt="Share" style={{ width: '16px', height: '16px', opacity: 0.6 }} />
+                                    <img src="/ICON/share.png" alt="Share" style={{ width: '16px', height: '16px', opacity: 0.7 }} />
                                     <span style={{ fontWeight: 400 }}>{product.shareCount || 0}</span>
                                 </div>
 
                                 {/* Views */}
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
-                                    <img src="/ICON/views.png" alt="Views" style={{ width: '16px', height: '16px', opacity: 0.6 }} />
+                                    <img src="/ICON/views.png" alt="Views" style={{ width: '16px', height: '16px', opacity: 0.7 }} />
                                     <span style={{ fontWeight: 400 }}>{product.viewCount || 0}</span>
                                 </div>
 
@@ -457,10 +457,10 @@ export default function ProductDetailsPage() {
                                     style={{
                                         display: 'flex', alignItems: 'center', gap: '6px',
                                         background: 'none', border: 'none', cursor: 'pointer',
-                                        color: '#555', fontSize: '14px'
+                                        color: '#666', fontSize: '14px'
                                     }}
                                 >
-                                    <FiCopy size={15} style={{ color: '#555' }} />
+                                    <FiCopy size={15} style={{ color: '#666' }} />
                                     <span style={{ fontWeight: 400 }}>{linkCopied ? 'Copied!' : 'Copy Link'}</span>
                                 </button>
 
@@ -469,10 +469,10 @@ export default function ProductDetailsPage() {
                                     onClick={() => setShowDownloadModal(true)}
                                     style={{
                                         display: 'flex', alignItems: 'center', gap: '6px',
-                                        color: '#555', fontSize: '14px', background: 'none', border: 'none', cursor: 'pointer'
+                                        color: '#666', fontSize: '14px', background: 'none', border: 'none', cursor: 'pointer'
                                     }}
                                 >
-                                    <FiDownload size={15} style={{ color: '#555' }} />
+                                    <FiDownload size={15} style={{ color: '#666' }} />
                                     <span style={{ fontWeight: 400 }}>Image Download</span>
                                 </button>
                             </div>
