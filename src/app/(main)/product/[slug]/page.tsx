@@ -597,7 +597,7 @@ export default function ProductDetailsPage() {
                             </div>
 
                             {/* Size Swatches Column (RIGHT of image) */}
-                            <div className="pd-swatch-col" style={{
+                            <div className="pd-size-col" style={{
                                 width: 'clamp(44px, 5vw, 56px)', display: 'flex', flexDirection: 'column',
                                 alignItems: 'center', padding: '8px 0',
                                 flexShrink: 0, gap: '4px',
@@ -634,7 +634,7 @@ export default function ProductDetailsPage() {
                             </div>
 
                             {/* Color Label Column (RIGHT of image) */}
-                            <div className="pd-swatch-col" style={{
+                            <div className="pd-color-col" style={{
                                 width: 'clamp(44px, 5vw, 56px)', display: 'flex', flexDirection: 'column',
                                 alignItems: 'center', padding: '8px 0',
                                 flexShrink: 0, gap: '4px',
@@ -1130,107 +1130,98 @@ export default function ProductDetailsPage() {
                 @media (max-width: 767px) {
 
                     /* Main flex → column */
-                    .pd-main-flex {
-                        flex-direction: column !important;
-                    }
+                    .pd-main-flex { flex-direction: column !important; }
 
-                    /* Left (image) section → full width, auto height */
+                    /* Left section → full width, wrap so inner cols reorder */
                     .pd-left-section {
-                        flex: 0 0 100% !important;
-                        max-width: 100% !important;
-                        min-width: unset !important;
-                        height: auto !important;
+                        flex: 0 0 100% !important; max-width: 100% !important;
+                        min-width: unset !important; height: auto !important;
                         padding-right: 0 !important;
+                        flex-wrap: wrap !important; align-content: flex-start !important;
                     }
 
-                    /* Right (details) section → full width, auto height */
-                    .pd-right-section {
-                        flex: 0 0 100% !important;
-                        max-width: 100% !important;
-                        height: auto !important;
-                        min-height: unset !important;
-                        border-left: none !important;
-                        border-top: 1px solid #e5e7eb !important;
-                        padding-left: 0 !important;
-                    }
-
-                    /* Right section scrollable content → not scrollable on mobile, just flow */
-                    .pd-right-scroll {
-                        overflow-y: visible !important;
-                        flex: unset !important;
-                        padding: 8px 0 !important;
-                    }
-
-                    /* Hide scroll arrows on mobile */
-                    .pd-scroll-arrow {
-                        display: none !important;
-                    }
-
-                    /* Thumbnail column (Image list) → smaller */
-                    .pd-thumb-col {
-                        width: 60px !important;
-                    }
-
-                    /* Thumbnail buttons */
-                    .pd-thumb-col button:not(.pd-scroll-arrow) {
-                        width: 52px !important;
-                        height: 52px !important;
-                    }
-
-                    /* Image square wrapper → full width square */
+                    /* ── Image wrapper → full width, ORDER 1 ── */
                     .pd-image-wrapper {
-                        height: auto !important;
+                        width: 100% !important; flex: unset !important;
+                        order: 1 !important; padding: 4px !important;
+                    }
+                    .pd-image-wrapper > div {
+                        width: 100% !important; height: auto !important;
                         aspect-ratio: 1 / 1 !important;
-                        flex: 1 !important;
                     }
 
-                    /* Size/Color swatch columns → smaller */
-                    .pd-swatch-col {
-                        width: 40px !important;
+                    /* ── Thumbnail column → horizontal strip, ORDER 2 ── */
+                    .pd-thumb-col {
+                        width: 100% !important; order: 2 !important;
+                        flex-direction: row !important; flex-wrap: nowrap !important;
+                        overflow-x: auto !important; overflow-y: hidden !important;
+                        gap: 6px !important; padding: 6px 0 !important;
+                        margin-left: 0 !important; align-items: center !important;
                     }
+                    .pd-thumb-col > span { display: none !important; }
+                    .pd-thumb-col > div:last-child { display: none !important; }
+                    .pd-thumb-col > div:first-of-type {
+                        flex-direction: row !important; flex-wrap: nowrap !important;
+                        max-height: unset !important; overflow: visible !important; gap: 6px !important;
+                    }
+                    .pd-thumb-col button { width: 56px !important; height: 56px !important; }
 
-                    /* Action bar → full width, wrap */
+                    /* ── Size → horizontal row, ORDER 3 ── */
+                    .pd-size-col {
+                        width: 100% !important; order: 3 !important;
+                        flex-direction: row !important; flex-wrap: wrap !important;
+                        align-items: center !important; gap: 8px !important; padding: 6px 0 !important;
+                    }
+                    .pd-size-col > div:first-of-type {
+                        flex-direction: row !important; flex-wrap: wrap !important;
+                        max-height: unset !important; overflow: visible !important; gap: 6px !important;
+                    }
+                    .pd-size-col > div:last-child { display: none !important; }
+                    .pd-size-col button { width: 40px !important; height: 40px !important; font-size: 11px !important; }
+
+                    /* ── Color → horizontal row, ORDER 4 ── */
+                    .pd-color-col {
+                        width: 100% !important; order: 4 !important;
+                        flex-direction: row !important; flex-wrap: wrap !important;
+                        align-items: center !important; gap: 8px !important; padding: 6px 0 !important;
+                    }
+                    .pd-color-col > div:first-of-type {
+                        flex-direction: row !important; flex-wrap: wrap !important;
+                        max-height: unset !important; overflow: visible !important; gap: 6px !important;
+                    }
+                    .pd-color-col > div:last-child { display: none !important; }
+                    .pd-color-col button { width: 36px !important; height: 36px !important; }
+
+                    /* Right section → full width, auto height */
+                    .pd-right-section {
+                        flex: 0 0 100% !important; max-width: 100% !important;
+                        height: auto !important; border-left: none !important;
+                        border-top: 1px solid #e5e7eb !important; padding-left: 0 !important;
+                    }
+                    .pd-right-scroll { overflow-y: visible !important; flex: unset !important; padding: 8px 0 !important; }
+                    .pd-scroll-arrow { display: none !important; }
+
+                    /* Action bar → full width */
                     .pd-action-bar {
-                        flex: 0 0 100% !important;
-                        max-width: 100% !important;
-                        flex-wrap: wrap !important;
-                        gap: 8px !important;
-                        height: auto !important;
-                        padding-right: 0 !important;
-                        margin-top: 16px !important;
+                        flex: 0 0 100% !important; max-width: 100% !important;
+                        flex-wrap: wrap !important; gap: 8px !important;
+                        height: auto !important; padding-right: 0 !important; margin-top: 16px !important;
+                    }
+                    .pd-action-bar > div, .pd-action-bar > button {
+                        flex: 1 1 auto !important; min-width: 100px !important; height: 42px !important;
                     }
 
-                    /* Delivery/Payment/Terms bar → full width */
+                    /* Info bar → full width */
                     .pd-info-bar {
-                        flex: 0 0 100% !important;
-                        max-width: 100% !important;
-                        height: auto !important;
-                        flex-wrap: wrap !important;
-                        margin-left: 0 !important;
-                        padding: 8px 0 0 0 !important;
-                        gap: 12px !important;
+                        flex: 0 0 100% !important; max-width: 100% !important;
+                        height: auto !important; flex-wrap: wrap !important;
+                        margin-left: 0 !important; padding: 8px 0 0 0 !important; gap: 12px !important;
                     }
 
-                    /* Stats row → wrap tightly */
-                    .pd-stats-row {
-                        gap: 12px !important;
-                        flex-wrap: wrap !important;
-                    }
-
-                    /* Related products → 2 cols on mobile */
-                    .pd-related-grid {
-                        grid-template-columns: repeat(2, 1fr) !important;
-                    }
-
-                    /* Title font → smaller */
-                    .pd-title {
-                        font-size: 16px !important;
-                    }
-
-                    /* Price font → smaller */
-                    .pd-price {
-                        font-size: 17px !important;
-                    }
+                    .pd-stats-row { gap: 12px !important; flex-wrap: wrap !important; }
+                    .pd-related-grid { grid-template-columns: repeat(2, 1fr) !important; }
+                    .pd-title { font-size: 16px !important; }
+                    .pd-price { font-size: 17px !important; }
                 }
             `}</style>
 
