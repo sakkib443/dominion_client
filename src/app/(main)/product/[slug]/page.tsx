@@ -9,19 +9,19 @@ import {
     FiThumbsUp, FiChevronUp, FiChevronDown, FiMessageSquare,
     FiEye, FiChevronRight, FiChevronLeft
 } from 'react-icons/fi';
-import { useGetProductBySlugQuery, useGetRelatedProductsQuery } from '@/redux/api/productApi';
+import { useGetProductBySlugQuery, useGetRelatedProductsQuery, useIncrementProductStatMutation } from '@/redux/api/productApi';
 import { useGetProductReviewsQuery, usePublicCreateReviewMutation } from '@/redux/api/reviewApi';
 import { useAppDispatch, useAppSelector } from '@/redux';
 import { addToCart } from '@/redux/slices/cartSlice';
 import { useCreateInquiryMutation } from '@/redux/api/inquiryApi';
-import NewProductCard from '@/components/shared/NewProductCard';
+import NewProductCard, { CommentsPopup } from '@/components/shared/NewProductCard';
 import OrderModal from '@/components/shared/OrderModal';
 import { FiSend } from 'react-icons/fi';
 import {
     FaFacebookF, FaWhatsapp, FaTelegramPlane,
-    FaLinkedinIn, FaPinterestP, FaEnvelope
+    FaLinkedinIn, FaPinterestP, FaEnvelope, FaInstagram
 } from 'react-icons/fa';
-import { FaXTwitter } from 'react-icons/fa6';
+import { FaXTwitter, FaTiktok } from 'react-icons/fa6';
 
 export default function ProductDetailsPage() {
     const { slug } = useParams();
@@ -29,6 +29,7 @@ export default function ProductDetailsPage() {
     const dispatch = useAppDispatch();
     const { isAuthenticated } = useAppSelector((state: any) => state.auth);
     const [createInquiry] = useCreateInquiryMutation();
+    const [incrementStat] = useIncrementProductStatMutation();
     const [quantity, setQuantity] = useState(1);
     const [buyNowQty, setBuyNowQty] = useState(1);
     const [selectedImage, setSelectedImage] = useState(0);
@@ -80,7 +81,7 @@ export default function ProductDetailsPage() {
     );
     const relatedProducts = relatedData?.data || [];
 
-    const { data: reviewsData } = useGetProductReviewsQuery(product?._id, { skip: !product?._id });
+    const { data: reviewsData } = useGetProductReviewsQuery({ productId: product?._id }, { skip: !product?._id });
     const reviews = reviewsData?.data || [];
     const [publicCreateReview] = usePublicCreateReviewMutation();
 
@@ -374,32 +375,38 @@ export default function ProductDetailsPage() {
 
                             {/* Like / Heart */}
                             <button
-                                onClick={() => { setIsLiked(!isLiked); setLikeCount(prev => isLiked ? prev - 1 : prev + 1); }}
+                                onClick={() => {
+                                    if (!isLiked && product?._id) {
+                                        incrementStat({ id: product._id, field: 'likeCount' });
+                                        setIsLiked(true);
+                                        setLikeCount(prev => prev + 1);
+                                    }
+                                }}
                                 style={{
                                     display: 'flex', alignItems: 'center', gap: '6px',
                                     background: 'none', border: 'none', cursor: 'pointer',
                                     color: '#555', fontSize: '14px'
                                 }}
                             >
-                                <FiThumbsUp size={15} style={{ color: '#555' }} />
-                                <span style={{ fontWeight: 400 }}>{(product.likeCount || 0) + likeCount}</span>
+                                <img src="/ICON/like.png" alt="Like" style={{ width: '16px', height: '16px', opacity: isLiked ? 1 : 0.6 }} />
+                                <span style={{ fontWeight: 400, color: isLiked ? '#E4525C' : undefined }}>{(product.likeCount || 0) + likeCount}</span>
                             </button>
 
                             {/* Comments */}
                             <div onClick={() => setShowCommentsModal(true)} style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
-                                <FiMessageSquare size={15} style={{ color: '#555' }} />
+                                <img src="/ICON/comments.png" alt="Comments" style={{ width: '16px', height: '16px', opacity: 0.6 }} />
                                 <span style={{ fontWeight: 400 }}>{product.commentCount || product.reviewCount || 0}</span>
                             </div>
 
                             {/* Share */}
-                            <div onClick={() => setShowSharePopup(true)} style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
-                                <FiShare2 size={15} style={{ color: '#555' }} />
+                            <div onClick={() => { setShowSharePopup(true); if (product?._id) incrementStat({ id: product._id, field: 'shareCount' }); }} style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
+                                <img src="/ICON/share.png" alt="Share" style={{ width: '16px', height: '16px', opacity: 0.6 }} />
                                 <span style={{ fontWeight: 400 }}>{product.shareCount || 0}</span>
                             </div>
 
                             {/* Views */}
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
-                                <FiEye size={15} style={{ color: '#555' }} />
+                                <img src="/ICON/views.png" alt="Views" style={{ width: '16px', height: '16px', opacity: 0.6 }} />
                                 <span style={{ fontWeight: 400 }}>{product.viewCount || 0}</span>
                             </div>
 
@@ -994,6 +1001,11 @@ export default function ProductDetailsPage() {
                                             reviews: item.reviewCount,
                                             categoryName: item.category?.name || product?.category?.name,
                                             priceType: item.priceType,
+                                            likeCount: item.likeCount || 0,
+                                            commentCount: item.commentCount || 0,
+                                            shareCount: item.shareCount || 0,
+                                            viewCount: item.viewCount || 0,
+                                            reviewCount: item.reviewCount || 0,
                                         }}
                                     />
                                 ))}
@@ -1240,6 +1252,8 @@ export default function ProductDetailsPage() {
                         { name: 'Telegram', icon: FaTelegramPlane, color: '#0088cc', url: `https://t.me/share/url?url=${encodeURIComponent(productUrl)}&text=${encodeURIComponent(shareText)}` },
                         { name: 'LinkedIn', icon: FaLinkedinIn, color: '#0A66C2', url: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(productUrl)}` },
                         { name: 'Pinterest', icon: FaPinterestP, color: '#E60023', url: `https://pinterest.com/pin/create/button/?url=${encodeURIComponent(productUrl)}&media=${encodeURIComponent(allImages[0])}&description=${encodeURIComponent(shareText)}` },
+                        { name: 'Instagram', icon: FaInstagram, color: '#E1306C', url: `https://www.instagram.com/` },
+                        { name: 'TikTok', icon: FaTiktok, color: '#000000', url: `https://www.tiktok.com/` },
                         { name: 'Email', icon: FaEnvelope, color: '#555555', url: `mailto:?subject=${encodeURIComponent(product.name)}&body=${encodeURIComponent(shareText + '\n\n' + productUrl)}` },
                     ];
                     return (
@@ -1248,38 +1262,68 @@ export default function ProductDetailsPage() {
                             onClick={() => setShowSharePopup(false)}
                         >
                             <div
-                                className='bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl'
+                                className='bg-white rounded-lg w-full max-w-[620px] max-h-[88vh] flex flex-col overflow-hidden shadow-2xl'
                                 onClick={(e) => e.stopPropagation()}
                                 style={{ animation: 'fadeIn 0.2s ease-out' }}
                             >
-                                <div className='flex items-center justify-between px-5 py-3.5 border-b border-gray-100'>
-                                    <h3 className='text-base font-bold text-gray-900'>Share Product</h3>
-                                    <button onClick={() => setShowSharePopup(false)} className='text-gray-400 hover:text-gray-600 transition-colors'>
-                                        <FiX size={20} />
+                                {/* Header */}
+                                <div className='flex items-center justify-between px-4 py-2.5 border-b border-gray-200 shrink-0'>
+                                    <h3 className='text-[15px] font-bold text-gray-900 truncate pr-4'>{product.name}</h3>
+                                    <button
+                                        onClick={() => setShowSharePopup(false)}
+                                        className='w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-800 transition-colors shrink-0'
+                                    >
+                                        <FiX size={18} />
                                     </button>
                                 </div>
-                                <div className='px-5 py-4'>
-                                    <div className='grid grid-cols-4 gap-3 mb-4'>
+
+                                {/* Product Image — full view like comments popup */}
+                                <div className='shrink-0 border-b border-gray-200'>
+                                    <div className='w-full bg-gray-50 flex items-center justify-center' style={{ maxHeight: '280px' }}>
+                                        <img
+                                            src={allImages[0]}
+                                            alt={product.name}
+                                            className='w-full object-contain'
+                                            style={{ maxHeight: '280px' }}
+                                            onError={(e) => {
+                                                (e.target as HTMLImageElement).src = 'https://via.placeholder.com/620x200/f3f4f6/9ca3af?text=No+Image';
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Share With label */}
+                                <div className='px-4 pt-3 pb-1'>
+                                    <p className='text-[13px] font-bold text-gray-900'>Share With</p>
+                                </div>
+
+                                {/* Social Media Grid */}
+                                <div className='px-4 py-2 overflow-y-auto flex-1'>
+                                    <div className='grid grid-cols-5 gap-3'>
                                         {shareLinks.map((link) => (
                                             <a
                                                 key={link.name}
                                                 href={link.url}
                                                 target='_blank'
                                                 rel='noopener noreferrer'
-                                                className='flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-gray-50 transition-colors'
+                                                className='flex flex-col items-center gap-1.5 py-2 rounded-lg hover:bg-gray-50 transition-colors'
                                             >
-                                                <div className='w-10 h-10 rounded-full flex items-center justify-center text-white' style={{ background: link.color }}>
-                                                    <link.icon size={18} />
+                                                <div className='w-10 h-10 rounded-full flex items-center justify-center text-white transition-transform hover:scale-110' style={{ background: link.color }}>
+                                                    <link.icon size={16} />
                                                 </div>
                                                 <span className='text-[10px] text-gray-500 font-medium'>{link.name}</span>
                                             </a>
                                         ))}
                                     </div>
-                                    <div className='flex items-center gap-2 bg-gray-50 rounded-lg p-2.5'>
-                                        <input type='text' value={productUrl} readOnly className='flex-1 bg-transparent text-xs text-gray-600 outline-none truncate' />
+                                </div>
+
+                                {/* Copy Link Bar */}
+                                <div className='px-4 py-3 border-t border-gray-100 shrink-0'>
+                                    <div className='flex items-center bg-gray-100 rounded-lg overflow-hidden'>
+                                        <input type='text' value={productUrl} readOnly className='flex-1 bg-transparent text-xs text-gray-600 outline-none px-3 py-2.5 truncate' />
                                         <button
                                             onClick={() => { navigator.clipboard.writeText(productUrl); setShareLinkCopied(true); setTimeout(() => setShareLinkCopied(false), 2000); }}
-                                            className='shrink-0 px-3 py-1.5 bg-[#0B4222] text-white text-xs font-semibold rounded-md hover:bg-[#093519] transition-colors flex items-center gap-1'
+                                            className='px-4 py-2.5 bg-[#0B4222] text-white text-xs font-semibold hover:bg-[#093519] transition-colors flex items-center gap-1.5 whitespace-nowrap'
                                         >
                                             {shareLinkCopied ? <><FiCheckCircle size={12} /> Copied!</> : <><FiCopy size={12} /> Copy</>}
                                         </button>
@@ -1289,104 +1333,14 @@ export default function ProductDetailsPage() {
                         </div>
                     );
                 })()}
-                {/* ── Comments Modal (same as product card) ── */}
+                {/* ── Comments Modal (same component as product card) ── */}
                 {showCommentsModal && product && (
-                    <div
-                        className='fixed inset-0 bg-black/70 z-[9999] flex items-center justify-center p-4'
-                        onClick={() => setShowCommentsModal(false)}
-                    >
-                        <div
-                            className='bg-white rounded-lg w-full max-w-[620px] max-h-[88vh] flex flex-col overflow-hidden shadow-2xl'
-                            onClick={(e) => e.stopPropagation()}
-                            style={{ animation: 'fadeIn 0.2s ease-out' }}
-                        >
-                            {/* Header */}
-                            <div className='flex items-center justify-between px-4 py-2.5 border-b border-gray-200 bg-gray-50/80'>
-                                <span className='font-semibold text-gray-800' style={{ fontSize: '14px', fontFamily: 'Roboto, sans-serif' }}>{product.name}</span>
-                                <button onClick={() => setShowCommentsModal(false)} className='w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center hover:bg-gray-300 transition-colors cursor-pointer'>
-                                    <FiX size={14} />
-                                </button>
-                            </div>
-
-                            {/* Product Image */}
-                            <div className='w-full flex justify-center bg-gray-50 border-b border-gray-100'>
-                                <img
-                                    src={allImages[0]}
-                                    alt={product.name}
-                                    style={{ height: '280px', width: 'auto', objectFit: 'contain' }}
-                                />
-                            </div>
-
-                            {/* Comments List */}
-                            <div className='flex-1 overflow-y-auto px-4 py-2 space-y-1.5' style={{ maxHeight: '220px' }}>
-                                {reviews.length > 0 ? reviews.map((r: any, idx: number) => (
-                                    <div key={idx} className='flex gap-2 items-start'>
-                                        <div className='w-6 h-6 rounded-full bg-gray-300 flex items-center justify-center text-[10px] font-bold text-white mt-0.5 shrink-0'>
-                                            {(r.userName || 'A')[0].toUpperCase()}
-                                        </div>
-                                        <div className='bg-gray-100 rounded-xl px-3 py-1.5 max-w-[85%]'>
-                                            <span className='font-semibold text-gray-800 block' style={{ fontSize: '11px', fontFamily: 'Roboto, sans-serif' }}>{r.userName || 'Anonymous'}</span>
-                                            <p className='text-gray-600 m-0 leading-snug' style={{ fontSize: '11px', fontFamily: 'Roboto, sans-serif' }}>{r.comment}</p>
-                                        </div>
-                                    </div>
-                                )) : (
-                                    <div className='text-center py-6 text-gray-400' style={{ fontSize: '12px' }}>No comments yet</div>
-                                )}
-                            </div>
-
-                            {/* Rating Stars */}
-                            <div className='flex items-center justify-center gap-1 py-1.5 border-t border-gray-100'>
-                                {[1, 2, 3, 4, 5].map(star => (
-                                    <button
-                                        key={star}
-                                        onClick={() => setCmtRating(star)}
-                                        onMouseEnter={() => setCmtHoverRating(star)}
-                                        onMouseLeave={() => setCmtHoverRating(0)}
-                                        className='cursor-pointer bg-transparent border-none p-0.5'
-                                    >
-                                        <FiStar size={16} style={{
-                                            color: '#f59e0b',
-                                            fill: star <= (cmtHoverRating || cmtRating) ? '#f59e0b' : 'none',
-                                            transition: 'all 0.1s'
-                                        }} />
-                                    </button>
-                                ))}
-                            </div>
-
-                            {/* Input Area */}
-                            <div className='px-3 py-2 border-t border-gray-200 bg-white'>
-                                <div className='flex flex-col gap-0 border border-gray-200 rounded-lg overflow-hidden'>
-                                    <input
-                                        type='text'
-                                        placeholder='Name'
-                                        value={cmtUserName}
-                                        onChange={(e) => setCmtUserName(e.target.value)}
-                                        className='w-full px-3 py-1.5 text-gray-700 outline-none border-b border-gray-100'
-                                        style={{ fontSize: '12px', fontWeight: 400, fontFamily: 'Roboto, sans-serif' }}
-                                    />
-                                    <div className='flex items-center'>
-                                        <input
-                                            type='text'
-                                            placeholder='Write a comment...'
-                                            value={cmtText}
-                                            onChange={(e) => setCmtText(e.target.value)}
-                                            onKeyDown={(e) => e.key === 'Enter' && handleCommentSubmit()}
-                                            className='flex-1 px-3 py-1.5 text-gray-700 outline-none'
-                                            style={{ fontSize: '12px', fontWeight: 400, fontFamily: 'Roboto, sans-serif' }}
-                                        />
-                                        <button
-                                            onClick={handleCommentSubmit}
-                                            disabled={cmtSubmitting || !cmtText.trim()}
-                                            className='px-3 py-1.5 text-[#0B4222] hover:text-[#093519] transition-colors disabled:opacity-30 cursor-pointer bg-transparent border-none'
-                                        >
-                                            {cmtSubmitting ? '...' : <FiSend size={16} />}
-                                        </button>
-                                    </div>
-                                </div>
-                                {cmtSuccess && <p className='text-green-600 text-[10px] mt-1 text-center'>Comment posted!</p>}
-                            </div>
-                        </div>
-                    </div>
+                    <CommentsPopup
+                        productId={product._id}
+                        productName={product.name}
+                        productImage={allImages[0]}
+                        onClose={() => setShowCommentsModal(false)}
+                    />
                 )}
 
                 {/* ═══ Download Modal ═══ */}

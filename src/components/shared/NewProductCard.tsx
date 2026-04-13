@@ -2,15 +2,15 @@
 
 import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { useAppDispatch } from '@/redux';
-import { addToCart } from '@/redux/slices/cartSlice';
+
 import { useGetProductReviewsQuery, usePublicCreateReviewMutation } from '@/redux/api/reviewApi';
+import { useIncrementProductStatMutation } from '@/redux/api/productApi';
 import { FiStar, FiX, FiCopy, FiCheck, FiSend } from 'react-icons/fi';
 import {
     FaFacebookF, FaWhatsapp, FaTelegramPlane,
-    FaLinkedinIn, FaPinterestP, FaRedditAlien, FaEnvelope
+    FaLinkedinIn, FaPinterestP, FaRedditAlien, FaEnvelope, FaInstagram
 } from 'react-icons/fa';
-import { FaXTwitter } from 'react-icons/fa6';
+import { FaXTwitter, FaTiktok } from 'react-icons/fa6';
 
 interface Product {
     _id?: string;
@@ -47,38 +47,33 @@ const formatCount = (n: number): string => {
 };
 
 const NewProductCard: React.FC<NewProductCardProps> = ({ product }) => {
-    const dispatch = useAppDispatch();
+
     const [localLikes, setLocalLikes] = useState(0);
+    const [isLiked, setIsLiked] = useState(false);
     const [likeAnim, setLikeAnim] = useState(false);
     const [showComments, setShowComments] = useState(false);
     const [showShare, setShowShare] = useState(false);
     const [linkCopied, setLinkCopied] = useState(false);
+    const [incrementStat] = useIncrementProductStatMutation();
 
     const productId = String(product._id || product.id);
     const productUrl = typeof window !== 'undefined'
         ? `${window.location.origin}/product/${product.slug || product.id}`
         : `/product/${product.slug || product.id}`;
 
-    const handleAddToCart = (e: React.MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        dispatch(addToCart({
-            id: productId,
-            name: product.name,
-            price: product.price,
-            mrp: product.mrp || product.originalPrice || product.price,
-            image: product.image,
-            category: product.categoryName || 'General'
-        }));
-    };
 
-    // Like: every click = +1, with a little pop animation
+
+    // Like: calls API to save to database
     const handleLike = (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
-        setLocalLikes(prev => prev + 1);
-        setLikeAnim(true);
-        setTimeout(() => setLikeAnim(false), 300);
+        if (!isLiked) {
+            incrementStat({ id: productId, field: 'likeCount' });
+            setIsLiked(true);
+            setLocalLikes(prev => prev + 1);
+            setLikeAnim(true);
+            setTimeout(() => setLikeAnim(false), 300);
+        }
     };
 
     const handleCommentsClick = (e: React.MouseEvent) => {
@@ -91,6 +86,7 @@ const NewProductCard: React.FC<NewProductCardProps> = ({ product }) => {
         e.preventDefault();
         e.stopPropagation();
         setShowShare(true);
+        incrementStat({ id: productId, field: 'shareCount' });
     };
 
     const handleCopyLink = () => {
@@ -108,6 +104,8 @@ const NewProductCard: React.FC<NewProductCardProps> = ({ product }) => {
         { name: 'Telegram', icon: FaTelegramPlane, color: '#0088cc', url: `https://t.me/share/url?url=${encodeURIComponent(productUrl)}&text=${encodeURIComponent(shareText)}` },
         { name: 'LinkedIn', icon: FaLinkedinIn, color: '#0A66C2', url: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(productUrl)}` },
         { name: 'Pinterest', icon: FaPinterestP, color: '#E60023', url: `https://pinterest.com/pin/create/button/?url=${encodeURIComponent(productUrl)}&media=${encodeURIComponent(product.image)}&description=${encodeURIComponent(shareText)}` },
+        { name: 'Instagram', icon: FaInstagram, color: '#E1306C', url: `https://www.instagram.com/` },
+        { name: 'TikTok', icon: FaTiktok, color: '#000000', url: `https://www.tiktok.com/` },
         { name: 'Email', icon: FaEnvelope, color: '#555555', url: `mailto:?subject=${encodeURIComponent(product.name)}&body=${encodeURIComponent(shareText + '\n\n' + productUrl)}` },
     ];
 
@@ -135,13 +133,6 @@ const NewProductCard: React.FC<NewProductCardProps> = ({ product }) => {
                         {/* Sold count + Cart icon — overlaid on image */}
                         <div className='absolute top-0 left-0 right-0 flex items-center justify-between px-3 py-1.5 z-10'>
                             <span className='text-gray-600 text-xs font-medium'>Sold {formatCount(soldCount)}</span>
-                            <button
-                                onClick={handleAddToCart}
-                                className='relative text-gray-600 hover:text-[#0B4222] transition-all p-2 cart-icon-animate rounded-full bg-[#0B4222]/50 hover:bg-[#0B4222]/60'
-                                title='Add to Cart'
-                            >
-                                <img src="/ICON/cart.png" alt="Cart" className="w-5 h-5 opacity-70" />
-                            </button>
                         </div>
                         <img
                             src={product.image || 'https://via.placeholder.com/300x300/E8957A/E8957A'}
@@ -262,39 +253,44 @@ const NewProductCard: React.FC<NewProductCardProps> = ({ product }) => {
                     onClick={() => setShowShare(false)}
                 >
                     <div
-                        className='bg-white rounded-lg w-full max-w-[420px] overflow-hidden shadow-2xl'
+                        className='bg-white rounded-lg w-full max-w-[620px] max-h-[88vh] flex flex-col overflow-hidden shadow-2xl'
                         onClick={(e) => e.stopPropagation()}
                         style={{ animation: 'fbModalIn 0.2s ease-out' }}
                     >
-                        {/* Header — FB style */}
-                        <div className='flex items-center justify-between px-4 py-3 border-b border-gray-200'>
-                            <h3 className='text-base font-bold text-gray-900'>Share Product</h3>
+                        {/* Header */}
+                        <div className='flex items-center justify-between px-4 py-2.5 border-b border-gray-200 shrink-0'>
+                            <h3 className='text-[15px] font-bold text-gray-900 truncate pr-4'>{product.name}</h3>
                             <button
                                 onClick={() => setShowShare(false)}
-                                className='w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-800 transition-colors'
+                                className='w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-800 transition-colors shrink-0'
                             >
                                 <FiX size={18} />
                             </button>
                         </div>
 
-                        {/* Product preview — like a FB post */}
-                        <div className='px-4 py-3 border-b border-gray-100'>
-                            <div className='flex items-center gap-3'>
+                        {/* Product Image — full view like comments popup */}
+                        <div className='shrink-0 border-b border-gray-200'>
+                            <div className='w-full bg-gray-50 flex items-center justify-center' style={{ maxHeight: '280px' }}>
                                 <img
                                     src={product.image}
                                     alt={product.name}
-                                    className='w-12 h-12 rounded-lg object-cover'
+                                    className='w-full object-contain'
+                                    style={{ maxHeight: '280px' }}
+                                    onError={(e) => {
+                                        (e.target as HTMLImageElement).src = 'https://via.placeholder.com/620x200/f3f4f6/9ca3af?text=No+Image';
+                                    }}
                                 />
-                                <div className='flex-1 min-w-0'>
-                                    <p className='text-sm font-semibold text-gray-900 truncate'>{product.name}</p>
-                                    <p className='text-xs text-[#E4525C] font-medium'>Tk.{currentPrice.toLocaleString()}</p>
-                                </div>
                             </div>
                         </div>
 
+                        {/* Share With label */}
+                        <div className='px-4 pt-3 pb-1'>
+                            <p className='text-[13px] font-bold text-gray-900'>Share With</p>
+                        </div>
+
                         {/* Social Media Grid */}
-                        <div className='px-4 py-4'>
-                            <div className='grid grid-cols-4 gap-3'>
+                        <div className='px-4 py-2 overflow-y-auto flex-1'>
+                            <div className='grid grid-cols-5 gap-3'>
                                 {shareLinks.map((social) => (
                                     <a
                                         key={social.name}
@@ -317,7 +313,7 @@ const NewProductCard: React.FC<NewProductCardProps> = ({ product }) => {
                         </div>
 
                         {/* Copy Link Bar */}
-                        <div className='px-4 pb-4'>
+                        <div className='px-4 py-3 border-t border-gray-100 shrink-0'>
                             <div className='flex items-center bg-gray-100 rounded-lg overflow-hidden'>
                                 <input
                                     type="text"
@@ -561,4 +557,5 @@ const CommentsPopup: React.FC<{
     );
 };
 
+export { CommentsPopup };
 export default NewProductCard;

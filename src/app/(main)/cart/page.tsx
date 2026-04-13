@@ -63,22 +63,22 @@ const CartPage = () => {
                 <div style={{ width: '100%', borderCollapse: 'collapse', marginTop: '8px' }}>
                     {/* Table Header */}
                     <div style={{
-                        display: 'grid', gridTemplateColumns: '60px 1fr 160px 120px 120px 40px',
+                        display: 'grid', gridTemplateColumns: '60px 1fr 40px 160px 120px 120px',
                         borderBottom: '2px solid #e5e7eb', padding: '12px 16px',
                         fontSize: '12px', fontWeight: 800, color: '#1a1a1a', textTransform: 'uppercase', letterSpacing: '0.5px',
                     }}>
                         <div>SL NO</div>
                         <div style={{ paddingLeft: '8px' }}>Product Details</div>
+                        <div></div>
                         <div style={{ textAlign: 'center' }}>Qty</div>
                         <div style={{ textAlign: 'center' }}>Unit Price</div>
                         <div style={{ textAlign: 'right' }}>Total Price</div>
-                        <div></div>
                     </div>
 
                     {/* Cart Items */}
                     {items.map((item, index) => (
                         <div key={item.id} style={{
-                            display: 'grid', gridTemplateColumns: '60px 1fr 160px 120px 120px 40px',
+                            display: 'grid', gridTemplateColumns: '60px 1fr 40px 160px 120px 120px',
                             alignItems: 'center', padding: '8px 16px',
                             borderBottom: '1px solid #f3f4f6',
                             transition: 'background 0.15s',
@@ -97,6 +97,22 @@ const CartPage = () => {
                                 <div>
                                     <h3 style={{ fontSize: '13px', fontWeight: 700, color: '#1a1a1a', margin: 0, lineHeight: 1.4 }}>{item.name}</h3>
                                 </div>
+                            </div>
+
+                            {/* Remove Icon */}
+                            <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                <button
+                                    onClick={() => dispatch(removeFromCart(item.id))}
+                                    style={{
+                                        background: 'none', border: 'none', cursor: 'pointer',
+                                        color: '#ccc', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        padding: '4px', borderRadius: '4px', transition: 'color 0.2s',
+                                    }}
+                                    onMouseEnter={(e) => (e.currentTarget.style.color = '#ef4444')}
+                                    onMouseLeave={(e) => (e.currentTarget.style.color = '#ccc')}
+                                >
+                                    <FiTrash2 size={15} />
+                                </button>
                             </div>
 
                             {/* Quantity Controls */}
@@ -135,22 +151,6 @@ const CartPage = () => {
                             {/* Total Price */}
                             <div style={{ textAlign: 'right', fontSize: '14px', fontWeight: 800, color: '#1a1a1a' }}>
                                 {(item.price * item.quantity).toLocaleString()}
-                            </div>
-
-                            {/* Remove Icon */}
-                            <div style={{ display: 'flex', justifyContent: 'center' }}>
-                                <button
-                                    onClick={() => dispatch(removeFromCart(item.id))}
-                                    style={{
-                                        background: 'none', border: 'none', cursor: 'pointer',
-                                        color: '#ccc', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        padding: '4px', borderRadius: '4px', transition: 'color 0.2s',
-                                    }}
-                                    onMouseEnter={(e) => (e.currentTarget.style.color = '#ef4444')}
-                                    onMouseLeave={(e) => (e.currentTarget.style.color = '#ccc')}
-                                >
-                                    <FiTrash2 size={15} />
-                                </button>
                             </div>
                         </div>
                     ))}

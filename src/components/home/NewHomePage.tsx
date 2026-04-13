@@ -332,6 +332,11 @@ const NewHomePage: React.FC = () => {
                                 categoryName: product.category?.name || '',
                                 priceType: product.priceType || 'negotiable',
                                 sold: product.totalSold || 0,
+                                likeCount: product.likeCount || 0,
+                                commentCount: product.commentCount || 0,
+                                shareCount: product.shareCount || 0,
+                                viewCount: product.viewCount || 0,
+                                reviewCount: product.reviewCount || 0,
                             }}
                         />
                     ))}
