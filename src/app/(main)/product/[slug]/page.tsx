@@ -497,17 +497,17 @@ export default function ProductDetailsPage() {
                                 </div>
                             </div>
 
-                            {/* Image Wrapper — arrows sit INSIDE the image area */}
+                            {/* Image Wrapper — fills remaining flex space */}
                             <div className="pd-image-wrapper" style={{
-                                position: 'relative', height: '100%', aspectRatio: '1 / 1',
-                                flexShrink: 0,
-                                margin: '0 auto', padding: '16px',
+                                position: 'relative', flex: 1,
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                padding: '8px',
                             }}>
-                                {/* Left Arrow — inside image, left edge */}
+                                {/* Left Arrow — outside image, simple negative offset */}
                                 <button
                                     onClick={(e) => { e.stopPropagation(); if (selectedImage > 0) { setSelectedImage(prev => prev - 1); setZoomLevel(1); } }}
                                     style={{
-                                        position: 'absolute', left: 0, top: '50%', transform: 'translateX(-100%) translateY(-50%)',
+                                        position: 'absolute', left: '-18px', top: '50%', transform: 'translateY(-50%)',
                                         background: 'rgba(255,255,255,0.95)', border: '1px solid #ddd', borderRadius: '50%',
                                         width: '32px', height: '32px', zIndex: 5,
                                         cursor: selectedImage === 0 ? 'not-allowed' : 'pointer',
@@ -521,11 +521,11 @@ export default function ProductDetailsPage() {
                                     <FiChevronLeft size={18} color="#333" />
                                 </button>
 
-                                {/* Right Arrow — inside image, right edge */}
+                                {/* Right Arrow — outside image, simple positive offset */}
                                 <button
                                     onClick={(e) => { e.stopPropagation(); if (selectedImage < allImages.length - 1) { setSelectedImage(prev => prev + 1); setZoomLevel(1); } }}
                                     style={{
-                                        position: 'absolute', right: 0, top: '50%', transform: 'translateX(100%) translateY(-50%)',
+                                        position: 'absolute', right: '-18px', top: '50%', transform: 'translateY(-50%)',
                                         background: 'rgba(255,255,255,0.95)', border: '1px solid #ddd', borderRadius: '50%',
                                         width: '32px', height: '32px', zIndex: 5,
                                         cursor: selectedImage >= allImages.length - 1 ? 'not-allowed' : 'pointer',
@@ -539,10 +539,10 @@ export default function ProductDetailsPage() {
                                     <FiChevronRight size={18} color="#333" />
                                 </button>
 
-                                {/* Actual image */}
+                                {/* Actual image — square gray box centered */}
                                 <div
                                     style={{
-                                        height: '100%', width: '100%',
+                                        height: '100%', aspectRatio: '1 / 1',
                                         background: '#f5f5f5', display: 'flex',
                                         alignItems: 'center', justifyContent: 'center',
                                         cursor: 'pointer', position: 'relative',
