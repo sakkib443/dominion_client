@@ -289,6 +289,30 @@ h6 {
   animation: marqueeCard 12s linear infinite;
 }
 
+/* ===== Drop Text Animation (Product Detail Page) ===== */
+@keyframes dropText {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  10% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  60% {
+    transform: translateY(120%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(120%);
+    opacity: 0;
+  }
+}
+
 /* ===== Hover Effects ===== */
 .hover-lift {
   transition: transform 0.3s ease, box-shadow 0.3s ease;

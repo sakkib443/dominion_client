@@ -363,16 +363,25 @@ export default function ProductDetailsPage() {
                                 {product.sku ? `${product.sku}: ` : ''}{product.name}
                             </h1>
 
-                            {/* Warranty / Guarantee Text */}
-                            {product.shortDescription ? (
-                                <p style={{ fontSize: '11px', color: '#E4525C', fontWeight: 400, margin: '4px 0 4px' }}>
-                                    {product.shortDescription}
-                                </p>
-                            ) : (
-                                <p style={{ fontSize: '11px', color: '#E4525C', fontWeight: 400, margin: '4px 0 4px' }}>
-                                    Warranty: Service Warranty Available
-                                </p>
-                            )}
+                            {/* Warranty / Guarantee Text — Drop Animation */}
+                            {(() => {
+                                const dropStyle = (delay: string): React.CSSProperties => ({
+                                    fontSize: '11px', color: '#E4525C', fontWeight: 400, margin: 0,
+                                    animation: 'dropText 5s ease-in-out infinite',
+                                    animationDelay: delay,
+                                    position: 'absolute', top: 0, left: 0, width: '100%',
+                                });
+                                const text = product.shortDescription || 'Warranty: Service Warranty Available';
+                                return (
+                                    <div style={{
+                                        height: '18px', overflow: 'hidden', position: 'relative',
+                                        margin: '4px 0 4px',
+                                    }}>
+                                        <p style={dropStyle('0s')}>{text}</p>
+                                        <p style={dropStyle('2.5s')}>{text}</p>
+                                    </div>
+                                );
+                            })()}
 
                             {/* Stats Row */}
                             <div className="pd-stats-row" style={{
