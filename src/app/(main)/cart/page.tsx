@@ -40,7 +40,14 @@ const CartPage = () => {
     const [guestCheckout, { isLoading: isOrdering }] = useGuestCheckoutMutation();
     const [showOrderModal, setShowOrderModal] = useState(false);
     const [orderSuccess, setOrderSuccess] = useState(false);
-    const [formData, setFormData] = useState({ fullName: '', phone: '', email: '', location: '' });
+    const [formData, setFormData] = useState({
+        name: '',
+        contact: '',      // email or phone
+        location: '',
+        query: '',        // optional note/message
+        password: '',     // optional - for account creation
+    });
+    const [showPassword, setShowPassword] = useState(false);
 
     if (items.length === 0 && !orderSuccess) {
         return (
@@ -64,25 +71,27 @@ const CartPage = () => {
 
     const handleSubmitOrder = async () => {
         // ── Client-side validation ──
-        if (!formData.fullName.trim()) {
-            toast.error('Full Name is required.'); return;
+        if (!formData.name.trim()) {
+            toast.error('Name is required.'); return;
         }
-        if (!formData.phone.trim()) {
-            toast.error('Phone Number is required.'); return;
-        }
-        if (!/^[0-9+\-\s()]{7,}$/.test(formData.phone.trim())) {
-            toast.error('Please enter a valid phone number.'); return;
+        if (!formData.contact.trim()) {
+            toast.error('Phone or Email is required.'); return;
         }
         if (!formData.location.trim()) {
             toast.error('Delivery Location is required.'); return;
         }
 
+        // Detect email vs phone
+        const isEmail = formData.contact.includes('@');
+        const phone = isEmail ? '' : formData.contact.trim();
+        const email = isEmail ? formData.contact.trim() : `${formData.contact.trim().replace(/\s+/g, '')}@guest.dominion.com`;
+
         try {
             const orderData = {
                 shippingAddress: {
-                    fullName: formData.fullName,
-                    phone: formData.phone,
-                    email: formData.email || `${formData.phone}@guest.com`,
+                    fullName: formData.name,
+                    phone: phone || formData.contact.trim(),
+                    email,
                     address: formData.location,
                     city: '',
                     area: '',
@@ -92,30 +101,22 @@ const CartPage = () => {
                     quantity: item.quantity,
                 })),
                 paymentMethod: 'cod',
+                note: formData.query || '',
+                password: formData.password || undefined,
             };
             await guestCheckout(orderData).unwrap();
             setShowOrderModal(false);
             setOrderSuccess(true);
             dispatch(clearCart());
-            setFormData({ fullName: '', phone: '', email: '', location: '' });
+            setFormData({ name: '', contact: '', location: '', query: '', password: '' });
             toast.success('Order placed successfully!');
         } catch (err: any) {
             const data = err?.data;
-
-            // Try to extract detailed validation messages
             if (data?.errors) {
                 if (Array.isArray(data.errors)) {
-                    // Array of { field, message } or just strings
-                    const msgs = data.errors.map((e: any) =>
-                        typeof e === 'string' ? e : (e.message || e.msg || JSON.stringify(e))
-                    ).join('\n');
-                    toast.error(msgs, { duration: 5000 });
+                    toast.error(data.errors.map((e: any) => typeof e === 'string' ? e : (e.message || e.msg)).join('\n'), { duration: 5000 });
                 } else if (typeof data.errors === 'object') {
-                    // Object: { field: { message } }
-                    const msgs = Object.values(data.errors)
-                        .map((e: any) => e?.message || e?.msg || String(e))
-                        .join('\n');
-                    toast.error(msgs, { duration: 5000 });
+                    toast.error(Object.values(data.errors).map((e: any) => e?.message || String(e)).join('\n'), { duration: 5000 });
                 } else {
                     toast.error(String(data.errors), { duration: 5000 });
                 }
@@ -322,70 +323,83 @@ const CartPage = () => {
 
                             {/* Form Fields */}
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+
+                                {/* Name */}
                                 <div>
                                     <label style={{ fontSize: '12px', fontWeight: 700, color: '#555', display: 'block', marginBottom: '4px' }}>Full Name *</label>
                                     <input
                                         type="text"
-                                        value={formData.fullName}
-                                        onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                                        value={formData.name}
+                                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                         placeholder="Enter your full name"
-                                        style={{
-                                            width: '100%', padding: '10px 14px', fontSize: '13px',
-                                            border: '1px solid #e5e7eb', borderRadius: '6px', outline: 'none',
-                                            transition: 'border-color 0.2s', boxSizing: 'border-box',
-                                        }}
+                                        style={{ width: '100%', padding: '10px 14px', fontSize: '13px', border: '1px solid #e5e7eb', borderRadius: '6px', outline: 'none', transition: 'border-color 0.2s', boxSizing: 'border-box' }}
                                         onFocus={(e) => e.target.style.borderColor = '#0B4222'}
                                         onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
                                     />
                                 </div>
+
+                                {/* Phone or Email */}
                                 <div>
-                                    <label style={{ fontSize: '12px', fontWeight: 700, color: '#555', display: 'block', marginBottom: '4px' }}>Phone Number *</label>
+                                    <label style={{ fontSize: '12px', fontWeight: 700, color: '#555', display: 'block', marginBottom: '4px' }}>Phone or Email *</label>
                                     <input
-                                        type="tel"
-                                        value={formData.phone}
-                                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                        placeholder="01XXXXXXXXX"
-                                        style={{
-                                            width: '100%', padding: '10px 14px', fontSize: '13px',
-                                            border: '1px solid #e5e7eb', borderRadius: '6px', outline: 'none',
-                                            transition: 'border-color 0.2s', boxSizing: 'border-box',
-                                        }}
+                                        type="text"
+                                        value={formData.contact}
+                                        onChange={(e) => setFormData({ ...formData, contact: e.target.value })}
+                                        placeholder="01XXXXXXXXX or name@email.com"
+                                        style={{ width: '100%', padding: '10px 14px', fontSize: '13px', border: '1px solid #e5e7eb', borderRadius: '6px', outline: 'none', transition: 'border-color 0.2s', boxSizing: 'border-box' }}
                                         onFocus={(e) => e.target.style.borderColor = '#0B4222'}
                                         onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
                                     />
                                 </div>
-                                <div>
-                                    <label style={{ fontSize: '12px', fontWeight: 700, color: '#555', display: 'block', marginBottom: '4px' }}>Email</label>
-                                    <input
-                                        type="email"
-                                        value={formData.email}
-                                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                        placeholder="your@email.com (optional)"
-                                        style={{
-                                            width: '100%', padding: '10px 14px', fontSize: '13px',
-                                            border: '1px solid #e5e7eb', borderRadius: '6px', outline: 'none',
-                                            transition: 'border-color 0.2s', boxSizing: 'border-box',
-                                        }}
-                                        onFocus={(e) => e.target.style.borderColor = '#0B4222'}
-                                        onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
-                                    />
-                                </div>
+
+                                {/* Delivery Location */}
                                 <div>
                                     <label style={{ fontSize: '12px', fontWeight: 700, color: '#555', display: 'block', marginBottom: '4px' }}>Delivery Location *</label>
                                     <textarea
                                         value={formData.location}
                                         onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                                         placeholder="Enter your full delivery address"
-                                        rows={3}
-                                        style={{
-                                            width: '100%', padding: '10px 14px', fontSize: '13px',
-                                            border: '1px solid #e5e7eb', borderRadius: '6px', outline: 'none',
-                                            transition: 'border-color 0.2s', resize: 'none', boxSizing: 'border-box',
-                                            fontFamily: 'inherit',
-                                        }}
+                                        rows={2}
+                                        style={{ width: '100%', padding: '10px 14px', fontSize: '13px', border: '1px solid #e5e7eb', borderRadius: '6px', outline: 'none', transition: 'border-color 0.2s', resize: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }}
                                         onFocus={(e) => e.target.style.borderColor = '#0B4222'}
                                         onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
                                     />
+                                </div>
+
+                                {/* Query (optional) */}
+                                <div>
+                                    <label style={{ fontSize: '12px', fontWeight: 700, color: '#555', display: 'block', marginBottom: '4px' }}>Query / Note <span style={{ color: '#aaa', fontWeight: 400 }}>(optional)</span></label>
+                                    <input
+                                        type="text"
+                                        value={formData.query}
+                                        onChange={(e) => setFormData({ ...formData, query: e.target.value })}
+                                        placeholder="Any special instructions or questions?"
+                                        style={{ width: '100%', padding: '10px 14px', fontSize: '13px', border: '1px solid #e5e7eb', borderRadius: '6px', outline: 'none', transition: 'border-color 0.2s', boxSizing: 'border-box' }}
+                                        onFocus={(e) => e.target.style.borderColor = '#0B4222'}
+                                        onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                                    />
+                                </div>
+
+                                {/* Password (optional) */}
+                                <div>
+                                    <label style={{ fontSize: '12px', fontWeight: 700, color: '#555', display: 'block', marginBottom: '4px' }}>
+                                        Password <span style={{ color: '#aaa', fontWeight: 400 }}>(optional — to login later)</span>
+                                    </label>
+                                    <div style={{ position: 'relative' }}>
+                                        <input
+                                            type={showPassword ? 'text' : 'password'}
+                                            value={formData.password}
+                                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                            placeholder="Set a password for your account"
+                                            style={{ width: '100%', padding: '10px 40px 10px 14px', fontSize: '13px', border: '1px solid #e5e7eb', borderRadius: '6px', outline: 'none', transition: 'border-color 0.2s', boxSizing: 'border-box' }}
+                                            onFocus={(e) => e.target.style.borderColor = '#0B4222'}
+                                            onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                                        />
+                                        <button type="button" onClick={() => setShowPassword(!showPassword)}
+                                            style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#aaa', fontSize: '12px', padding: 0 }}>
+                                            {showPassword ? 'Hide' : 'Show'}
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 
