@@ -63,10 +63,20 @@ const CartPage = () => {
     };
 
     const handleSubmitOrder = async () => {
-        if (!formData.fullName.trim() || !formData.phone.trim()) {
-            toast.error('Name and Phone are required');
-            return;
+        // ── Client-side validation ──
+        if (!formData.fullName.trim()) {
+            toast.error('Full Name is required.'); return;
         }
+        if (!formData.phone.trim()) {
+            toast.error('Phone Number is required.'); return;
+        }
+        if (!/^[0-9+\-\s()]{7,}$/.test(formData.phone.trim())) {
+            toast.error('Please enter a valid phone number.'); return;
+        }
+        if (!formData.location.trim()) {
+            toast.error('Delivery Location is required.'); return;
+        }
+
         try {
             const orderData = {
                 shippingAddress: {
@@ -90,7 +100,28 @@ const CartPage = () => {
             setFormData({ fullName: '', phone: '', email: '', location: '' });
             toast.success('Order placed successfully!');
         } catch (err: any) {
-            toast.error(err?.data?.message || 'Failed to place order');
+            const data = err?.data;
+
+            // Try to extract detailed validation messages
+            if (data?.errors) {
+                if (Array.isArray(data.errors)) {
+                    // Array of { field, message } or just strings
+                    const msgs = data.errors.map((e: any) =>
+                        typeof e === 'string' ? e : (e.message || e.msg || JSON.stringify(e))
+                    ).join('\n');
+                    toast.error(msgs, { duration: 5000 });
+                } else if (typeof data.errors === 'object') {
+                    // Object: { field: { message } }
+                    const msgs = Object.values(data.errors)
+                        .map((e: any) => e?.message || e?.msg || String(e))
+                        .join('\n');
+                    toast.error(msgs, { duration: 5000 });
+                } else {
+                    toast.error(String(data.errors), { duration: 5000 });
+                }
+            } else {
+                toast.error(data?.message || 'Failed to place order. Please try again.', { duration: 4000 });
+            }
         }
     };
 
