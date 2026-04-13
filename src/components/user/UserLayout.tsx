@@ -61,7 +61,7 @@ const UserLayout = ({ children }: { children: React.ReactNode }) => {
             {/* Top Header */}
             <header className="bg-white border-b border-gray-100 sticky top-0 z-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex items-center justify-between h-16">
+                    <div className="flex items-center justify-between h-12">
                         {/* Left: Logo + Back */}
                         <div className="flex items-center gap-4">
                             <button
@@ -103,13 +103,13 @@ const UserLayout = ({ children }: { children: React.ReactNode }) => {
                                 <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
                             </button>
                             <div className="w-px h-8 bg-gray-100 hidden sm:block"></div>
-                            <div className="flex items-center gap-3">
-                                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#0B4222] to-[#1a6b3c] flex items-center justify-center text-white text-xs font-bold shadow-sm">
+                        <div className="flex items-center gap-2">
+                                <div className="w-7 h-7 rounded-full bg-[#ebebeb] flex items-center justify-center text-gray-700 text-xs font-bold">
                                     {getInitials()}
                                 </div>
                                 <div className="hidden sm:block">
-                                    <p className="text-sm font-bold text-gray-800 leading-none">{user?.name || 'User'}</p>
-                                    <p className="text-[11px] text-gray-400 mt-0.5">{user?.email}</p>
+                                    <p className="text-xs font-semibold text-gray-700 leading-none">{user?.name || 'User'}</p>
+                                    <p className="text-[10px] text-gray-400 mt-0.5">{user?.email}</p>
                                 </div>
                             </div>
                         </div>
