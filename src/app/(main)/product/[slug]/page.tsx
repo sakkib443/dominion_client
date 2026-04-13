@@ -947,7 +947,7 @@ export default function ProductDetailsPage() {
 
                     {/* ═══ Related Products Section ═══ */}
                     {relatedProducts.length > 0 && (
-                        <div style={{ borderTop: '1px solid #e5e7eb', marginTop: '1rem' }}>
+                        <div style={{ marginTop: '1rem' }}>
                             <div style={{ padding: '2rem 0' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
                                     <div>
