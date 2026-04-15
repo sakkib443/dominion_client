@@ -187,8 +187,75 @@ export default function ProductDetailsPage() {
         );
     }
 
-    const allImages = [product.thumbnail, ...(product.images || [])].filter(Boolean);
-    const discountedPrice = product.discount > 0 ? product.price - (product.price * product.discount) / 100 : product.price;
+    // ── Variant-Aware Logic ──────────────────────────────────────
+    const baseImages = [product.thumbnail, ...(product.images || [])].filter(Boolean);
+    const variants = product.variants || [];
+    const hasVariants = variants.length > 0;
+
+    // Color swatches — from variants first, then product.colors, then empty
+    const colorSwatches = (() => {
+        if (hasVariants) {
+            const map = new Map<string, string>();
+            variants.forEach((v: any) => { if (v.color) map.set(v.color, v.colorHex || v.color); });
+            return Array.from(map.entries()).map(([name, hex]) => ({ name, hex }));
+        }
+        if (product.colors?.length > 0) {
+            return product.colors.map((c: string, i: number) => ({ name: c, hex: product.colorHex?.[i] || c }));
+        }
+        return [];
+    })();
+
+    // Size list — from variants first, then product.sizes
+    const sizeList: string[] = (() => {
+        if (hasVariants) {
+            return [...new Set(variants.filter((v: any) => v.size).map((v: any) => v.size))];
+        }
+        return product.sizes?.length > 0 ? product.sizes : [];
+    })();
+
+    // Active variant — matched by selected color + size
+    const activeVariant = hasVariants ? variants.find((v: any) =>
+        (!selectedColor || v.color === selectedColor) &&
+        (!selectedSize || v.size === selectedSize)
+    ) : null;
+
+    // Available sizes for selected color (variant mode)
+    const availableSizesForColor = hasVariants && selectedColor
+        ? variants.filter((v: any) => v.color === selectedColor && v.stock > 0).map((v: any) => v.size).filter(Boolean)
+        : sizeList;
+
+    // Available colors for selected size (variant mode)
+    const availableColorsForSize = hasVariants && selectedSize
+        ? variants.filter((v: any) => v.size === selectedSize && v.stock > 0).map((v: any) => v.color).filter(Boolean)
+        : colorSwatches.map((c: any) => c.name);
+
+    // Display images — variant images > color-mapped images > base images
+    const allImages = (() => {
+        // If variant selected and has images, show those
+        if (activeVariant?.images?.length > 0) return activeVariant.images;
+        // If no variants but color selected, try to map color index to image
+        if (!hasVariants && selectedColor && colorSwatches.length > 0) {
+            const colorIdx = colorSwatches.findIndex((c: any) => c.name === selectedColor);
+            // If we have roughly 1 image per color (thumbnail + extra = colors count),
+            // map color to corresponding image
+            if (colorIdx >= 0 && colorIdx < baseImages.length) {
+                return baseImages; // keep all images, but auto-select the right one
+            }
+        }
+        return baseImages;
+    })();
+
+    // Display price — variant price > product discounted price
+    const discountedPrice = (() => {
+        if (activeVariant) {
+            const vDiscount = activeVariant.discount || 0;
+            return vDiscount > 0 ? activeVariant.price - (activeVariant.price * vDiscount) / 100 : activeVariant.price;
+        }
+        return product.discount > 0 ? product.price - (product.price * product.discount) / 100 : product.price;
+    })();
+
+    // Display stock
+    const displayStock = activeVariant ? activeVariant.stock : product.stock;
 
     // Build product details key-value pairs from product data
     const productDetails: { key: string; value: string }[] = [];
@@ -212,18 +279,6 @@ export default function ProductDetailsPage() {
         productDetails.push({ key: 'Stock', value: product.stock > 0 ? `${product.stock} available` : 'Out of Stock' });
     }
 
-    // Available color swatches (use product colors + colorHex, or default palette)
-    const colorSwatches = product.colors?.length > 0
-        ? product.colors.map((c: string, i: number) => ({ name: c, hex: product.colorHex?.[i] || c }))
-        : [
-            { name: 'Red', hex: '#FF0000' },
-            { name: 'Orange', hex: '#FF8C00' },
-            { name: 'Yellow', hex: '#FFD700' },
-            { name: 'Green', hex: '#00C853' },
-            { name: 'Light Green', hex: '#76FF03' },
-            { name: 'Lime', hex: '#AEEA00' },
-        ];
-
     const getColorHex = (colorName: string) => {
         const namedColors: Record<string, string> = {
             red: '#FF0000', orange: '#FF8C00', yellow: '#FFD700', green: '#00C853',
@@ -234,6 +289,36 @@ export default function ProductDetailsPage() {
             silver: '#C0C0C0', beige: '#F5F5DC', cream: '#FFFDD0', khaki: '#F0E68C',
         };
         return namedColors[colorName.toLowerCase()] || colorName;
+    };
+
+    // Handler: when color is selected, auto-switch image
+    const handleColorSelect = (colorName: string) => {
+        if (selectedColor === colorName) {
+            setSelectedColor('');
+            setSelectedImage(0);
+            return;
+        }
+        setSelectedColor(colorName);
+        if (hasVariants) {
+            // Find first variant with this color that has images
+            const vWithImg = variants.find((v: any) => v.color === colorName && v.images?.length > 0);
+            if (vWithImg) setSelectedImage(0); // reset to first variant image
+        } else {
+            // No variants — map color index to image index
+            const colorIdx = colorSwatches.findIndex((c: any) => c.name === colorName);
+            if (colorIdx >= 0 && colorIdx < baseImages.length) {
+                setSelectedImage(colorIdx);
+            }
+        }
+    };
+
+    // Handler: when size is selected
+    const handleSizeSelect = (size: string) => {
+        if (selectedSize === size) {
+            setSelectedSize('');
+            return;
+        }
+        setSelectedSize(size);
     };
 
     return (
@@ -655,6 +740,7 @@ export default function ProductDetailsPage() {
                                 </div>
 
                                 {/* Size Swatches Column (RIGHT of image) */}
+                                {sizeList.length > 0 && (
                                 <div className="pd-size-col" style={{
                                     width: 'clamp(44px, 5vw, 56px)', display: 'flex', flexDirection: 'column',
                                     alignItems: 'center', padding: '8px 0',
@@ -665,33 +751,43 @@ export default function ProductDetailsPage() {
                                         display: 'flex', flexDirection: 'column', gap: '8px',
                                         overflow: 'hidden', maxHeight: '580px', flex: 1,
                                     }} className="no-scrollbar">
-                                        {(product.sizes && product.sizes.length > 0 ? product.sizes : ['S', 'M', 'L', 'XL', 'XXL']).map((size: string, idx: number) => (
+                                        {sizeList.map((size: string, idx: number) => {
+                                            const isAvailable = availableSizesForColor.includes(size);
+                                            const isSelected = selectedSize === size;
+                                            return (
                                             <button
                                                 key={idx}
-                                                onClick={() => setSelectedSize(selectedSize === size ? '' : size)}
+                                                onClick={() => isAvailable && handleSizeSelect(size)}
+                                                title={!isAvailable ? `${size} — not available` : size}
                                                 style={{
                                                     width: 'clamp(36px, 4vw, 48px)', height: 'clamp(36px, 4vw, 48px)', flexShrink: 0,
-                                                    background: selectedSize === size ? '#0B4222' : '#fff',
-                                                    color: selectedSize === size ? '#fff' : '#333',
-                                                    border: selectedSize === size ? '2px solid #0B4222' : '2px solid #e0e0e0',
-                                                    borderRadius: '6px', cursor: 'pointer',
+                                                    background: isSelected ? '#0B4222' : !isAvailable ? '#f3f4f6' : '#fff',
+                                                    color: isSelected ? '#fff' : !isAvailable ? '#ccc' : '#333',
+                                                    border: isSelected ? '2px solid #0B4222' : !isAvailable ? '2px solid #e8e8e8' : '2px solid #e0e0e0',
+                                                    borderRadius: '6px',
+                                                    cursor: !isAvailable ? 'not-allowed' : 'pointer',
                                                     fontWeight: 700, fontSize: '12px',
                                                     transition: 'all 0.2s ease',
                                                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                    boxShadow: selectedSize === size ? '0 0 0 2px rgba(11,66,34,0.2)' : 'none',
+                                                    boxShadow: isSelected ? '0 0 0 2px rgba(11,66,34,0.2)' : 'none',
+                                                    opacity: !isAvailable ? 0.5 : 1,
+                                                    textDecoration: !isAvailable ? 'line-through' : 'none',
                                                 }}
                                             >
                                                 {size}
                                             </button>
-                                        ))}
+                                            );
+                                        })}
                                     </div>
                                     <div style={{ display: 'flex', gap: '4px' }}>
                                         <button onClick={() => scrollList(sizeSwatchRef, 'up')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FiChevronUp size={18} /></button>
                                         <button onClick={() => scrollList(sizeSwatchRef, 'down')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FiChevronDown size={18} /></button>
                                     </div>
                                 </div>
+                                )}
 
                                 {/* Color Label Column (RIGHT of image) */}
+                                {colorSwatches.length > 0 && (
                                 <div className="pd-color-col" style={{
                                     width: 'clamp(44px, 5vw, 56px)', display: 'flex', flexDirection: 'column',
                                     alignItems: 'center', padding: '8px 0',
@@ -702,32 +798,38 @@ export default function ProductDetailsPage() {
                                         display: 'flex', flexDirection: 'column', gap: '8px',
                                         overflow: 'hidden', maxHeight: '580px', flex: 1,
                                     }} className="no-scrollbar">
-                                        {colorSwatches.map((color: any, idx: number) => (
+                                        {colorSwatches.map((color: any, idx: number) => {
+                                            const isAvailable = availableColorsForSize.includes(color.name);
+                                            const isSelected = selectedColor === color.name;
+                                            return (
                                             <button
                                                 key={idx}
-                                                onClick={() => setSelectedColor(selectedColor === color.name ? '' : color.name)}
-                                                title={color.name}
+                                                onClick={() => isAvailable && handleColorSelect(color.name)}
+                                                title={!isAvailable ? `${color.name} — not available` : color.name}
                                                 style={{
                                                     width: 'clamp(36px, 4vw, 48px)', height: 'clamp(36px, 4vw, 48px)', flexShrink: 0,
                                                     background: getColorHex(color.hex || color.name),
-                                                    border: selectedColor === color.name
+                                                    border: isSelected
                                                         ? '3px solid #0B4222'
-                                                        : '2px solid #e0e0e0',
+                                                        : !isAvailable ? '2px solid #ccc' : '2px solid #e0e0e0',
                                                     borderRadius: '6px',
-                                                    cursor: 'pointer',
+                                                    cursor: !isAvailable ? 'not-allowed' : 'pointer',
                                                     transition: 'all 0.2s ease',
-                                                    boxShadow: selectedColor === color.name
+                                                    boxShadow: isSelected
                                                         ? '0 0 0 2px rgba(11,66,34,0.2)'
                                                         : 'none',
+                                                    opacity: !isAvailable ? 0.3 : 1,
                                                 }}
                                             />
-                                        ))}
+                                            );
+                                        })}
                                     </div>
                                     <div style={{ display: 'flex', gap: '4px' }}>
                                         <button onClick={() => scrollList(colorSwatchRef2, 'up')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FiChevronUp size={18} /></button>
                                         <button onClick={() => scrollList(colorSwatchRef2, 'down')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FiChevronDown size={18} /></button>
                                     </div>
                                 </div>
+                                )}
                                 </div>{/* end image area row */}
                                 {/* ═══ ACTION BAR at bottom of left section ═══ */}
                                 <div className="pd-action-bar" style={{
