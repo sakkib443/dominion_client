@@ -155,6 +155,7 @@ const NewHeader: React.FC = () => {
                     position: 'sticky',
                     top: 0,
                     zIndex: 50,
+                    background: scrolled ? '#fff' : 'transparent',
                     transition: 'box-shadow 0.3s ease, background 0.3s ease',
                     boxShadow: scrolled ? '0 2px 16px rgba(0,0,0,0.18)' : 'none',
                 }}
