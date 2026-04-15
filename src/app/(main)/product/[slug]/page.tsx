@@ -263,18 +263,21 @@ export default function ProductDetailsPage() {
         : colorSwatches.map((c: any) => c.name);
 
     // ── Display images — ALWAYS show ALL variant images + base images ──
-    // All images are always visible; color selection just highlights/auto-scrolls
+    // Collect per-COLOR (not per-variant) to avoid duplicates from same color's different sizes
     const allImages = (() => {
         if (hasVariants) {
-            // Collect ALL unique images from ALL variants + base images
             const seen = new Set<string>();
             const imgs: string[] = [];
             // First add base/thumbnail
             baseImages.forEach(img => {
                 if (!seen.has(img)) { seen.add(img); imgs.push(img); }
             });
-            // Then add ALL variant images (every color, every size)
+            // Then add images per unique COLOR (only first variant of each color)
+            const processedColors = new Set<string>();
             variants.forEach((v: any) => {
+                const colorKey = v.color || `__no_color_${v.size}`;
+                if (processedColors.has(colorKey)) return; // skip same color
+                processedColors.add(colorKey);
                 (v.images || []).forEach((img: string) => {
                     if (!seen.has(img)) { seen.add(img); imgs.push(img); }
                 });
