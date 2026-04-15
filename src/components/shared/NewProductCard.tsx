@@ -72,6 +72,7 @@ const NewProductCard: React.FC<NewProductCardProps> = ({ product }) => {
     const cartItems = useAppSelector((state: any) => state.cart.items);
     const isInCart = cartItems.some((item: any) => item.id === productId);
     const [cartAnim, setCartAnim] = useState(false);
+    const [showAlreadyAdded, setShowAlreadyAdded] = useState(false);
 
     const productUrl = typeof window !== 'undefined'
         ? `${window.location.origin}/product/${product.slug || product.id}`
@@ -115,8 +116,8 @@ const NewProductCard: React.FC<NewProductCardProps> = ({ product }) => {
         e.preventDefault();
         e.stopPropagation();
         if (isInCart) {
-            setCartAnim(true);
-            setTimeout(() => setCartAnim(false), 600);
+            setShowAlreadyAdded(true);
+            setTimeout(() => setShowAlreadyAdded(false), 1500);
             return;
         }
         dispatch(addToCart({
@@ -172,12 +173,23 @@ const NewProductCard: React.FC<NewProductCardProps> = ({ product }) => {
                             <button
                                 onClick={handleAddToCart}
                                 className='relative text-gray-600 hover:text-[#0B4222] transition-all p-2 cart-icon-animate rounded-full bg-[#0B4222]/50 hover:bg-[#0B4222]/60'
-                                title={isInCart ? 'Already in Cart' : 'Add to Cart'}
                             >
                                 <img src="/ICON/cart.png" alt="Cart" className="w-5 h-5 opacity-70" />
                                 {isInCart && <span className='absolute -top-1 -right-1 w-3 h-3 bg-[#0B4222] rounded-full border border-white flex items-center justify-center text-white text-[7px] font-bold'>✓</span>}
                             </button>
                         </div>
+
+                        {/* Already Added text — simple, no background */}
+                        {showAlreadyAdded && (
+                            <span style={{
+                                position: 'absolute', top: '46px', right: '10px',
+                                fontSize: '10px', fontWeight: 500, color: '#9ca3af',
+                                zIndex: 10, pointerEvents: 'none',
+                            }}>
+                                Already Added
+                            </span>
+                        )}
+
                         <img
                             src={product.image || 'https://via.placeholder.com/300x300/E8957A/E8957A'}
                             alt={product.name}

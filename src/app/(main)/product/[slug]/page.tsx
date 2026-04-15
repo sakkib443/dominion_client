@@ -55,8 +55,11 @@ export default function ProductDetailsPage() {
     const [cmtSuccess, setCmtSuccess] = useState(false);
     const [zoomLevel, setZoomLevel] = useState(1);
     const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
-    const [isDragging, setIsDragging] = useState(false);
-    const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+    // Refs for drag — avoids stale closure in mouse event handlers
+    const isDraggingRef = useRef(false);
+    const hasDraggedRef = useRef(false);  // true if mouse actually moved during drag
+    const dragStartRef = useRef({ x: 0, y: 0 });
+    const panOffsetRef = useRef({ x: 0, y: 0 });
     const [showDownloadModal, setShowDownloadModal] = useState(false);
     const [showInquiryModal, setShowInquiryModal] = useState(false);
     const [inquiryName, setInquiryName] = useState('');
@@ -68,6 +71,11 @@ export default function ProductDetailsPage() {
     const sizeSwatchRef = useRef<HTMLDivElement>(null);
     const colorSwatchRef2 = useRef<HTMLDivElement>(null);
     const detailsRef = useRef<HTMLDivElement>(null);
+
+    // Scroll to top whenever the slug changes (page navigation)
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: 'instant' });
+    }, [slug]);
 
     // Lock body scroll when any modal is open
     const anyModalOpen = showSharePopup || showCommentsModal || showRatingModal || showBuyNowModal || isFullscreen || showDownloadModal || showInquiryModal;
@@ -469,17 +477,27 @@ export default function ProductDetailsPage() {
                                     onMouseDown={(e) => {
                                         if (zoomLevel > 1) {
                                             e.preventDefault();
-                                            setIsDragging(true);
-                                            setDragStart({ x: e.clientX - panOffset.x, y: e.clientY - panOffset.y });
+                                            isDraggingRef.current = true;
+                                            hasDraggedRef.current = false;  // reset on each new press
+                                            dragStartRef.current = {
+                                                x: e.clientX - panOffsetRef.current.x,
+                                                y: e.clientY - panOffsetRef.current.y,
+                                            };
                                         }
                                     }}
                                     onMouseMove={(e) => {
-                                        if (isDragging && zoomLevel > 1) {
-                                            setPanOffset({ x: e.clientX - dragStart.x, y: e.clientY - dragStart.y });
+                                        if (isDraggingRef.current && zoomLevel > 1) {
+                                            hasDraggedRef.current = true;  // real drag happened
+                                            const newOffset = {
+                                                x: e.clientX - dragStartRef.current.x,
+                                                y: e.clientY - dragStartRef.current.y,
+                                            };
+                                            panOffsetRef.current = newOffset;
+                                            setPanOffset({ ...newOffset });
                                         }
                                     }}
-                                    onMouseUp={() => setIsDragging(false)}
-                                    onMouseLeave={() => setIsDragging(false)}
+                                    onMouseUp={() => { isDraggingRef.current = false; }}
+                                    onMouseLeave={() => { isDraggingRef.current = false; }}
                                 >
                                     <img
                                         src={allImages[selectedImage] || allImages[0]}
@@ -488,18 +506,25 @@ export default function ProductDetailsPage() {
                                         style={{
                                             width: '100%', height: '100%',
                                             objectFit: 'contain', borderRadius: '12px',
-                                            transition: isDragging ? 'none' : 'transform 0.3s ease',
-                                            transform: `scale(${zoomLevel}) translate(${panOffset.x / zoomLevel}px, ${panOffset.y / zoomLevel}px)`,
-                                            cursor: zoomLevel > 1 ? (isDragging ? 'grabbing' : 'grab') : 'zoom-in',
+                                            transition: 'transform 0.1s ease',
+                                            transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoomLevel})`,
+                                            cursor: zoomLevel > 1 ? 'grab' : 'zoom-in',
                                             background: '#111',
                                             userSelect: 'none',
+                                            transformOrigin: 'center center',
                                         }}
                                         onClick={(e) => {
-                                            if (isDragging) return;
+                                            // Block click if a real drag just happened
+                                            if (hasDraggedRef.current) {
+                                                hasDraggedRef.current = false;
+                                                return;
+                                            }
                                             e.stopPropagation();
                                             if (zoomLevel > 1) {
                                                 setZoomLevel(1);
-                                                setPanOffset({ x: 0, y: 0 });
+                                                const reset = { x: 0, y: 0 };
+                                                panOffsetRef.current = reset;
+                                                setPanOffset(reset);
                                             } else {
                                                 setZoomLevel(1.8);
                                             }
@@ -509,7 +534,11 @@ export default function ProductDetailsPage() {
                                             setZoomLevel(prev => {
                                                 const next = prev + (e.deltaY < 0 ? 0.15 : -0.15);
                                                 const clamped = Math.max(1, Math.min(2.5, next));
-                                                if (clamped <= 1) setPanOffset({ x: 0, y: 0 });
+                                                if (clamped <= 1) {
+                                                    const reset = { x: 0, y: 0 };
+                                                    panOffsetRef.current = reset;
+                                                    setPanOffset(reset);
+                                                }
                                                 return clamped;
                                             });
                                         }}
@@ -1166,8 +1195,8 @@ export default function ProductDetailsPage() {
 
                     {/* ═══ Related Products Section ═══ */}
                     {relatedProducts.length > 0 && (
-                        <div style={{ marginTop: '1rem' }}>
-                            <div style={{ padding: '2rem 0' }}>
+                        <div style={{ marginTop: '0.25rem' }}>
+                            <div style={{ padding: '0.75rem 0' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
                                     <div>
                                         <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#1a1a1a', margin: 0 }}>Related Products</h2>
