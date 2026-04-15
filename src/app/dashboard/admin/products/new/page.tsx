@@ -517,16 +517,51 @@ const ProductFormInner = () => {
                             </div>
                         )}
 
-                        {/* ── Variant Cards ── */}
+                        {/* ── Per-Color Images — upload once, auto-apply to all sizes ── */}
+                        {(formData.variants?.length || 0) > 0 && formData.colors.length > 0 && (
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-4">
+                                <p className="text-xs font-bold text-blue-700">📸 Per-Color Images — একবার upload করলে ওই কালারের সব size এ apply হবে</p>
+                                {formData.colors.map((colorName: string, ci: number) => {
+                                    // Get images from first variant of this color
+                                    const firstVariantOfColor = (formData.variants || []).find((v: any) => v.color === colorName);
+                                    const currentImages = firstVariantOfColor?.images || [];
+                                    return (
+                                        <div key={ci} className="bg-white rounded-lg p-3 border border-blue-100">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <span className="w-5 h-5 rounded" style={{ background: formData.colorHex?.[ci] || '#ccc', border: '1px solid #ddd' }} />
+                                                <span className="text-sm font-bold text-gray-700">{colorName}</span>
+                                                <span className="text-[10px] text-gray-400">({(formData.variants || []).filter((v: any) => v.color === colorName).length} variants)</span>
+                                            </div>
+                                            <MultipleImageUploader
+                                                label={`${colorName} Images`}
+                                                values={currentImages}
+                                                onChange={(urls: string[]) => {
+                                                    // Apply images to ALL variants of this color
+                                                    setFormData((prev: any) => ({
+                                                        ...prev,
+                                                        variants: prev.variants.map((vr: any) =>
+                                                            vr.color === colorName ? { ...vr, images: urls } : vr
+                                                        )
+                                                    }));
+                                                }}
+                                                max={6}
+                                            />
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+
+                        {/* ── Variant Cards (price/stock only, no images) ── */}
                         {(formData.variants?.length || 0) > 0 && (
-                            <p className="text-xs text-gray-400">{formData.variants.length} variant{formData.variants.length > 1 ? 's' : ''} — click করে expand করুন</p>
+                            <p className="text-xs text-gray-400">{formData.variants.length} variant{formData.variants.length > 1 ? 's' : ''} — click করে price/stock edit করুন</p>
                         )}
                         {(formData.variants || []).map((v: any, i: number) => (
                             <details key={i} className="border border-gray-200 rounded-lg overflow-hidden bg-gray-50">
                                 <summary className="flex items-center gap-3 px-4 py-3 cursor-pointer select-none hover:bg-gray-100 transition-all" style={{ listStyle: 'none' }}>
                                     {v.colorHex && <span className="w-5 h-5 rounded shrink-0 border border-gray-300" style={{ background: v.colorHex }} />}
                                     <span className="flex-1 text-sm font-semibold text-gray-800">{[v.color, v.size].filter(Boolean).join(' / ') || `Variant #${i + 1}`}</span>
-                                    <span className="text-xs text-gray-400">৳{v.price || 0} • Stock: {v.stock || 0}</span>
+                                    <span className="text-xs text-gray-400">৳{v.price || 0} • Stock: {v.stock || 0}{(v.images?.length || 0) > 0 ? ` • 📷${v.images.length}` : ''}</span>
                                     <button type="button" onClick={(e) => { e.preventDefault(); setFormData((prev: any) => ({ ...prev, variants: prev.variants.filter((_: any, j: number) => j !== i) })); }} className="px-2 py-1 bg-red-50 border border-red-200 text-red-500 rounded text-[10px] font-bold hover:bg-red-100">
                                         <FiTrash2 size={12} />
                                     </button>
@@ -535,18 +570,11 @@ const ProductFormInner = () => {
                                     <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                                         <div className="space-y-1">
                                             <label className="text-[10px] font-bold text-gray-400 uppercase">Color</label>
-                                            <input type="text" value={v.color || ''} onChange={e => { const vars = [...formData.variants]; vars[i] = { ...vars[i], color: e.target.value }; setFormData((prev: any) => ({ ...prev, variants: vars })); }} className="w-full px-3 py-2 bg-white border border-gray-200 rounded-md text-sm outline-none focus:border-[#0B4222]" />
-                                        </div>
-                                        <div className="space-y-1">
-                                            <label className="text-[10px] font-bold text-gray-400 uppercase">Color Hex</label>
-                                            <div className="flex gap-2 items-center">
-                                                <input type="color" value={v.colorHex || '#000000'} onChange={e => { const vars = [...formData.variants]; vars[i] = { ...vars[i], colorHex: e.target.value }; setFormData((prev: any) => ({ ...prev, variants: vars })); }} className="w-9 h-9 rounded border border-gray-200 cursor-pointer p-0.5 shrink-0" />
-                                                <input type="text" value={v.colorHex || ''} onChange={e => { const vars = [...formData.variants]; vars[i] = { ...vars[i], colorHex: e.target.value }; setFormData((prev: any) => ({ ...prev, variants: vars })); }} className="flex-1 px-3 py-2 bg-white border border-gray-200 rounded-md text-xs outline-none font-mono" />
-                                            </div>
+                                            <input type="text" value={v.color || ''} readOnly className="w-full px-3 py-2 bg-gray-100 border border-gray-200 rounded-md text-sm outline-none text-gray-500" />
                                         </div>
                                         <div className="space-y-1">
                                             <label className="text-[10px] font-bold text-gray-400 uppercase">Size</label>
-                                            <input type="text" value={v.size || ''} onChange={e => { const vars = [...formData.variants]; vars[i] = { ...vars[i], size: e.target.value }; setFormData((prev: any) => ({ ...prev, variants: vars })); }} className="w-full px-3 py-2 bg-white border border-gray-200 rounded-md text-sm outline-none focus:border-[#0B4222]" />
+                                            <input type="text" value={v.size || ''} readOnly className="w-full px-3 py-2 bg-gray-100 border border-gray-200 rounded-md text-sm outline-none text-gray-500" />
                                         </div>
                                         <div className="space-y-1">
                                             <label className="text-[10px] font-bold text-gray-400 uppercase">Price (৳) *</label>
@@ -560,14 +588,6 @@ const ProductFormInner = () => {
                                             <label className="text-[10px] font-bold text-gray-400 uppercase">Stock</label>
                                             <input type="number" value={v.stock || 0} min="0" onChange={e => { const vars = [...formData.variants]; vars[i] = { ...vars[i], stock: Number(e.target.value) }; setFormData((prev: any) => ({ ...prev, variants: vars })); }} className="w-full px-3 py-2 bg-white border border-gray-200 rounded-md text-sm outline-none focus:border-[#0B4222]" />
                                         </div>
-                                    </div>
-                                    <div className="space-y-1">
-                                        <MultipleImageUploader
-                                            label={`Variant Images — ${[v.color, v.size].filter(Boolean).join(' / ')}`}
-                                            values={v.images || []}
-                                            onChange={(urls: string[]) => { const vars = [...formData.variants]; vars[i] = { ...vars[i], images: urls }; setFormData((prev: any) => ({ ...prev, variants: vars })); }}
-                                            max={5}
-                                        />
                                     </div>
                                     {v.originalPrice > 0 && v.price > 0 && v.originalPrice > v.price && (
                                         <p className="text-xs text-emerald-700 font-bold bg-emerald-50 px-3 py-1.5 rounded inline-block">✅ Discount: {Math.round(((v.originalPrice - v.price) / v.originalPrice) * 100)}%</p>
