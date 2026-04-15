@@ -54,6 +54,9 @@ export default function ProductDetailsPage() {
     const [cmtSubmitting, setCmtSubmitting] = useState(false);
     const [cmtSuccess, setCmtSuccess] = useState(false);
     const [zoomLevel, setZoomLevel] = useState(1);
+    const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
+    const [isDragging, setIsDragging] = useState(false);
+    const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
     const [showDownloadModal, setShowDownloadModal] = useState(false);
     const [showInquiryModal, setShowInquiryModal] = useState(false);
     const [inquiryName, setInquiryName] = useState('');
@@ -380,11 +383,11 @@ export default function ProductDetailsPage() {
                                 background: 'rgba(0,0,0,0.95)', display: 'flex',
                                 alignItems: 'center', justifyContent: 'center', padding: '1rem'
                             }}
-                            onClick={() => { setIsFullscreen(false); setZoomLevel(1); }}
+                            onClick={() => { setIsFullscreen(false); setZoomLevel(1); setPanOffset({ x: 0, y: 0 }); }}
                         >
                             {/* Close Button */}
                             <button
-                                onClick={() => { setIsFullscreen(false); setZoomLevel(1); }}
+                                onClick={() => { setIsFullscreen(false); setZoomLevel(1); setPanOffset({ x: 0, y: 0 }); }}
                                 style={{
                                     position: 'absolute', top: '1rem', right: '1rem',
                                     width: '40px', height: '40px', background: 'rgba(255,255,255,0.1)',
@@ -406,7 +409,7 @@ export default function ProductDetailsPage() {
                                     {allImages.map((img, idx) => (
                                         <button
                                             key={idx}
-                                            onClick={(e) => { e.stopPropagation(); handleImageSelect(idx); setZoomLevel(1); }}
+                                            onClick={(e) => { e.stopPropagation(); handleImageSelect(idx); setZoomLevel(1); setPanOffset({ x: 0, y: 0 }); }}
                                             style={{
                                                 width: '56px', height: '56px', borderRadius: '8px',
                                                 overflow: 'hidden', border: selectedImage === idx ? '2px solid #fff' : '2px solid rgba(255,255,255,0.2)',
@@ -426,7 +429,7 @@ export default function ProductDetailsPage() {
                             <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: '12px' }} onClick={(e) => e.stopPropagation()}>
                                 {/* Left Arrow — always visible, disabled at first */}
                                 <button
-                                    onClick={() => { if (selectedImage > 0) { setSelectedImage(prev => prev - 1); setZoomLevel(1); } }}
+                                    onClick={() => { if (selectedImage > 0) { setSelectedImage(prev => prev - 1); setZoomLevel(1); setPanOffset({ x: 0, y: 0 }); } }}
                                     disabled={selectedImage === 0}
                                     style={{
                                         background: selectedImage === 0 ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.15)',
@@ -441,23 +444,54 @@ export default function ProductDetailsPage() {
                                     <FiChevronLeft size={24} color="#fff" />
                                 </button>
 
-                                {/* Image Box — fixed square */}
-                                <div style={{ position: 'relative', width: '500px', height: '500px', flexShrink: 0 }}>
+                                {/* Image Box — large, responsive to viewport */}
+                                <div
+                                    style={{ position: 'relative', width: 'min(92vh, 90vw)', height: 'min(92vh, 90vw)', flexShrink: 0, overflow: 'hidden', borderRadius: '12px' }}
+                                    onMouseDown={(e) => {
+                                        if (zoomLevel > 1) {
+                                            e.preventDefault();
+                                            setIsDragging(true);
+                                            setDragStart({ x: e.clientX - panOffset.x, y: e.clientY - panOffset.y });
+                                        }
+                                    }}
+                                    onMouseMove={(e) => {
+                                        if (isDragging && zoomLevel > 1) {
+                                            setPanOffset({ x: e.clientX - dragStart.x, y: e.clientY - dragStart.y });
+                                        }
+                                    }}
+                                    onMouseUp={() => setIsDragging(false)}
+                                    onMouseLeave={() => setIsDragging(false)}
+                                >
                                     <img
                                         src={allImages[selectedImage] || allImages[0]}
                                         alt={product.name}
+                                        draggable={false}
                                         style={{
                                             width: '100%', height: '100%',
-                                            objectFit: 'cover', borderRadius: '12px',
-                                            transition: 'transform 0.3s ease', transform: `scale(${zoomLevel})`,
-                                            cursor: zoomLevel > 1 ? 'zoom-out' : 'zoom-in',
+                                            objectFit: 'contain', borderRadius: '12px',
+                                            transition: isDragging ? 'none' : 'transform 0.3s ease',
+                                            transform: `scale(${zoomLevel}) translate(${panOffset.x / zoomLevel}px, ${panOffset.y / zoomLevel}px)`,
+                                            cursor: zoomLevel > 1 ? (isDragging ? 'grabbing' : 'grab') : 'zoom-in',
                                             background: '#111',
+                                            userSelect: 'none',
+                                        }}
+                                        onClick={(e) => {
+                                            if (isDragging) return;
+                                            e.stopPropagation();
+                                            if (zoomLevel > 1) {
+                                                setZoomLevel(1);
+                                                setPanOffset({ x: 0, y: 0 });
+                                            } else {
+                                                setZoomLevel(1.8);
+                                            }
                                         }}
                                         onWheel={(e) => {
                                             e.stopPropagation();
                                             setZoomLevel(prev => {
-                                                const next = prev + (e.deltaY < 0 ? 0.2 : -0.2);
-                                                return Math.max(1, Math.min(3, next));
+                                                const next = prev + (e.deltaY < 0 ? 0.15 : -0.15);
+                                                const clamped = Math.max(1, Math.min(2.5, next));
+                                                if (clamped <= 1) setPanOffset({ x: 0, y: 0 });
+                                                return clamped;
                                             });
                                         }}
                                     />
@@ -474,7 +508,7 @@ export default function ProductDetailsPage() {
 
                                 {/* Right Arrow — always visible, disabled at last */}
                                 <button
-                                    onClick={() => { if (selectedImage < allImages.length - 1) { setSelectedImage(prev => prev + 1); setZoomLevel(1); } }}
+                                    onClick={() => { if (selectedImage < allImages.length - 1) { setSelectedImage(prev => prev + 1); setZoomLevel(1); setPanOffset({ x: 0, y: 0 }); } }}
                                     disabled={selectedImage === allImages.length - 1}
                                     style={{
                                         background: selectedImage === allImages.length - 1 ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.15)',
