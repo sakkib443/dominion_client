@@ -187,7 +187,7 @@ export default function ProductDetailsPage() {
         );
     }
 
-    // ── Variant-Aware Logic ──────────────────────────────────────
+    // ── Variant-Aware Logic with Bi-directional Color ↔ Image Sync ──
     const baseImages = [product.thumbnail, ...(product.images || [])].filter(Boolean);
     const variants = product.variants || [];
     const hasVariants = variants.length > 0;
@@ -213,6 +213,39 @@ export default function ProductDetailsPage() {
         return product.sizes?.length > 0 ? product.sizes : [];
     })();
 
+    // ── Build Color → Images Map (key piece for bi-directional sync) ──
+    const colorImageMap = (() => {
+        const map: Record<string, string[]> = {};
+        if (hasVariants) {
+            // Collect all images from variants of same color
+            variants.forEach((v: any) => {
+                if (v.color && v.images?.length > 0) {
+                    if (!map[v.color]) map[v.color] = [];
+                    v.images.forEach((img: string) => {
+                        if (!map[v.color].includes(img)) map[v.color].push(img);
+                    });
+                }
+            });
+        } else if (colorSwatches.length > 0 && baseImages.length > 0) {
+            // No variants — map each color to corresponding image by index
+            colorSwatches.forEach((c, i) => {
+                if (i < baseImages.length) {
+                    map[c.name] = [baseImages[i]];
+                }
+            });
+        }
+        return map;
+    })();
+
+    // ── Build Image → Color reverse map (for thumbnail click → color select) ──
+    const imageToColorMap = (() => {
+        const map: Record<string, string> = {};
+        Object.entries(colorImageMap).forEach(([colorName, imgs]) => {
+            imgs.forEach(img => { map[img] = colorName; });
+        });
+        return map;
+    })();
+
     // Active variant — matched by selected color + size
     const activeVariant = hasVariants ? variants.find((v: any) =>
         (!selectedColor || v.color === selectedColor) &&
@@ -229,19 +262,13 @@ export default function ProductDetailsPage() {
         ? variants.filter((v: any) => v.size === selectedSize && v.stock > 0).map((v: any) => v.color).filter(Boolean)
         : colorSwatches.map((c: any) => c.name);
 
-    // Display images — variant images > color-mapped images > base images
+    // ── Display images — selected color's images → fallback to all ──
     const allImages = (() => {
-        // If variant selected and has images, show those
-        if (activeVariant?.images?.length > 0) return activeVariant.images;
-        // If no variants but color selected, try to map color index to image
-        if (!hasVariants && selectedColor && colorSwatches.length > 0) {
-            const colorIdx = colorSwatches.findIndex((c: any) => c.name === selectedColor);
-            // If we have roughly 1 image per color (thumbnail + extra = colors count),
-            // map color to corresponding image
-            if (colorIdx >= 0 && colorIdx < baseImages.length) {
-                return baseImages; // keep all images, but auto-select the right one
-            }
+        // If a color is selected and has mapped images, show ONLY those
+        if (selectedColor && colorImageMap[selectedColor]?.length > 0) {
+            return colorImageMap[selectedColor];
         }
+        // No color selected — show all base images
         return baseImages;
     })();
 
@@ -291,23 +318,31 @@ export default function ProductDetailsPage() {
         return namedColors[colorName.toLowerCase()] || colorName;
     };
 
-    // Handler: when color is selected, auto-switch image
+    // ── Handler: COLOR selected → switch to that color's images ──
     const handleColorSelect = (colorName: string) => {
         if (selectedColor === colorName) {
+            // Deselect → show all images
             setSelectedColor('');
             setSelectedImage(0);
             return;
         }
         setSelectedColor(colorName);
-        if (hasVariants) {
-            // Find first variant with this color that has images
-            const vWithImg = variants.find((v: any) => v.color === colorName && v.images?.length > 0);
-            if (vWithImg) setSelectedImage(0); // reset to first variant image
-        } else {
-            // No variants — map color index to image index
-            const colorIdx = colorSwatches.findIndex((c: any) => c.name === colorName);
-            if (colorIdx >= 0 && colorIdx < baseImages.length) {
-                setSelectedImage(colorIdx);
+        setSelectedImage(0); // always reset to first image of this color
+    };
+
+    // ── Handler: IMAGE thumbnail clicked → auto-select matching color ──
+    const handleImageSelect = (imgIdx: number) => {
+        setSelectedImage(imgIdx);
+        // Check if this image belongs to a specific color
+        const imgUrl = allImages[imgIdx];
+        if (imgUrl && imageToColorMap[imgUrl]) {
+            const matchedColor = imageToColorMap[imgUrl];
+            if (matchedColor !== selectedColor) {
+                // Don't change color if already on the same color (just switching images within)
+                // Only auto-select if no color selected or image is from different color
+                if (!selectedColor) {
+                    setSelectedColor(matchedColor);
+                }
             }
         }
     };
@@ -359,7 +394,7 @@ export default function ProductDetailsPage() {
                                     {allImages.map((img, idx) => (
                                         <button
                                             key={idx}
-                                            onClick={(e) => { e.stopPropagation(); setSelectedImage(idx); setZoomLevel(1); }}
+                                            onClick={(e) => { e.stopPropagation(); handleImageSelect(idx); setZoomLevel(1); }}
                                             style={{
                                                 width: '56px', height: '56px', borderRadius: '8px',
                                                 overflow: 'hidden', border: selectedImage === idx ? '2px solid #fff' : '2px solid rgba(255,255,255,0.2)',
@@ -610,7 +645,7 @@ export default function ProductDetailsPage() {
                                         {allImages.map((img: string, idx: number) => (
                                             <button
                                                 key={idx}
-                                                onClick={() => setSelectedImage(idx)}
+                                                onClick={() => handleImageSelect(idx)}
                                                 style={{
                                                     width: '75px', height: '75px', flexShrink: 0,
                                                     border: selectedImage === idx
