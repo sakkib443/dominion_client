@@ -121,23 +121,42 @@ export default function ProductDetailsPage() {
     };
 
     const cartItems = useAppSelector((state: any) => state.cart.items);
-    const isInCart = product ? cartItems.some((item: any) => item.id === product._id) : false;
+
+    // Build unique cart ID that includes variant info
+    const getCartId = () => {
+        const parts = [product?._id];
+        if (selectedColor) parts.push(selectedColor);
+        if (selectedSize) parts.push(selectedSize);
+        return parts.join('_');
+    };
+
+    const isInCart = product ? cartItems.some((item: any) => item.id === getCartId()) : false;
 
     const handleAddToCart = () => {
         if (!product) return;
+        const cartId = getCartId();
+
         if (isInCart) {
             setAddedToCart(true);
             setTimeout(() => setAddedToCart(false), 2000);
             return;
         }
+
+        // Use variant's first image if available, else product thumbnail
+        const variantImage = activeVariant?.images?.[0] || allImages[selectedImage] || product.thumbnail;
+
         dispatch(addToCart({
-            id: product._id,
+            id: cartId,
+            productId: product._id,
             name: product.name,
             price: discountedPrice,
-            mrp: product.originalPrice || product.price,
-            image: product.thumbnail,
+            mrp: activeVariant?.originalPrice || product.originalPrice || product.price,
+            image: variantImage,
             category: product.category?.name || 'General',
             quantity: quantity,
+            color: selectedColor || undefined,
+            colorHex: activeVariant?.colorHex || undefined,
+            size: selectedSize || undefined,
         }));
         setAddedToCart(true);
         setTimeout(() => setAddedToCart(false), 2000);
@@ -1752,7 +1771,13 @@ export default function ProductDetailsPage() {
                 <OrderModal
                     isOpen={showBuyNowModal}
                     onClose={() => setShowBuyNowModal(false)}
-                    items={[{ product: product._id, quantity: buyNowQty }]}
+                    items={[{
+                        product: product._id,
+                        quantity: buyNowQty,
+                        color: selectedColor || undefined,
+                        size: selectedSize || undefined,
+                        price: discountedPrice,
+                    }]}
                     totalPrice={discountedPrice * buyNowQty}
                     clearCartOnSuccess={false}
                 />

@@ -96,6 +96,21 @@ const CartPage = () => {
                                 </div>
                                 <div>
                                     <h3 style={{ fontSize: '13px', fontWeight: 700, color: '#1a1a1a', margin: 0, lineHeight: 1.4 }}>{item.name}</h3>
+                                    {(item.color || item.size) && (
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px', flexWrap: 'wrap' }}>
+                                            {item.color && (
+                                                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: '#666', fontWeight: 600 }}>
+                                                    <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: item.colorHex || '#ccc', border: '1px solid #ddd', flexShrink: 0 }} />
+                                                    {item.color}
+                                                </span>
+                                            )}
+                                            {item.size && (
+                                                <span style={{ fontSize: '10px', fontWeight: 700, color: '#555', background: '#f3f4f6', padding: '2px 8px', borderRadius: '4px', border: '1px solid #e5e7eb' }}>
+                                                    {item.size}
+                                                </span>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
@@ -216,7 +231,13 @@ const CartPage = () => {
                 <OrderModal
                     isOpen={showOrderModal}
                     onClose={() => setShowOrderModal(false)}
-                    items={items.map(item => ({ product: item.id, quantity: item.quantity }))}
+                    items={items.map(item => ({
+                        product: item.productId || item.id,
+                        quantity: item.quantity,
+                        color: item.color || undefined,
+                        size: item.size || undefined,
+                        price: item.price,
+                    }))}
                     totalPrice={totalPrice}
                     clearCartOnSuccess={true}
                     onSuccess={() => setOrderSuccess(true)}
