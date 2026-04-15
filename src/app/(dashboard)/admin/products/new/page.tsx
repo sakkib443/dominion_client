@@ -271,81 +271,182 @@ export default function NewProductPage() {
                             </div>
                         </Section>
 
-                        {/* 4. Variants */}
-                        <Section icon={<FiPackage size={16} />} title="Product Variants (Color / Size)">
-                            <p style={{ fontSize: '12px', color: '#6b7280', margin: '0 0 14px 0', lineHeight: 1.6 }}>
-                                ভিন্ন color বা size এ আলাদা দাম, stock ও images দিতে পারবেন।
-                                {variants.length === 0 && <span style={{ color: '#9ca3af' }}> Variant না থাকলে base price/stock ব্যবহার হবে।</span>}
+                        {/* 4. Variations — WooCommerce-style */}
+                        <Section icon={<FiPackage size={16} />} title="Product Variations">
+                            <p style={{ fontSize: '12px', color: '#6b7280', margin: '0 0 16px 0', lineHeight: 1.6 }}>
+                                Color ও Size যোগ করে <strong>"Generate Variants"</strong> ক্লিক করুন। প্রতিটা combination এর আলাদা price, stock ও images দিতে পারবেন।
                             </p>
 
-                            {variants.map((v, i) => (
-                                <div key={i} style={{ border: '1px solid #e5e7eb', borderRadius: '10px', padding: '16px', marginBottom: '12px', background: '#fafafa' }}>
-                                    {/* Variant Header */}
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-                                        <span style={{ fontSize: '13px', fontWeight: 700, color: '#0B4222' }}>
-                                            Variant #{i + 1}{v.color || v.size ? ` — ${[v.color, v.size].filter(Boolean).join(' / ')}` : ''}
+                            {/* ── Step 1: Define Colors ── */}
+                            <div style={{ marginBottom: '16px' }}>
+                                <label style={{ ...lbl, fontSize: '13px', marginBottom: '8px' }}>🎨 Colors</label>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '10px' }}>
+                                    {colors.map((c, i) => (
+                                        <span key={i} style={{
+                                            display: 'flex', alignItems: 'center', gap: '6px',
+                                            background: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px',
+                                            fontSize: '13px', padding: '6px 12px', fontWeight: 600,
+                                        }}>
+                                            <span style={{ width: '18px', height: '18px', borderRadius: '4px', background: colorHex[i], border: '1px solid #ddd', flexShrink: 0 }} />
+                                            {c}
+                                            <button type="button" onClick={() => removeColor(i)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#dc2626', fontSize: '16px', lineHeight: 1, padding: 0, marginLeft: '2px' }}>×</button>
                                         </span>
-                                        <button type="button" onClick={() => removeVariant(i)} style={{ display: 'flex', alignItems: 'center', gap: '4px', background: '#fef2f2', border: '1px solid #fecaca', color: '#dc2626', borderRadius: '6px', padding: '5px 10px', cursor: 'pointer', fontSize: '12px', fontWeight: 600 }}>
-                                            <FiTrash2 size={12} /> Remove
-                                        </button>
-                                    </div>
+                                    ))}
+                                </div>
+                                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                    <input type="color" value={colorInput.hex} onChange={e => setColorInput(p => ({ ...p, hex: e.target.value }))} style={{ width: '42px', height: '40px', border: '1px solid #e5e7eb', borderRadius: '8px', cursor: 'pointer', padding: '2px', flexShrink: 0 }} />
+                                    <input value={colorInput.name} onChange={e => setColorInput(p => ({ ...p, name: e.target.value }))} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addColor(); } }} placeholder="Color নাম লিখুন (e.g. Sky Blue)" style={{ ...inp, flex: 1 }} onFocus={focus} onBlur={blur} />
+                                    <button type="button" onClick={addColor} style={{ padding: '9px 16px', background: '#0B4222', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}>+ Add</button>
+                                </div>
+                            </div>
 
-                                    {/* Variant Fields Grid */}
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '10px' }}>
-                                        <div>
-                                            <label style={lbl}>Color Name</label>
-                                            <input value={v.color} onChange={e => setV(i, 'color', e.target.value)} placeholder="Red" style={inp} onFocus={focus} onBlur={blur} />
+                            {/* ── Step 2: Define Sizes ── */}
+                            <div style={{ marginBottom: '16px' }}>
+                                <TagInput label="📐 Sizes" value={sizes} onChange={setSizes} placeholder="S, M, L, XL, XXL, Free Size..." />
+                            </div>
+
+                            {/* ── Step 3: Generate / Bulk Actions ── */}
+                            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '16px' }}>
+                                <button type="button" onClick={() => {
+                                    const newVariants: Variant[] = [];
+                                    const defPrice = form.price || '0';
+                                    const defOrigPrice = form.originalPrice || '';
+                                    if (colors.length > 0 && sizes.length > 0) {
+                                        colors.forEach((c, ci) => {
+                                            sizes.forEach(s => {
+                                                // Skip if already exists
+                                                if (variants.some(v => v.color === c && v.size === s)) return;
+                                                newVariants.push({ ...emptyVariant(), color: c, colorHex: colorHex[ci] || '#000000', size: s, price: defPrice, originalPrice: defOrigPrice, stock: '0' });
+                                            });
+                                        });
+                                    } else if (colors.length > 0) {
+                                        colors.forEach((c, ci) => {
+                                            if (variants.some(v => v.color === c && !v.size)) return;
+                                            newVariants.push({ ...emptyVariant(), color: c, colorHex: colorHex[ci] || '#000000', price: defPrice, originalPrice: defOrigPrice, stock: '0' });
+                                        });
+                                    } else if (sizes.length > 0) {
+                                        sizes.forEach(s => {
+                                            if (variants.some(v => v.size === s && !v.color)) return;
+                                            newVariants.push({ ...emptyVariant(), size: s, price: defPrice, originalPrice: defOrigPrice, stock: '0' });
+                                        });
+                                    }
+                                    if (newVariants.length > 0) setVariants(p => [...p, ...newVariants]);
+                                }} disabled={colors.length === 0 && sizes.length === 0} style={{
+                                    padding: '10px 20px', background: (colors.length === 0 && sizes.length === 0) ? '#e5e7eb' : '#0B4222',
+                                    color: (colors.length === 0 && sizes.length === 0) ? '#9ca3af' : '#fff',
+                                    border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: 700,
+                                    cursor: (colors.length === 0 && sizes.length === 0) ? 'not-allowed' : 'pointer',
+                                    display: 'flex', alignItems: 'center', gap: '6px',
+                                }}>
+                                    🔄 Generate Variants {colors.length > 0 && sizes.length > 0 ? `(${colors.length} × ${sizes.length} = ${colors.length * sizes.length})` : ''}
+                                </button>
+                                {variants.length > 0 && (
+                                    <button type="button" onClick={() => { if (confirm('সব variant মুছে ফেলবেন?')) setVariants([]); }} style={{ padding: '10px 16px', background: '#fef2f2', border: '1px solid #fecaca', color: '#dc2626', borderRadius: '8px', fontSize: '12px', fontWeight: 600, cursor: 'pointer' }}>
+                                        🗑 Clear All
+                                    </button>
+                                )}
+                            </div>
+
+                            {/* ── Bulk Set ── */}
+                            {variants.length > 0 && (
+                                <div style={{ background: '#f0faf4', border: '1px solid #bbf7d0', borderRadius: '10px', padding: '12px 16px', marginBottom: '16px' }}>
+                                    <p style={{ fontSize: '12px', fontWeight: 700, color: '#0B4222', margin: '0 0 10px' }}>⚡ Bulk Set — সব variant এ একসাথে</p>
+                                    <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
+                                        <div style={{ flex: '1 1 120px' }}>
+                                            <label style={{ ...lbl, fontSize: '11px' }}>Price (৳)</label>
+                                            <input type="number" placeholder="All price" style={inp} min="0" onFocus={focus} onBlur={blur}
+                                                onChange={e => { const val = e.target.value; if (val) setVariants(p => p.map(v => ({ ...v, price: val }))); }}
+                                            />
                                         </div>
-                                        <div>
-                                            <label style={lbl}>Color Hex</label>
-                                            <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                                                <input type="color" value={v.colorHex} onChange={e => setV(i, 'colorHex', e.target.value)} style={{ width: '38px', height: '38px', border: '1px solid #e5e7eb', borderRadius: '8px', cursor: 'pointer', padding: '2px', flexShrink: 0 }} />
-                                                <input value={v.colorHex} onChange={e => setV(i, 'colorHex', e.target.value)} style={{ ...inp, flex: 1 }} onFocus={focus} onBlur={blur} />
+                                        <div style={{ flex: '1 1 120px' }}>
+                                            <label style={{ ...lbl, fontSize: '11px' }}>MRP (৳)</label>
+                                            <input type="number" placeholder="All MRP" style={inp} min="0" onFocus={focus} onBlur={blur}
+                                                onChange={e => { const val = e.target.value; if (val) setVariants(p => p.map(v => ({ ...v, originalPrice: val }))); }}
+                                            />
+                                        </div>
+                                        <div style={{ flex: '1 1 120px' }}>
+                                            <label style={{ ...lbl, fontSize: '11px' }}>Stock</label>
+                                            <input type="number" placeholder="All stock" style={inp} min="0" onFocus={focus} onBlur={blur}
+                                                onChange={e => { const val = e.target.value; if (val) setVariants(p => p.map(v => ({ ...v, stock: val }))); }}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* ── Variant Cards ── */}
+                            {variants.length > 0 && (
+                                <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '10px' }}>
+                                    {variants.length} variant{variants.length > 1 ? 's' : ''} — প্রতিটা expand করে edit করুন
+                                </div>
+                            )}
+                            {variants.map((v, i) => (
+                                <details key={i} style={{ border: '1px solid #e5e7eb', borderRadius: '10px', marginBottom: '8px', background: '#fafafa', overflow: 'hidden' }}>
+                                    <summary style={{
+                                        display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 16px',
+                                        cursor: 'pointer', fontSize: '13px', fontWeight: 600, color: '#1a1a1a',
+                                        listStyle: 'none', userSelect: 'none',
+                                    }}>
+                                        {v.colorHex && v.colorHex !== '#000000' && (
+                                            <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: v.colorHex, border: '1px solid #ddd', flexShrink: 0 }} />
+                                        )}
+                                        <span style={{ flex: 1 }}>
+                                            {[v.color, v.size].filter(Boolean).join(' / ') || `Variant #${i + 1}`}
+                                        </span>
+                                        <span style={{ fontSize: '12px', color: '#6b7280', fontWeight: 400 }}>
+                                            ৳{v.price || '0'} • Stock: {v.stock || '0'}
+                                        </span>
+                                        <button type="button" onClick={(e) => { e.preventDefault(); removeVariant(i); }} style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#dc2626', borderRadius: '6px', padding: '3px 8px', cursor: 'pointer', fontSize: '11px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '3px' }}>
+                                            <FiTrash2 size={11} /> ×
+                                        </button>
+                                    </summary>
+                                    <div style={{ padding: '12px 16px 16px', borderTop: '1px solid #f3f4f6' }}>
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '10px' }}>
+                                            <div>
+                                                <label style={lbl}>Color</label>
+                                                <input value={v.color} onChange={e => setV(i, 'color', e.target.value)} placeholder="Red" style={inp} onFocus={focus} onBlur={blur} />
+                                            </div>
+                                            <div>
+                                                <label style={lbl}>Color Hex</label>
+                                                <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                                                    <input type="color" value={v.colorHex} onChange={e => setV(i, 'colorHex', e.target.value)} style={{ width: '36px', height: '36px', border: '1px solid #e5e7eb', borderRadius: '6px', cursor: 'pointer', padding: '2px', flexShrink: 0 }} />
+                                                    <input value={v.colorHex} onChange={e => setV(i, 'colorHex', e.target.value)} style={{ ...inp, flex: 1 }} onFocus={focus} onBlur={blur} />
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label style={lbl}>Size</label>
+                                                <input value={v.size} onChange={e => setV(i, 'size', e.target.value)} placeholder="M" style={inp} onFocus={focus} onBlur={blur} />
+                                            </div>
+                                            <div>
+                                                <label style={lbl}>Price (৳) <span style={{ color: '#E4525C' }}>*</span></label>
+                                                <input type="number" value={v.price} onChange={e => setV(i, 'price', e.target.value)} placeholder="0" style={inp} min="0" onFocus={focus} onBlur={blur} />
+                                            </div>
+                                            <div>
+                                                <label style={lbl}>MRP (৳)</label>
+                                                <input type="number" value={v.originalPrice} onChange={e => setV(i, 'originalPrice', e.target.value)} placeholder="0" style={inp} min="0" onFocus={focus} onBlur={blur} />
+                                            </div>
+                                            <div>
+                                                <label style={lbl}>Stock</label>
+                                                <input type="number" value={v.stock} onChange={e => setV(i, 'stock', e.target.value)} placeholder="0" style={inp} min="0" onFocus={focus} onBlur={blur} />
                                             </div>
                                         </div>
-                                        <div>
-                                            <label style={lbl}>Size</label>
-                                            <input value={v.size} onChange={e => setV(i, 'size', e.target.value)} placeholder="S / M / XL / 1kg" style={inp} onFocus={focus} onBlur={blur} />
+                                        {/* Variant Images */}
+                                        <div style={{ marginTop: '10px' }}>
+                                            <label style={lbl}>Images <span style={{ fontSize: '11px', color: '#9ca3af', fontWeight: 400 }}>— প্রতিটা URL নতুন লাইনে</span></label>
+                                            <textarea value={v.images} onChange={e => setV(i, 'images', e.target.value)} placeholder={"https://example.com/red-front.jpg\nhttps://example.com/red-back.jpg"} rows={2} style={{ ...inp, resize: 'vertical' }} onFocus={focus} onBlur={blur} />
                                         </div>
-                                        <div>
-                                            <label style={lbl}>Price (৳) <span style={{ color: '#E4525C' }}>*</span></label>
-                                            <input type="number" value={v.price} onChange={e => setV(i, 'price', e.target.value)} placeholder="0" style={inp} min="0" onFocus={focus} onBlur={blur} />
-                                        </div>
-                                        <div>
-                                            <label style={lbl}>MRP (৳)</label>
-                                            <input type="number" value={v.originalPrice} onChange={e => setV(i, 'originalPrice', e.target.value)} placeholder="0" style={inp} min="0" onFocus={focus} onBlur={blur} />
-                                        </div>
-                                        <div>
-                                            <label style={lbl}>Stock</label>
-                                            <input type="number" value={v.stock} onChange={e => setV(i, 'stock', e.target.value)} placeholder="0" style={inp} min="0" onFocus={focus} onBlur={blur} />
-                                        </div>
-                                        <div>
-                                            <label style={lbl}>SKU <span style={{ fontWeight: 400, color: '#9ca3af' }}>(optional)</span></label>
-                                            <input value={v.sku} onChange={e => setV(i, 'sku', e.target.value)} placeholder="SHIRT-RED-M" style={inp} onFocus={focus} onBlur={blur} />
-                                        </div>
-                                        <div>
-                                            <label style={lbl}>Note <span style={{ fontWeight: 400, color: '#9ca3af' }}>(optional)</span></label>
-                                            <input value={v.note} onChange={e => setV(i, 'note', e.target.value)} placeholder="e.g. Limited stock" style={inp} onFocus={focus} onBlur={blur} />
-                                        </div>
+                                        {discPct(v.price, v.originalPrice) > 0 && (
+                                            <div style={{ marginTop: '8px', fontSize: '12px', color: '#0B4222', fontWeight: 700, background: '#f0faf4', padding: '5px 12px', borderRadius: '6px', display: 'inline-block' }}>
+                                                ✅ Discount: {discPct(v.price, v.originalPrice)}%
+                                            </div>
+                                        )}
                                     </div>
-
-                                    {/* Variant Images */}
-                                    <div style={{ marginTop: '12px' }}>
-                                        <label style={lbl}>Variant Images <span style={{ fontSize: '11px', color: '#9ca3af', fontWeight: 400 }}>— প্রতিটা URL নতুন লাইনে</span></label>
-                                        <textarea value={v.images} onChange={e => setV(i, 'images', e.target.value)} placeholder={"https://example.com/red-front.jpg\nhttps://example.com/red-back.jpg"} rows={2} style={{ ...inp, resize: 'vertical' }} onFocus={focus} onBlur={blur} />
-                                    </div>
-
-                                    {/* Variant discount preview */}
-                                    {discPct(v.price, v.originalPrice) > 0 && (
-                                        <div style={{ marginTop: '8px', fontSize: '12px', color: '#0B4222', fontWeight: 700, background: '#f0faf4', padding: '5px 12px', borderRadius: '6px', display: 'inline-block' }}>
-                                            ✅ Discount: {discPct(v.price, v.originalPrice)}%
-                                        </div>
-                                    )}
-                                </div>
+                                </details>
                             ))}
 
-                            <button type="button" onClick={addVariant} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '11px', background: '#f0faf4', border: '1.5px dashed #0B4222', color: '#0B4222', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: 600 }}>
-                                <FiPlus size={15} /> Add Variant
+                            {/* Manual add (fallback) */}
+                            <button type="button" onClick={addVariant} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '10px', background: '#fff', border: '1px dashed #d1d5db', color: '#6b7280', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: 500, marginTop: '8px' }}>
+                                <FiPlus size={14} /> Manually Add Single Variant
                             </button>
                         </Section>
 
@@ -404,30 +505,9 @@ export default function NewProductPage() {
                         </Section>
 
                         {/* Filter Tags */}
-                        <Section icon={<FiTag size={16} />} title="Filter Tags">
+                        <Section icon={<FiTag size={16} />} title="Search Tags">
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-
-                                {/* Colors */}
-                                <div>
-                                    <label style={lbl}>Colors (name + color)</label>
-                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '8px' }}>
-                                        {colors.map((c, i) => (
-                                            <span key={i} style={{ display: 'flex', alignItems: 'center', gap: '5px', background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: '999px', fontSize: '12px', padding: '3px 8px', fontWeight: 500 }}>
-                                                <span style={{ width: '12px', height: '12px', borderRadius: '50%', background: colorHex[i], border: '1px solid #ddd', flexShrink: 0 }} />
-                                                {c}
-                                                <button type="button" onClick={() => removeColor(i)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', fontSize: '14px', lineHeight: 1, padding: 0 }}>×</button>
-                                            </span>
-                                        ))}
-                                    </div>
-                                    <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                                        <input type="color" value={colorInput.hex} onChange={e => setColorInput(p => ({ ...p, hex: e.target.value }))} style={{ width: '38px', height: '37px', border: '1px solid #e5e7eb', borderRadius: '8px', cursor: 'pointer', padding: '2px', flexShrink: 0 }} />
-                                        <input value={colorInput.name} onChange={e => setColorInput(p => ({ ...p, name: e.target.value }))} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addColor(); } }} placeholder="Color name" style={{ ...inp, flex: 1 }} onFocus={focus} onBlur={blur} />
-                                        <button type="button" onClick={addColor} style={{ padding: '8px 12px', background: '#0B4222', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: 700, cursor: 'pointer' }}>+</button>
-                                    </div>
-                                </div>
-
-                                <TagInput label="Sizes" value={sizes} onChange={setSizes} placeholder="S, M, L, XL, 1kg..." />
-                                <TagInput label="Search Tags" value={tags} onChange={setTags} placeholder="shoe, cotton, premium..." />
+                                <TagInput label="Tags" value={tags} onChange={setTags} placeholder="shoe, cotton, premium..." />
                             </div>
                         </Section>
 
