@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -34,6 +34,14 @@ const NewHeader: React.FC = () => {
 
     const { data: categoriesData } = useGetCategoriesQuery({});
     const categories: Category[] = categoriesData?.data || [];
+
+    // Sticky scroll animation
+    const [scrolled, setScrolled] = useState(false);
+    useEffect(() => {
+        const onScroll = () => setScrolled(window.scrollY > 10);
+        window.addEventListener('scroll', onScroll, { passive: true });
+        return () => window.removeEventListener('scroll', onScroll);
+    }, []);
 
     // ── Hover handlers with slight delay ─
     const handleCategoryMouseEnter = () => {
@@ -141,7 +149,16 @@ const NewHeader: React.FC = () => {
 
     return (
         <>
-            <header className="z-50">
+            <header
+                className="z-50"
+                style={{
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 50,
+                    transition: 'box-shadow 0.3s ease, background 0.3s ease',
+                    boxShadow: scrolled ? '0 2px 16px rgba(0,0,0,0.18)' : 'none',
+                }}
+            >
                 {/* Main Header */}
                 <div className="bg-[#0B4222]">
                     <div className="container mx-auto px-4">
