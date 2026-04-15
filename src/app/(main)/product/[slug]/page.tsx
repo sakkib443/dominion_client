@@ -231,7 +231,7 @@ export default function ProductDetailsPage() {
             });
         } else if (colorSwatches.length > 0 && baseImages.length > 0) {
             // No variants — map each color to corresponding image by index
-            colorSwatches.forEach((c, i) => {
+            colorSwatches.forEach((c: any, i: number) => {
                 if (i < baseImages.length) {
                     map[c.name] = [baseImages[i]];
                 }
