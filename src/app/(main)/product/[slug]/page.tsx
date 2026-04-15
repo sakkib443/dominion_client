@@ -252,14 +252,14 @@ export default function ProductDetailsPage() {
         (!selectedSize || v.size === selectedSize)
     ) : null;
 
-    // Available sizes for selected color (variant mode)
+    // Available sizes for selected color — show ALL sizes that exist for this color (regardless of stock)
     const availableSizesForColor = hasVariants && selectedColor
-        ? variants.filter((v: any) => v.color === selectedColor && v.stock > 0).map((v: any) => v.size).filter(Boolean)
+        ? variants.filter((v: any) => v.color === selectedColor).map((v: any) => v.size).filter(Boolean)
         : sizeList;
 
-    // Available colors for selected size (variant mode)
+    // Available colors for selected size — show ALL colors that exist for this size (regardless of stock)
     const availableColorsForSize = hasVariants && selectedSize
-        ? variants.filter((v: any) => v.size === selectedSize && v.stock > 0).map((v: any) => v.color).filter(Boolean)
+        ? variants.filter((v: any) => v.size === selectedSize).map((v: any) => v.color).filter(Boolean)
         : colorSwatches.map((c: any) => c.name);
 
     // ── Display images — ALWAYS show ALL variant images + base images ──
