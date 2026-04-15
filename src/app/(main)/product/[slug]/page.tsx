@@ -250,6 +250,7 @@ export default function ProductDetailsPage() {
                             }}
                             onClick={() => { setIsFullscreen(false); setZoomLevel(1); }}
                         >
+                            {/* Close Button */}
                             <button
                                 onClick={() => { setIsFullscreen(false); setZoomLevel(1); }}
                                 style={{
@@ -262,14 +263,8 @@ export default function ProductDetailsPage() {
                             >
                                 <FiX size={22} />
                             </button>
-                            {/* Image Counter */}
-                            <div style={{
-                                position: 'absolute', top: '1.2rem', left: '50%', transform: 'translateX(-50%)',
-                                color: '#fff', fontSize: '14px', fontWeight: 600, letterSpacing: '1px',
-                                background: 'rgba(0,0,0,0.5)', padding: '4px 16px', borderRadius: '20px', zIndex: 10,
-                            }}>
-                                {selectedImage + 1} / {allImages.length}
-                            </div>
+
+                            {/* Thumbnail Strip */}
                             {allImages.length > 1 && (
                                 <div className="pd-zoom-thumbs" style={{
                                     position: 'absolute', left: '11rem', top: '50%',
@@ -294,60 +289,73 @@ export default function ProductDetailsPage() {
                                     ))}
                                 </div>
                             )}
+
                             {/* Image + Arrows Container */}
-                            <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }} onClick={(e) => e.stopPropagation()}>
-                                {/* Left Arrow */}
-                                {selectedImage > 0 && (
-                                    <button
-                                        onClick={() => { setSelectedImage(prev => prev - 1); setZoomLevel(1); }}
-                                        style={{
-                                            position: 'absolute', left: '-52px', top: '50%', transform: 'translateY(-50%)',
-                                            background: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: '50%',
-                                            width: '44px', height: '44px', cursor: 'pointer', display: 'flex',
-                                            alignItems: 'center', justifyContent: 'center', zIndex: 10,
-                                            transition: 'all 0.2s ease',
-                                        }}
-                                        onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.3)'; }}
-                                        onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.15)'; }}
-                                    >
-                                        <FiChevronLeft size={24} color="#fff" />
-                                    </button>
-                                )}
-
-                                <img
-                                    src={allImages[selectedImage] || allImages[0]}
-                                    alt={product.name}
+                            <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: '12px' }} onClick={(e) => e.stopPropagation()}>
+                                {/* Left Arrow — always visible, disabled at first */}
+                                <button
+                                    onClick={() => { if (selectedImage > 0) { setSelectedImage(prev => prev - 1); setZoomLevel(1); } }}
+                                    disabled={selectedImage === 0}
                                     style={{
-                                        maxWidth: '75vw', maxHeight: '90vh', objectFit: 'contain', borderRadius: '12px',
-                                        transition: 'transform 0.3s ease', transform: `scale(${zoomLevel})`,
-                                        cursor: zoomLevel > 1 ? 'zoom-out' : 'zoom-in',
+                                        background: selectedImage === 0 ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.15)',
+                                        border: 'none', borderRadius: '50%',
+                                        width: '44px', height: '44px',
+                                        cursor: selectedImage === 0 ? 'not-allowed' : 'pointer',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        transition: 'all 0.2s ease', flexShrink: 0,
+                                        opacity: selectedImage === 0 ? 0.3 : 1,
                                     }}
-                                    onWheel={(e) => {
-                                        e.stopPropagation();
-                                        setZoomLevel(prev => {
-                                            const next = prev + (e.deltaY < 0 ? 0.2 : -0.2);
-                                            return Math.max(1, Math.min(3, next));
-                                        });
-                                    }}
-                                />
+                                >
+                                    <FiChevronLeft size={24} color="#fff" />
+                                </button>
 
-                                {/* Right Arrow */}
-                                {selectedImage < allImages.length - 1 && (
-                                    <button
-                                        onClick={() => { setSelectedImage(prev => prev + 1); setZoomLevel(1); }}
+                                {/* Image Box — fixed square */}
+                                <div style={{ position: 'relative', width: '500px', height: '500px', flexShrink: 0 }}>
+                                    <img
+                                        src={allImages[selectedImage] || allImages[0]}
+                                        alt={product.name}
                                         style={{
-                                            position: 'absolute', right: '-52px', top: '50%', transform: 'translateY(-50%)',
-                                            background: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: '50%',
-                                            width: '44px', height: '44px', cursor: 'pointer', display: 'flex',
-                                            alignItems: 'center', justifyContent: 'center', zIndex: 10,
-                                            transition: 'all 0.2s ease',
+                                            width: '100%', height: '100%',
+                                            objectFit: 'cover', borderRadius: '12px',
+                                            transition: 'transform 0.3s ease', transform: `scale(${zoomLevel})`,
+                                            cursor: zoomLevel > 1 ? 'zoom-out' : 'zoom-in',
+                                            background: '#111',
                                         }}
-                                        onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.3)'; }}
-                                        onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.15)'; }}
-                                    >
-                                        <FiChevronRight size={24} color="#fff" />
-                                    </button>
-                                )}
+                                        onWheel={(e) => {
+                                            e.stopPropagation();
+                                            setZoomLevel(prev => {
+                                                const next = prev + (e.deltaY < 0 ? 0.2 : -0.2);
+                                                return Math.max(1, Math.min(3, next));
+                                            });
+                                        }}
+                                    />
+                                    {/* Counter — always visible inside image */}
+                                    <div style={{
+                                        position: 'absolute', bottom: '12px', left: '50%', transform: 'translateX(-50%)',
+                                        color: '#fff', fontSize: '13px', fontWeight: 600, letterSpacing: '1px',
+                                        background: 'rgba(0,0,0,0.55)', padding: '4px 14px', borderRadius: '20px',
+                                        pointerEvents: 'none', whiteSpace: 'nowrap',
+                                    }}>
+                                        {selectedImage + 1} / {allImages.length}
+                                    </div>
+                                </div>
+
+                                {/* Right Arrow — always visible, disabled at last */}
+                                <button
+                                    onClick={() => { if (selectedImage < allImages.length - 1) { setSelectedImage(prev => prev + 1); setZoomLevel(1); } }}
+                                    disabled={selectedImage === allImages.length - 1}
+                                    style={{
+                                        background: selectedImage === allImages.length - 1 ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.15)',
+                                        border: 'none', borderRadius: '50%',
+                                        width: '44px', height: '44px',
+                                        cursor: selectedImage === allImages.length - 1 ? 'not-allowed' : 'pointer',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        transition: 'all 0.2s ease', flexShrink: 0,
+                                        opacity: selectedImage === allImages.length - 1 ? 0.3 : 1,
+                                    }}
+                                >
+                                    <FiChevronRight size={24} color="#fff" />
+                                </button>
                             </div>
                         </div>
                     )}
