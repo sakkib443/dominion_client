@@ -262,13 +262,25 @@ export default function ProductDetailsPage() {
         ? variants.filter((v: any) => v.size === selectedSize && v.stock > 0).map((v: any) => v.color).filter(Boolean)
         : colorSwatches.map((c: any) => c.name);
 
-    // ── Display images — selected color's images → fallback to all ──
+    // ── Display images — ALWAYS show ALL variant images + base images ──
+    // All images are always visible; color selection just highlights/auto-scrolls
     const allImages = (() => {
-        // If a color is selected and has mapped images, show ONLY those
-        if (selectedColor && colorImageMap[selectedColor]?.length > 0) {
-            return colorImageMap[selectedColor];
+        if (hasVariants) {
+            // Collect ALL unique images from ALL variants + base images
+            const seen = new Set<string>();
+            const imgs: string[] = [];
+            // First add base/thumbnail
+            baseImages.forEach(img => {
+                if (!seen.has(img)) { seen.add(img); imgs.push(img); }
+            });
+            // Then add ALL variant images (every color, every size)
+            variants.forEach((v: any) => {
+                (v.images || []).forEach((img: string) => {
+                    if (!seen.has(img)) { seen.add(img); imgs.push(img); }
+                });
+            });
+            return imgs;
         }
-        // No color selected — show all base images
         return baseImages;
     })();
 
@@ -318,32 +330,29 @@ export default function ProductDetailsPage() {
         return namedColors[colorName.toLowerCase()] || colorName;
     };
 
-    // ── Handler: COLOR selected → switch to that color's images ──
+    // ── Handler: COLOR selected → find that color's FIRST image in allImages and select it ──
     const handleColorSelect = (colorName: string) => {
         if (selectedColor === colorName) {
-            // Deselect → show all images
             setSelectedColor('');
-            setSelectedImage(0);
-            return;
+            return; // keep current image, just deselect color
         }
         setSelectedColor(colorName);
-        setSelectedImage(0); // always reset to first image of this color
+        // Find the first image belonging to this color in allImages
+        const colorImgs = colorImageMap[colorName];
+        if (colorImgs?.length > 0) {
+            const firstColorImg = colorImgs[0];
+            const idx = allImages.indexOf(firstColorImg);
+            if (idx >= 0) setSelectedImage(idx);
+        }
     };
 
     // ── Handler: IMAGE thumbnail clicked → auto-select matching color ──
     const handleImageSelect = (imgIdx: number) => {
         setSelectedImage(imgIdx);
-        // Check if this image belongs to a specific color
+        // Find which color this image belongs to and auto-select
         const imgUrl = allImages[imgIdx];
         if (imgUrl && imageToColorMap[imgUrl]) {
-            const matchedColor = imageToColorMap[imgUrl];
-            if (matchedColor !== selectedColor) {
-                // Don't change color if already on the same color (just switching images within)
-                // Only auto-select if no color selected or image is from different color
-                if (!selectedColor) {
-                    setSelectedColor(matchedColor);
-                }
-            }
+            setSelectedColor(imageToColorMap[imgUrl]);
         }
     };
 
