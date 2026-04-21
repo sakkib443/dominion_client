@@ -122,6 +122,7 @@ const NewProductCard: React.FC<NewProductCardProps> = ({ product }) => {
         }
         dispatch(addToCart({
             id: productId,
+            productId: productId,
             name: product.name,
             price: product.price,
             mrp: product.originalPrice || product.mrp || product.price,

@@ -34,6 +34,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         e.preventDefault();
         dispatch(addToCart({
             id: String(product._id || product.id),
+            productId: String(product._id || product.id),
             name: product.name,
             price: product.price,
             mrp: product.mrp || product.originalPrice || product.price,
