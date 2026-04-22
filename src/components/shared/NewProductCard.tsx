@@ -176,7 +176,7 @@ const NewProductCard: React.FC<NewProductCardProps> = ({ product }) => {
                                 className='relative text-gray-600 hover:text-[#0B4222] transition-all p-2 cart-icon-animate rounded-full bg-[#0B4222]/50 hover:bg-[#0B4222]/60'
                             >
                                 <img src="/ICON/cart.png" alt="Cart" className="w-5 h-5 opacity-70" />
-                                {isInCart && <span className='absolute -top-1 -right-1 w-3 h-3 bg-[#0B4222] rounded-full border border-white flex items-center justify-center text-white text-[7px] font-bold'>✓</span>}
+                                {isInCart && <span className='absolute -top-1 -right-1 w-3 h-3 bg-[#E4525C] rounded-full border border-white flex items-center justify-center text-white text-[7px] font-bold'>✓</span>}
                             </button>
                         </div>
 

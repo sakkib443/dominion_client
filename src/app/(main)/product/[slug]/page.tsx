@@ -977,7 +977,7 @@ export default function ProductDetailsPage() {
                                         onMouseEnter={(e) => { e.currentTarget.style.background = '#0B4222'; e.currentTarget.style.borderColor = '#0B4222'; e.currentTarget.querySelectorAll<HTMLElement>('button, span').forEach(el => { el.style.color = '#fff'; }); }}
                                         onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = '#000'; e.currentTarget.querySelectorAll<HTMLElement>('button, span').forEach(el => { el.style.color = '#000'; }); }}
                                     >
-                                        <button onClick={handleAddToCart} disabled={product.stock === 0} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', color: '#000', fontWeight: 700, fontSize: '11px', cursor: 'pointer', padding: '0 16px', height: '100%', letterSpacing: '0.4px', textTransform: 'uppercase', whiteSpace: 'nowrap', width: '100%' }}>
+                                        <button onClick={handleAddToCart} disabled={product.stock === 0} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', color: isInCart ? '#E4525C' : '#000', fontWeight: 700, fontSize: '11px', cursor: 'pointer', padding: '0 16px', height: '100%', letterSpacing: '0.4px', textTransform: 'uppercase', whiteSpace: 'nowrap', width: '100%' }}>
                                             {isInCart ? '✓ ALREADY ADDED' : addedToCart ? 'ADDED!' : 'ADD TO CART'}
                                         </button>
                                     </div>

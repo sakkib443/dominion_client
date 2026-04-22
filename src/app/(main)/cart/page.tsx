@@ -182,6 +182,18 @@ const CartPage = () => {
                         </div>
                     </div>
 
+                    {/* Transportation Row */}
+                    <div style={{
+                        display: 'grid', gridTemplateColumns: '60px 1fr 120px',
+                        padding: '8px 16px', background: '#f9fafb', borderBottom: '1px solid #e5e7eb',
+                    }}>
+                        <div></div>
+                        <div style={{ fontSize: '12px', fontWeight: 600, color: '#666', textAlign: 'center' }}>
+                            Transportation: To Be Negotiated
+                        </div>
+                        <div></div>
+                    </div>
+
                     {/* Amount in Words */}
                     <div style={{
                         display: 'grid', gridTemplateColumns: '60px 1fr 120px',
