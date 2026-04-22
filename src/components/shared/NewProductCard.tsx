@@ -180,23 +180,6 @@ const NewProductCard: React.FC<NewProductCardProps> = ({ product }) => {
                                 {isInCart && <span className='absolute -top-1 -right-1 w-3 h-3 bg-[#E4525C] rounded-full border border-white flex items-center justify-center text-white text-[7px] font-bold'>✓</span>}
                             </button>
                         </div>
-
-                        {/* Already Added overlay — shown when product is in cart */}
-                        {isInCart && (
-                            <div className='absolute inset-0 flex items-center justify-center z-10 pointer-events-none'>
-                                <span style={{
-                                    background: 'rgba(228, 82, 92, 0.85)',
-                                    color: '#fff',
-                                    fontSize: '12px',
-                                    fontWeight: 700,
-                                    padding: '6px 14px',
-                                    borderRadius: '999px',
-                                    letterSpacing: '0.5px',
-                                    textTransform: 'uppercase',
-                                }}>✓ Already Added</span>
-                            </div>
-                        )}
-
                         <img
                             src={product.image || 'https://via.placeholder.com/300x300/E8957A/E8957A'}
                             alt={product.name}
