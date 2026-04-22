@@ -9,22 +9,6 @@ import EmptyState from '@/components/shared/EmptyState';
 import OrderModal from '@/components/shared/OrderModal';
 import { toast } from 'react-hot-toast';
 
-const numberToWords = (num: number): string => {
-    const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten',
-        'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
-    const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
-    if (num === 0) return 'Zero';
-    const convert = (n: number): string => {
-        if (n < 20) return ones[n];
-        if (n < 100) return tens[Math.floor(n / 10)] + (n % 10 ? ' ' + ones[n % 10] : '');
-        if (n < 1000) return ones[Math.floor(n / 100)] + ' Hundred' + (n % 100 ? ' ' + convert(n % 100) : '');
-        if (n < 100000) return convert(Math.floor(n / 1000)) + ' Thousand' + (n % 1000 ? ' ' + convert(n % 1000) : '');
-        if (n < 10000000) return convert(Math.floor(n / 100000)) + ' Lakh' + (n % 100000 ? ' ' + convert(n % 100000) : '');
-        return convert(Math.floor(n / 10000000)) + ' Crore' + (n % 10000000 ? ' ' + convert(n % 10000000) : '');
-    };
-    return convert(Math.round(num));
-};
-
 const CartPage = () => {
     const { items, totalPrice } = useAppSelector((state) => state.cart);
     const dispatch = useAppDispatch();
@@ -170,40 +154,19 @@ const CartPage = () => {
                         </div>
                     ))}
 
-                    {/* Total Amount Row */}
+                    {/* Total Amount + Transportation Row */}
                     <div style={{
                         display: 'grid', gridTemplateColumns: '60px 1fr 160px 120px 120px',
-                        padding: '14px 16px', background: '#f3f4f6', borderBottom: '1px solid #e5e7eb',
+                        padding: '14px 16px 4px', background: '#f3f4f6',
                     }}>
                         <div></div>
                         <div style={{ fontSize: '14px', fontWeight: 800, color: '#1a1a1a', textAlign: 'center', gridColumn: '2 / 5' }}>Total Amount</div>
                         <div style={{ textAlign: 'right', fontSize: '16px', fontWeight: 900, color: '#1a1a1a' }}>
                             {totalPrice.toLocaleString()}
                         </div>
-                    </div>
-
-                    {/* Transportation Row */}
-                    <div style={{
-                        display: 'grid', gridTemplateColumns: '60px 1fr 120px',
-                        padding: '8px 16px', background: '#f9fafb', borderBottom: '1px solid #e5e7eb',
-                    }}>
-                        <div></div>
-                        <div style={{ fontSize: '12px', fontWeight: 600, color: '#666', textAlign: 'center' }}>
+                        <div style={{ gridColumn: '2 / 5', fontSize: '12px', fontWeight: 600, color: '#666', textAlign: 'center', marginTop: '2px' }}>
                             Transportation: To Be Negotiated
                         </div>
-                        <div></div>
-                    </div>
-
-                    {/* Amount in Words */}
-                    <div style={{
-                        display: 'grid', gridTemplateColumns: '60px 1fr 120px',
-                        padding: '10px 16px', background: '#f9fafb', borderBottom: '1px solid #e5e7eb',
-                    }}>
-                        <div></div>
-                        <div style={{ fontSize: '12px', fontWeight: 600, color: '#666', textAlign: 'center' }}>
-                            BDT {numberToWords(totalPrice)} Only
-                        </div>
-                        <div></div>
                     </div>
                 </div>
 

@@ -1,10 +1,10 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { FiHeart, FiShoppingCart, FiEye } from 'react-icons/fi';
 import { FaStar } from 'react-icons/fa';
-import { useAppDispatch } from '@/redux';
+import { useAppDispatch, useAppSelector } from '@/redux';
 import { addToCart } from '@/redux/slices/cartSlice';
 import { addToWishlist } from '@/redux/slices/wishlistSlice';
 
@@ -29,12 +29,33 @@ interface ProductCardProps {
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     const dispatch = useAppDispatch();
+    const cartItems = useAppSelector((state) => state.cart.items);
+    const productKey = String(product._id || product.id);
+    const isInCart = cartItems.some((item) => item.id === productKey);
+
+    const [showAlready, setShowAlready] = useState(false);
+    const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    useEffect(() => {
+        return () => {
+            if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+        };
+    }, []);
 
     const handleAddToCart = (e: React.MouseEvent) => {
         e.preventDefault();
+        e.stopPropagation();
+
+        if (isInCart) {
+            setShowAlready(true);
+            if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+            hideTimerRef.current = setTimeout(() => setShowAlready(false), 2000);
+            return;
+        }
+
         dispatch(addToCart({
-            id: String(product._id || product.id),
-            productId: String(product._id || product.id),
+            id: productKey,
+            productId: productKey,
             name: product.name,
             price: product.price,
             mrp: product.mrp || product.originalPrice || product.price,
@@ -122,12 +143,19 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                         </div>
 
                         {/* Add to Cart Button */}
-                        <button
-                            onClick={handleAddToCart}
-                            className='w-10 h-10 bg-[var(--color-primary)]/30 text-[var(--color-primary)] rounded-full flex items-center justify-center hover:bg-[var(--color-primary)]/40 transition-all active:scale-95 group/btn'
-                        >
-                            <FiShoppingCart size={18} className='group-hover/btn:scale-110 transition-transform' />
-                        </button>
+                        <div className='relative flex flex-col items-end'>
+                            <button
+                                onClick={handleAddToCart}
+                                className='w-10 h-10 bg-[var(--color-primary)]/30 text-[var(--color-primary)] rounded-full flex items-center justify-center hover:bg-[var(--color-primary)]/40 transition-all active:scale-95 group/btn'
+                            >
+                                <FiShoppingCart size={18} className='group-hover/btn:scale-110 transition-transform' />
+                            </button>
+                            {showAlready && (
+                                <span className='absolute top-full right-0 mt-1 text-xs font-normal text-[#E4525C] whitespace-nowrap' style={{ opacity: 1 }}>
+                                    Already Added
+                                </span>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
