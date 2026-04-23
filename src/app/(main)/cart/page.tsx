@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useAppDispatch, useAppSelector } from '@/redux';
 import { removeFromCart, increaseQuantity, decreaseQuantity, clearCart } from '@/redux/slices/cartSlice';
-import { FiTrash2, FiChevronLeft } from 'react-icons/fi';
+import { FiTrash2, FiChevronLeft, FiAlertTriangle } from 'react-icons/fi';
 import EmptyState from '@/components/shared/EmptyState';
 import OrderModal from '@/components/shared/OrderModal';
 import { toast } from 'react-hot-toast';
@@ -14,6 +14,7 @@ const CartPage = () => {
     const dispatch = useAppDispatch();
     const [showOrderModal, setShowOrderModal] = useState(false);
     const [orderSuccess, setOrderSuccess] = useState(false);
+    const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
     if (items.length === 0 && !orderSuccess) {
         return (
@@ -101,7 +102,7 @@ const CartPage = () => {
                             {/* Remove Icon */}
                             <div style={{ display: 'flex', justifyContent: 'center' }}>
                                 <button
-                                    onClick={() => dispatch(removeFromCart(item.id))}
+                                    onClick={() => setDeleteConfirmId(item.id)}
                                     style={{
                                         background: 'none', border: 'none', cursor: 'pointer',
                                         color: '#ccc', display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -218,6 +219,75 @@ const CartPage = () => {
                     onSuccess={() => setOrderSuccess(true)}
                 />
 
+
+                {/* ═══ DELETE CONFIRMATION MODAL ═══ */}
+                {deleteConfirmId && (
+                    <div style={{
+                        position: 'fixed', inset: 0, zIndex: 9999,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        background: 'rgba(0,0,0,0.45)',
+                        backdropFilter: 'blur(3px)',
+                        animation: 'fadeIn 0.18s ease',
+                    }}>
+                        <div style={{
+                            background: '#fff', borderRadius: '16px',
+                            padding: '36px 32px 28px', maxWidth: '360px', width: '90%',
+                            boxShadow: '0 20px 60px rgba(0,0,0,0.18)',
+                            textAlign: 'center',
+                            animation: 'slideUp 0.2s ease',
+                        }}>
+                            {/* Icon */}
+                            <div style={{
+                                width: '56px', height: '56px', borderRadius: '50%',
+                                background: '#fff1f2', display: 'flex', alignItems: 'center',
+                                justifyContent: 'center', margin: '0 auto 16px',
+                            }}>
+                                <FiAlertTriangle size={26} color="#ef4444" />
+                            </div>
+                            {/* Title */}
+                            <h3 style={{ fontSize: '17px', fontWeight: 800, color: '#1a1a1a', margin: '0 0 8px' }}>
+                                Delete Item?
+                            </h3>
+                            {/* Message */}
+                            <p style={{ fontSize: '13px', color: '#666', margin: '0 0 24px', lineHeight: 1.6 }}>
+                                Are you sure you want to remove this item from your cart?
+                            </p>
+                            {/* Buttons */}
+                            <div style={{ display: 'flex', gap: '12px' }}>
+                                <button
+                                    onClick={() => setDeleteConfirmId(null)}
+                                    style={{
+                                        flex: 1, padding: '11px', borderRadius: '8px',
+                                        border: '1.5px solid #e5e7eb', background: '#fff',
+                                        fontSize: '13px', fontWeight: 700, color: '#555',
+                                        cursor: 'pointer', transition: 'all 0.15s',
+                                    }}
+                                    onMouseEnter={(e) => { e.currentTarget.style.background = '#f9fafb'; }}
+                                    onMouseLeave={(e) => { e.currentTarget.style.background = '#fff'; }}
+                                >
+                                    No, Keep It
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        dispatch(removeFromCart(deleteConfirmId));
+                                        toast.success('Item removed from cart');
+                                        setDeleteConfirmId(null);
+                                    }}
+                                    style={{
+                                        flex: 1, padding: '11px', borderRadius: '8px',
+                                        border: 'none', background: '#ef4444',
+                                        fontSize: '13px', fontWeight: 700, color: '#fff',
+                                        cursor: 'pointer', transition: 'all 0.15s',
+                                    }}
+                                    onMouseEnter={(e) => { e.currentTarget.style.background = '#dc2626'; }}
+                                    onMouseLeave={(e) => { e.currentTarget.style.background = '#ef4444'; }}
+                                >
+                                    Yes, Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* ═══ ORDER SUCCESS MESSAGE ═══ */}
                 {orderSuccess && (
