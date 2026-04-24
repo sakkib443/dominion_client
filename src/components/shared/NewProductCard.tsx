@@ -157,10 +157,10 @@ const NewProductCard: React.FC<NewProductCardProps> = ({ product }) => {
     const priceType = product.priceType || 'negotiable';
     const soldCount = product.sold || product.soldCount || product.totalSold || 0;
 
-    // Use real stats from database
+    // reviewCount is the source of truth (post-save hook keeps it accurate)
     const stats = useMemo(() => ({
         likes: product.likeCount || 0,
-        comments: product.commentCount || product.reviewCount || 0,
+        comments: product.reviewCount ?? product.commentCount ?? 0,
         shares: product.shareCount || 0,
         views: product.viewCount || 0,
     }), [product.likeCount, product.commentCount, product.reviewCount, product.shareCount, product.viewCount]);

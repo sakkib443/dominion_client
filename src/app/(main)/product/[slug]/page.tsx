@@ -648,7 +648,7 @@ export default function ProductDetailsPage() {
                                 {/* Comments */}
                                 <div onClick={() => setShowCommentsModal(true)} style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
                                     <img src="/ICON/comments.png" alt="Comments" style={{ width: '16px', height: '16px', opacity: 0.7 }} />
-                                    <span style={{ fontWeight: 400 }}>{product.commentCount || product.reviewCount || 0}</span>
+                                    <span style={{ fontWeight: 400 }}>{product.reviewCount ?? product.commentCount ?? 0}</span>
                                 </div>
 
                                 {/* Share */}
