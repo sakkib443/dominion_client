@@ -3,14 +3,20 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 
-import { useGetProductReviewsQuery, usePublicCreateReviewMutation } from '@/redux/api/reviewApi';
+import {
+    useGetProductReviewsQuery,
+    usePublicCreateReviewMutation,
+    useLikeReviewMutation,
+    useReplyToReviewMutation,
+    useLikeReplyMutation,
+} from '@/redux/api/reviewApi';
 import { useIncrementProductStatMutation } from '@/redux/api/productApi';
 import { useAppDispatch, useAppSelector } from '@/redux';
 import { addToCart } from '@/redux/slices/cartSlice';
-import { FiStar, FiX, FiCopy, FiCheck, FiSend } from 'react-icons/fi';
+import { FiStar, FiX, FiCopy, FiCheck, FiSend, FiThumbsUp, FiCornerDownRight } from 'react-icons/fi';
 import {
-    FaFacebookF, FaWhatsapp, FaTelegramPlane,
-    FaLinkedinIn, FaPinterestP, FaRedditAlien, FaEnvelope, FaInstagram
+    FaFacebookF, FaFacebookMessenger, FaWhatsapp, FaTelegramPlane,
+    FaLinkedinIn, FaPinterestP, FaEnvelope, FaInstagram
 } from 'react-icons/fa';
 import { FaXTwitter, FaTiktok } from 'react-icons/fa6';
 
@@ -50,7 +56,6 @@ const formatCount = (n: number): string => {
 
 const NewProductCard: React.FC<NewProductCardProps> = ({ product }) => {
 
-    const [localLikes, setLocalLikes] = useState(0);
     const [isLiked, setIsLiked] = useState(false);
     const [likeAnim, setLikeAnim] = useState(false);
     const [showComments, setShowComments] = useState(false);
@@ -80,14 +85,13 @@ const NewProductCard: React.FC<NewProductCardProps> = ({ product }) => {
 
 
 
-    // Like: calls API to save to database
+    // Like: calls API; optimistic cache update in the mutation keeps all pages in sync instantly.
     const handleLike = (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
         if (!isLiked) {
             incrementStat({ id: productId, field: 'likeCount' });
             setIsLiked(true);
-            setLocalLikes(prev => prev + 1);
             setLikeAnim(true);
             setTimeout(() => setLikeAnim(false), 300);
         }
@@ -137,7 +141,7 @@ const NewProductCard: React.FC<NewProductCardProps> = ({ product }) => {
     const shareLinks = [
         { name: 'Facebook', icon: FaFacebookF, color: '#1877F2', url: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(productUrl)}&quote=${encodeURIComponent(shareText)}` },
         { name: 'WhatsApp', icon: FaWhatsapp, color: '#25D366', url: `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + '\n' + productUrl)}` },
-        { name: 'Messenger', icon: FaFacebookF, color: '#0078FF', url: `https://www.facebook.com/dialog/send?link=${encodeURIComponent(productUrl)}&app_id=966242223397117&redirect_uri=${encodeURIComponent(productUrl)}` },
+        { name: 'Messenger', icon: FaFacebookMessenger, color: '#0078FF', url: `https://www.facebook.com/dialog/send?link=${encodeURIComponent(productUrl)}&app_id=966242223397117&redirect_uri=${encodeURIComponent(productUrl)}` },
         { name: 'X', icon: FaXTwitter, color: '#000000', url: `https://twitter.com/intent/tweet?url=${encodeURIComponent(productUrl)}&text=${encodeURIComponent(shareText)}` },
         { name: 'Telegram', icon: FaTelegramPlane, color: '#0088cc', url: `https://t.me/share/url?url=${encodeURIComponent(productUrl)}&text=${encodeURIComponent(shareText)}` },
         { name: 'LinkedIn', icon: FaLinkedinIn, color: '#0A66C2', url: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(productUrl)}` },
@@ -245,8 +249,8 @@ const NewProductCard: React.FC<NewProductCardProps> = ({ product }) => {
                                 className="w-3.5 h-3.5 opacity-50 transition-all stat-icon"
                                 style={{ transform: likeAnim ? 'scale(1.5)' : 'scale(1)' }}
                             />
-                            <span style={{ color: localLikes > 0 ? '#E4525C' : undefined, fontWeight: localLikes > 0 ? 600 : undefined }}>
-                                {formatCount(stats.likes + localLikes)}
+                            <span style={{ color: isLiked ? '#E4525C' : undefined, fontWeight: isLiked ? 600 : undefined }}>
+                                {formatCount(stats.likes)}
                             </span>
                         </button>
 
@@ -405,6 +409,25 @@ const NewProductCard: React.FC<NewProductCardProps> = ({ product }) => {
 /* ═══════════════════════════════════════════════ */
 /* ═══ COMMENTS POPUP — with write comment ═══ */
 /* ═══════════════════════════════════════════════ */
+
+// localStorage helpers — track which reviews/replies this device has liked
+const LIKED_REVIEWS_KEY = 'dominion_liked_reviews';
+const LIKED_REPLIES_KEY = 'dominion_liked_replies';
+
+const getLikedSet = (key: string): Set<string> => {
+    if (typeof window === 'undefined') return new Set();
+    try {
+        const raw = localStorage.getItem(key);
+        return new Set(raw ? JSON.parse(raw) : []);
+    } catch { return new Set(); }
+};
+const addToLikedSet = (key: string, id: string) => {
+    if (typeof window === 'undefined') return;
+    const set = getLikedSet(key);
+    set.add(id);
+    localStorage.setItem(key, JSON.stringify(Array.from(set)));
+};
+
 const CommentsPopup: React.FC<{
     productId: string;
     productName: string;
@@ -413,14 +436,25 @@ const CommentsPopup: React.FC<{
 }> = ({ productId, productName, productImage, onClose }) => {
     const { data: reviewsData, isLoading } = useGetProductReviewsQuery({ productId });
     const [publicCreateReview] = usePublicCreateReviewMutation();
+    const [likeReview] = useLikeReviewMutation();
+    const [replyToReview] = useReplyToReviewMutation();
+    const [likeReply] = useLikeReplyMutation();
     const reviews = reviewsData?.data || [];
 
     const [newComment, setNewComment] = useState('');
     const [newRating, setNewRating] = useState(5);
     const [hoverRating, setHoverRating] = useState(0);
-    const [userName, setUserName] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitSuccess, setSubmitSuccess] = useState(false);
+
+    // Like tracking (per-device via localStorage)
+    const [likedReviews, setLikedReviews] = useState<Set<string>>(() => getLikedSet(LIKED_REVIEWS_KEY));
+    const [likedReplies, setLikedReplies] = useState<Set<string>>(() => getLikedSet(LIKED_REPLIES_KEY));
+
+    // Reply UI state — which review has reply box open + text
+    const [replyingTo, setReplyingTo] = useState<string | null>(null);
+    const [replyText, setReplyText] = useState('');
+    const [isReplying, setIsReplying] = useState(false);
 
     const handleSubmitComment = async () => {
         if (!newComment.trim()) return;
@@ -430,10 +464,9 @@ const CommentsPopup: React.FC<{
                 product: productId,
                 rating: newRating,
                 comment: newComment.trim(),
-                userName: userName.trim() || 'Anonymous'
+                userName: 'Anonymous'
             }).unwrap();
             setNewComment('');
-            setUserName('');
             setNewRating(5);
             setSubmitSuccess(true);
             setTimeout(() => setSubmitSuccess(false), 3000);
@@ -442,6 +475,33 @@ const CommentsPopup: React.FC<{
         } finally {
             setIsSubmitting(false);
         }
+    };
+
+    const handleLikeReview = async (reviewId: string) => {
+        if (likedReviews.has(reviewId)) return;
+        addToLikedSet(LIKED_REVIEWS_KEY, reviewId);
+        setLikedReviews(prev => new Set(prev).add(reviewId));
+        try { await likeReview(reviewId).unwrap(); } catch (e) { console.error(e); }
+    };
+
+    const handleLikeReply = async (reviewId: string, replyId: string) => {
+        const key = `${reviewId}_${replyId}`;
+        if (likedReplies.has(key)) return;
+        addToLikedSet(LIKED_REPLIES_KEY, key);
+        setLikedReplies(prev => new Set(prev).add(key));
+        try { await likeReply({ reviewId, replyId }).unwrap(); } catch (e) { console.error(e); }
+    };
+
+    const handleSubmitReply = async (reviewId: string) => {
+        const text = replyText.trim();
+        if (!text) return;
+        setIsReplying(true);
+        try {
+            await replyToReview({ reviewId, text, userName: 'Anonymous' }).unwrap();
+            setReplyText('');
+            setReplyingTo(null);
+        } catch (e) { console.error(e); }
+        finally { setIsReplying(false); }
     };
 
     return (
@@ -485,7 +545,7 @@ const CommentsPopup: React.FC<{
                 </div>
 
                 {/* ── Comments List — scrollable ── */}
-                <div className='flex-1 overflow-y-auto px-4 py-2 space-y-1.5' style={{ minHeight: '60px' }}>
+                <div className='flex-1 overflow-y-auto px-4 py-2 space-y-2.5' style={{ minHeight: '60px' }}>
                     {isLoading ? (
                         <div className='flex items-center justify-center py-8'>
                             <div className='w-6 h-6 border-2 border-gray-200 border-t-[#0B4222] rounded-full animate-spin' />
@@ -493,35 +553,108 @@ const CommentsPopup: React.FC<{
                     ) : reviews.length > 0 ? (
                         <>
                             <p className='text-[11px] font-semibold text-gray-400 uppercase tracking-wide'>Most relevant</p>
-                            {reviews.map((review: any, idx: number) => (
-                                <div key={idx} className='flex gap-2'>
-                                    <div className='w-7 h-7 rounded-full bg-gradient-to-br from-[#0B4222] to-[#16a34a] flex items-center justify-center text-white text-[10px] font-bold shrink-0'>
-                                        {(review.userName || review.user?.firstName || review.user?.name || 'A').charAt(0).toUpperCase()}
-                                    </div>
-                                    <div className='flex-1 min-w-0'>
-                                        <div className='bg-gray-100 rounded-2xl px-3 py-1.5'>
-                                            <span className='text-[11px] font-semibold text-gray-900'>
-                                                {review.userName || review.user?.name || `${review.user?.firstName || ''} ${review.user?.lastName || ''}`.trim() || 'Anonymous'}
-                                            </span>
-                                            {review.comment && (
-                                                <p className='text-[11px] text-gray-700 leading-snug'>{review.comment}</p>
+                            {reviews.map((review: any) => {
+                                const reviewId = review._id;
+                                const isLiked = likedReviews.has(reviewId);
+                                const likeCount = review.likes || 0;
+                                const replies = review.replies || [];
+                                const isReplyOpen = replyingTo === reviewId;
+
+                                return (
+                                    <div key={reviewId} className='flex gap-2'>
+                                        <div className='flex-1 min-w-0'>
+                                            <div className='bg-gray-100 rounded-2xl px-3 py-2'>
+                                                {review.comment && (
+                                                    <p className='text-[12px] text-gray-800 leading-snug'>{review.comment}</p>
+                                                )}
+                                            </div>
+                                            <div className='flex items-center gap-3 px-3 mt-0.5 text-[10px] text-gray-400'>
+                                                <span className='flex gap-0.5'>
+                                                    {[1, 2, 3, 4, 5].map(star => (
+                                                        <FiStar key={star} size={9} style={{
+                                                            color: '#f59e0b',
+                                                            fill: star <= (review.rating || 0) ? '#f59e0b' : 'none'
+                                                        }} />
+                                                    ))}
+                                                </span>
+                                                <button
+                                                    onClick={() => handleLikeReview(reviewId)}
+                                                    className={`font-medium hover:underline flex items-center gap-1 ${isLiked ? 'text-[#E4525C]' : ''}`}
+                                                    disabled={isLiked}
+                                                >
+                                                    <FiThumbsUp size={10} style={{ fill: isLiked ? '#E4525C' : 'none' }} />
+                                                    <span>Like{likeCount > 0 ? ` (${likeCount})` : ''}</span>
+                                                </button>
+                                                <button
+                                                    onClick={() => { setReplyingTo(isReplyOpen ? null : reviewId); setReplyText(''); }}
+                                                    className='font-medium hover:underline'
+                                                >
+                                                    Reply{replies.length > 0 ? ` (${replies.length})` : ''}
+                                                </button>
+                                            </div>
+
+                                            {/* ── Replies list ── */}
+                                            {replies.length > 0 && (
+                                                <div className='mt-1.5 ml-1 space-y-1.5'>
+                                                    {replies.map((reply: any) => {
+                                                        const replyKey = `${reviewId}_${reply._id}`;
+                                                        const isReplyLiked = likedReplies.has(replyKey);
+                                                        return (
+                                                            <div key={reply._id} className='flex gap-2'>
+                                                                <FiCornerDownRight size={12} className='text-gray-300 mt-1.5 shrink-0' />
+                                                                <div className='flex-1 min-w-0'>
+                                                                    <div className='bg-gray-50 rounded-2xl px-3 py-1.5'>
+                                                                        <p className='text-[11px] text-gray-800 leading-snug'>{reply.text}</p>
+                                                                    </div>
+                                                                    <div className='flex items-center gap-3 px-3 mt-0.5 text-[10px] text-gray-400'>
+                                                                        <button
+                                                                            onClick={() => handleLikeReply(reviewId, reply._id)}
+                                                                            className={`font-medium hover:underline flex items-center gap-1 ${isReplyLiked ? 'text-[#E4525C]' : ''}`}
+                                                                            disabled={isReplyLiked}
+                                                                        >
+                                                                            <FiThumbsUp size={9} style={{ fill: isReplyLiked ? '#E4525C' : 'none' }} />
+                                                                            <span>Like{reply.likes > 0 ? ` (${reply.likes})` : ''}</span>
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            )}
+
+                                            {/* ── Reply input ── */}
+                                            {isReplyOpen && (
+                                                <div className='flex gap-2 mt-2 ml-1'>
+                                                    <FiCornerDownRight size={12} className='text-gray-300 mt-2 shrink-0' />
+                                                    <div className='flex-1 flex items-center bg-gray-100 rounded-full px-3 py-1'>
+                                                        <input
+                                                            type='text'
+                                                            autoFocus
+                                                            value={replyText}
+                                                            onChange={e => setReplyText(e.target.value)}
+                                                            onKeyDown={e => { if (e.key === 'Enter' && replyText.trim()) handleSubmitReply(reviewId); }}
+                                                            placeholder='Write a reply...'
+                                                            className='flex-1 bg-transparent text-[11px] text-gray-700 outline-none'
+                                                        />
+                                                        <button
+                                                            onClick={() => handleSubmitReply(reviewId)}
+                                                            disabled={!replyText.trim() || isReplying}
+                                                            className='text-[#0B4222] font-semibold text-[11px] ml-2 disabled:opacity-30 flex items-center gap-1'
+                                                        >
+                                                            {isReplying ? (
+                                                                <div className='w-3 h-3 border-2 border-gray-300 border-t-[#0B4222] rounded-full animate-spin' />
+                                                            ) : (
+                                                                <FiSend size={11} />
+                                                            )}
+                                                        </button>
+                                                    </div>
+                                                </div>
                                             )}
                                         </div>
-                                        <div className='flex items-center gap-3 px-3 mt-0.5 text-[10px] text-gray-400'>
-                                            <span className='flex gap-0.5'>
-                                                {[1, 2, 3, 4, 5].map(star => (
-                                                    <FiStar key={star} size={9} style={{
-                                                        color: '#f59e0b',
-                                                        fill: star <= (review.rating || 0) ? '#f59e0b' : 'none'
-                                                    }} />
-                                                ))}
-                                            </span>
-                                            <span className='font-medium hover:underline cursor-pointer'>Like</span>
-                                            <span className='font-medium hover:underline cursor-pointer'>Reply</span>
-                                        </div>
                                     </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </>
                     ) : (
                         <div className='text-center py-6'>
@@ -540,30 +673,18 @@ const CommentsPopup: React.FC<{
                     )}
 
                     <div className='flex items-start gap-2.5'>
-                        {/* Avatar — updates live with typed name */}
-                        <div className='w-8 h-8 rounded-full bg-gradient-to-br from-gray-400 to-gray-500 flex items-center justify-center text-white text-xs font-bold shrink-0 mt-0.5'>
-                            {userName ? userName.charAt(0).toUpperCase() : '?'}
-                        </div>
-
-                        {/* Name + Comment + Rating — all in one compact block */}
+                        {/* Comment + Rating */}
                         <div className='flex-1 min-w-0 bg-gray-100 rounded-2xl px-3 py-1.5'>
-                            <input
-                                type="text"
-                                value={userName}
-                                onChange={(e) => setUserName(e.target.value)}
-                                placeholder="Your name"
-                                className='w-full bg-transparent text-[12px] text-gray-900 font-normal placeholder-gray-400 placeholder:font-normal outline-none pb-1 border-b border-gray-300/50'
-                            />
                             <input
                                 type="text"
                                 value={newComment}
                                 onChange={(e) => setNewComment(e.target.value)}
                                 onKeyDown={(e) => { if (e.key === 'Enter' && newComment.trim()) handleSubmitComment(); }}
                                 placeholder="Write a comment..."
-                                className='w-full bg-transparent text-[12px] text-gray-700 font-normal placeholder-gray-400 placeholder:font-normal outline-none pt-1'
+                                className='w-full bg-transparent text-[12px] text-gray-700 font-normal placeholder-gray-400 placeholder:font-normal outline-none py-1'
                             />
                             {/* Rating + Send row */}
-                            <div className='flex items-center justify-between mt-1.5 pt-1.5 border-t border-gray-200/60'>
+                            <div className='flex items-center justify-between mt-1 pt-1.5 border-t border-gray-200/60'>
                                 <div className='flex items-center gap-1.5'>
                                     <span className='text-[11px] text-gray-400'>Rating</span>
                                     <div className='flex gap-px'>

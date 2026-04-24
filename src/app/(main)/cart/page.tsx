@@ -8,6 +8,7 @@ import { FiTrash2, FiChevronLeft, FiAlertTriangle } from 'react-icons/fi';
 import EmptyState from '@/components/shared/EmptyState';
 import OrderModal from '@/components/shared/OrderModal';
 import { toast } from 'react-hot-toast';
+import { numberToWords } from '@/utils/numberToWords';
 
 const CartPage = () => {
     const { items, totalPrice } = useAppSelector((state) => state.cart);
@@ -16,7 +17,39 @@ const CartPage = () => {
     const [orderSuccess, setOrderSuccess] = useState(false);
     const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
-    if (items.length === 0 && !orderSuccess) {
+    if (orderSuccess) {
+        return (
+            <div style={{ minHeight: '100vh', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 16px' }}>
+                <div style={{ textAlign: 'center', maxWidth: '420px', width: '100%' }}>
+                    <div style={{
+                        width: '80px', height: '80px', borderRadius: '50%',
+                        background: '#ecfdf5', display: 'flex', alignItems: 'center',
+                        justifyContent: 'center', margin: '0 auto 20px',
+                        fontSize: '40px',
+                    }}>✅</div>
+                    <h2 style={{ fontSize: '24px', fontWeight: 800, color: '#0B4222', margin: '0 0 10px 0' }}>
+                        Order Placed Successfully!
+                    </h2>
+                    <p style={{ fontSize: '14px', color: '#666', margin: '0 0 28px 0', lineHeight: 1.6 }}>
+                        Thank you for your order. We will contact you shortly to confirm the details.
+                    </p>
+                    <Link
+                        href="/"
+                        style={{
+                            display: 'inline-flex', padding: '14px 40px',
+                            background: '#0B4222', color: '#fff', borderRadius: '8px',
+                            fontSize: '13px', fontWeight: 800, textDecoration: 'none',
+                            letterSpacing: '1px', textTransform: 'uppercase',
+                        }}
+                    >
+                        Continue Shopping
+                    </Link>
+                </div>
+            </div>
+        );
+    }
+
+    if (items.length === 0) {
         return (
             <div className="py-20">
                 <EmptyState
@@ -123,9 +156,15 @@ const CartPage = () => {
                                 }}>
                                     <button
                                         onClick={() => dispatch(decreaseQuantity(item.id))}
+                                        disabled={item.quantity <= 1}
+                                        title={item.quantity <= 1 ? 'Minimum quantity is 1' : 'Decrease quantity'}
                                         style={{
                                             width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                            background: '#f9fafb', border: 'none', cursor: 'pointer', fontSize: '14px', fontWeight: 700, color: '#555',
+                                            background: '#f9fafb', border: 'none',
+                                            cursor: item.quantity <= 1 ? 'not-allowed' : 'pointer',
+                                            fontSize: '14px', fontWeight: 700,
+                                            color: item.quantity <= 1 ? '#c4c4c4' : '#555',
+                                            opacity: item.quantity <= 1 ? 0.5 : 1,
                                         }}
                                     >−</button>
                                     <div style={{
@@ -161,11 +200,16 @@ const CartPage = () => {
                         padding: '14px 16px 4px', background: '#f3f4f6',
                     }}>
                         <div></div>
-                        <div style={{ fontSize: '14px', fontWeight: 800, color: '#1a1a1a', textAlign: 'center', gridColumn: '2 / 5' }}>Total Amount</div>
+                        <div style={{ gridColumn: '2 / 5', fontSize: '14px', fontWeight: 800, color: '#1a1a1a', textAlign: 'left', paddingLeft: '8px', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                            <span>Total Amount</span>
+                            <span style={{ fontSize: '12px', fontWeight: 600, color: '#555' }}>
+                                ({numberToWords(totalPrice)})
+                            </span>
+                        </div>
                         <div style={{ textAlign: 'right', fontSize: '16px', fontWeight: 900, color: '#1a1a1a' }}>
                             {totalPrice.toLocaleString()}
                         </div>
-                        <div style={{ gridColumn: '2 / 5', fontSize: '12px', fontWeight: 600, color: '#666', textAlign: 'center', marginTop: '2px' }}>
+                        <div style={{ gridColumn: '2 / 5', fontSize: '12px', fontWeight: 600, color: '#666', textAlign: 'left', paddingLeft: '8px', marginTop: '2px' }}>
                             Transportation: To Be Negotiated
                         </div>
                     </div>
@@ -289,24 +333,6 @@ const CartPage = () => {
                     </div>
                 )}
 
-                {/* ═══ ORDER SUCCESS MESSAGE ═══ */}
-                {orderSuccess && (
-                    <div style={{ textAlign: 'center', padding: '60px 0' }}>
-                        <div style={{ fontSize: '48px', marginBottom: '16px' }}>✅</div>
-                        <h2 style={{ fontSize: '22px', fontWeight: 800, color: '#0B4222', margin: '0 0 8px 0' }}>Order Placed Successfully!</h2>
-                        <p style={{ fontSize: '13px', color: '#666', margin: '0 0 24px 0' }}>Thank you for your order. We will contact you shortly.</p>
-                        <Link
-                            href="/"
-                            style={{
-                                display: 'inline-flex', padding: '12px 32px',
-                                background: '#0B4222', color: '#fff', borderRadius: '6px',
-                                fontSize: '13px', fontWeight: 700, textDecoration: 'none',
-                            }}
-                        >
-                            Continue Shopping
-                        </Link>
-                    </div>
-                )}
             </div>
         </div>
     );

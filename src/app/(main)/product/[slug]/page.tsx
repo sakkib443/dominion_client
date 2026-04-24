@@ -18,7 +18,7 @@ import NewProductCard, { CommentsPopup } from '@/components/shared/NewProductCar
 import OrderModal from '@/components/shared/OrderModal';
 import { FiSend } from 'react-icons/fi';
 import {
-    FaFacebookF, FaWhatsapp, FaTelegramPlane,
+    FaFacebookF, FaFacebookMessenger, FaWhatsapp, FaTelegramPlane,
     FaLinkedinIn, FaPinterestP, FaEnvelope, FaInstagram
 } from 'react-icons/fa';
 import { FaXTwitter, FaTiktok } from 'react-icons/fa6';
@@ -38,7 +38,6 @@ export default function ProductDetailsPage() {
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [linkCopied, setLinkCopied] = useState(false);
     const [isLiked, setIsLiked] = useState(false);
-    const [likeCount, setLikeCount] = useState(0);
     const [selectedColor, setSelectedColor] = useState<string>('');
     const [selectedSize, setSelectedSize] = useState<string>('');
     const [activeInfoPanel, setActiveInfoPanel] = useState<'delivery' | 'payment' | 'terms' | null>(null);
@@ -47,7 +46,6 @@ export default function ProductDetailsPage() {
     const [showBuyNowModal, setShowBuyNowModal] = useState(false);
     const [shareLinkCopied, setShareLinkCopied] = useState(false);
     const [showCommentsModal, setShowCommentsModal] = useState(false);
-    const [cmtUserName, setCmtUserName] = useState('');
     const [cmtText, setCmtText] = useState('');
     const [cmtRating, setCmtRating] = useState(5);
     const [cmtHoverRating, setCmtHoverRating] = useState(0);
@@ -114,10 +112,9 @@ export default function ProductDetailsPage() {
                 product: product._id,
                 rating: cmtRating,
                 comment: cmtText.trim(),
-                userName: cmtUserName.trim() || 'Anonymous'
+                userName: 'Anonymous'
             }).unwrap();
             setCmtText('');
-            setCmtUserName('');
             setCmtRating(5);
             setCmtSuccess(true);
             setTimeout(() => setCmtSuccess(false), 3000);
@@ -636,7 +633,6 @@ export default function ProductDetailsPage() {
                                         if (!isLiked && product?._id) {
                                             incrementStat({ id: product._id, field: 'likeCount' });
                                             setIsLiked(true);
-                                            setLikeCount(prev => prev + 1);
                                         }
                                     }}
                                     style={{
@@ -646,7 +642,7 @@ export default function ProductDetailsPage() {
                                     }}
                                 >
                                     <img src="/ICON/like.png" alt="Like" style={{ width: '16px', height: '16px', opacity: isLiked ? 1 : 0.7 }} />
-                                    <span style={{ fontWeight: 400, color: isLiked ? '#E4525C' : undefined }}>{(product.likeCount || 0) + likeCount}</span>
+                                    <span style={{ fontWeight: 400, color: isLiked ? '#E4525C' : undefined }}>{product.likeCount || 0}</span>
                                 </button>
 
                                 {/* Comments */}
@@ -1333,18 +1329,13 @@ export default function ProductDetailsPage() {
                                     {(product.reviews && product.reviews.length > 0) ? (
                                         product.reviews.map((review: any, idx: number) => (
                                             <div key={idx} style={{ padding: '12px', border: '1px solid #e5e7eb', borderRadius: '8px' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                                                    <span style={{ fontWeight: 600, fontSize: '13px', color: '#1a1a1a' }}>
-                                                        {review.userName || review.user?.name || 'Anonymous'}
-                                                    </span>
-                                                    <div style={{ display: 'flex', gap: '2px' }}>
-                                                        {[1, 2, 3, 4, 5].map(star => (
-                                                            <FiStar key={star} size={10} style={{
-                                                                color: '#f59e0b',
-                                                                fill: star <= (review.rating || 0) ? '#f59e0b' : 'none'
-                                                            }} />
-                                                        ))}
-                                                    </div>
+                                                <div style={{ display: 'flex', gap: '2px', marginBottom: '6px' }}>
+                                                    {[1, 2, 3, 4, 5].map(star => (
+                                                        <FiStar key={star} size={10} style={{
+                                                            color: '#f59e0b',
+                                                            fill: star <= (review.rating || 0) ? '#f59e0b' : 'none'
+                                                        }} />
+                                                    ))}
                                                 </div>
                                                 {review.comment && (
                                                     <p style={{ fontSize: '12px', color: '#555', margin: 0, lineHeight: 1.6 }}>
@@ -1484,7 +1475,7 @@ export default function ProductDetailsPage() {
                         const shareLinks = [
                             { name: 'Facebook', icon: FaFacebookF, color: '#1877F2', url: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(productUrl)}&quote=${encodeURIComponent(shareText)}` },
                             { name: 'WhatsApp', icon: FaWhatsapp, color: '#25D366', url: `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + '\n' + productUrl)}` },
-                            { name: 'Messenger', icon: FaFacebookF, color: '#0078FF', url: `https://www.facebook.com/dialog/send?link=${encodeURIComponent(productUrl)}&app_id=966242223397117&redirect_uri=${encodeURIComponent(productUrl)}` },
+                            { name: 'Messenger', icon: FaFacebookMessenger, color: '#0078FF', url: `https://www.facebook.com/dialog/send?link=${encodeURIComponent(productUrl)}&app_id=966242223397117&redirect_uri=${encodeURIComponent(productUrl)}` },
                             { name: 'X', icon: FaXTwitter, color: '#000000', url: `https://twitter.com/intent/tweet?url=${encodeURIComponent(productUrl)}&text=${encodeURIComponent(shareText)}` },
                             { name: 'Telegram', icon: FaTelegramPlane, color: '#0088cc', url: `https://t.me/share/url?url=${encodeURIComponent(productUrl)}&text=${encodeURIComponent(shareText)}` },
                             { name: 'LinkedIn', icon: FaLinkedinIn, color: '#0A66C2', url: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(productUrl)}` },

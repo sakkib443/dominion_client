@@ -103,6 +103,54 @@ export const productApi = baseApi.injectEndpoints({
                 method: 'PATCH',
                 body: { field },
             }),
+            // Optimistic update: patch every cached product query containing this product
+            // so the new count appears instantly across home, card, details, related — no reload.
+            async onQueryStarted({ id, field }, { dispatch, queryFulfilled, getState }) {
+                const state = getState();
+                const entries = productApi.util.selectInvalidatedBy(state, [
+                    'Products',
+                    { type: 'Products', id },
+                ]);
+
+                const patches: { undo: () => void }[] = [];
+
+                const bumpInDraft = (draft: any) => {
+                    if (!draft) return;
+                    const target = draft.data ?? draft;
+                    if (!target) return;
+                    const bump = (obj: any) => {
+                        if (obj && (obj._id === id || obj.id === id)) {
+                            obj[field] = (obj[field] || 0) + 1;
+                        }
+                    };
+                    if (Array.isArray(target)) {
+                        target.forEach(bump);
+                    } else {
+                        bump(target);
+                    }
+                };
+
+                for (const entry of entries) {
+                    try {
+                        const patch = dispatch(
+                            productApi.util.updateQueryData(
+                                entry.endpointName as any,
+                                entry.originalArgs,
+                                bumpInDraft as any,
+                            )
+                        );
+                        patches.push(patch);
+                    } catch {
+                        // ignore — entry may not be a query we can patch
+                    }
+                }
+
+                try {
+                    await queryFulfilled;
+                } catch {
+                    patches.forEach(p => p.undo());
+                }
+            },
         }),
     }),
 });
