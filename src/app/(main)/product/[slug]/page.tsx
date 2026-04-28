@@ -367,6 +367,13 @@ export default function ProductDetailsPage() {
             return; // keep current image, just deselect color
         }
         setSelectedColor(colorName);
+        // Reset size if current selectedSize is not available for the new color
+        if (selectedSize && hasVariants) {
+            const sizesForNewColor = variants.filter((v: any) => v.color === colorName).map((v: any) => v.size).filter(Boolean);
+            if (!sizesForNewColor.includes(selectedSize)) {
+                setSelectedSize('');
+            }
+        }
         // Find the first image belonging to this color in allImages
         const colorImgs = colorImageMap[colorName];
         if (colorImgs?.length > 0) {
@@ -929,8 +936,8 @@ export default function ProductDetailsPage() {
                                             return (
                                             <button
                                                 key={idx}
-                                                onClick={() => isAvailable && handleColorSelect(color.name)}
-                                                title={!isAvailable ? `${color.name} — not available` : color.name}
+                                                onClick={() => handleColorSelect(color.name)}
+                                                title={color.name}
                                                 style={{
                                                     width: 'clamp(36px, 4vw, 48px)', height: 'clamp(36px, 4vw, 48px)', flexShrink: 0,
                                                     background: getColorHex(color.hex || color.name),
@@ -938,14 +945,27 @@ export default function ProductDetailsPage() {
                                                         ? '3px solid #0B4222'
                                                         : !isAvailable ? '2px solid #ccc' : '2px solid #e0e0e0',
                                                     borderRadius: '6px',
-                                                    cursor: !isAvailable ? 'not-allowed' : 'pointer',
+                                                    cursor: 'pointer',
                                                     transition: 'all 0.2s ease',
                                                     boxShadow: isSelected
                                                         ? '0 0 0 2px rgba(11,66,34,0.2)'
                                                         : 'none',
-                                                    opacity: !isAvailable ? 0.3 : 1,
+                                                    opacity: !isAvailable ? 0.7 : 1,
+                                                    position: 'relative',
+                                                    overflow: 'hidden',
+                                                    padding: 0,
                                                 }}
-                                            />
+                                            >
+                                                {/* Diagonal cross for unavailable colors */}
+                                                {!isAvailable && (
+                                                    <div style={{
+                                                        position: 'absolute', inset: 0,
+                                                        background: 'linear-gradient(to top right, transparent calc(50% - 1px), rgba(180,180,180,0.7) calc(50% - 1px), rgba(180,180,180,0.7) calc(50% + 1px), transparent calc(50% + 1px))',
+                                                        pointerEvents: 'none',
+                                                        borderRadius: '4px',
+                                                    }} />
+                                                )}
+                                            </button>
                                             );
                                         })}
                                     </div>
@@ -1794,6 +1814,7 @@ export default function ProductDetailsPage() {
                     items={[{
                         product: product._id,
                         quantity: buyNowQty,
+                        name: product.name,
                         color: selectedColor || undefined,
                         size: selectedSize || undefined,
                         price: discountedPrice,

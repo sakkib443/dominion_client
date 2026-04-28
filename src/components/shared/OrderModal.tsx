@@ -133,7 +133,7 @@ const OrderModal: React.FC<OrderModalProps> = ({
                     city: '',
                     area: '',
                 },
-                items: items.map(item => ({ product: item.product, quantity: item.quantity })),
+                items: items.map(item => ({ product: item.product, quantity: item.quantity, color: item.color || '', size: item.size || '' })),
                 paymentMethod: 'cod',
                 note: formData.query || '',
                 password: formData.contact.trim(),

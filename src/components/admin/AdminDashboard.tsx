@@ -1,524 +1,283 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import {
-    FiShoppingBag,
-    FiUsers,
-    FiShoppingCart,
-    FiDollarSign,
-    FiTrendingUp,
-    FiTrendingDown,
-    FiPackage,
-    FiEye,
-    FiMoreVertical,
-    FiArrowRight,
-    FiRefreshCw,
-    FiAlertCircle,
-    FiCheckCircle,
-    FiClock,
-    FiTruck,
-    FiStar,
-    FiCreditCard,
-    FiActivity,
-    FiCalendar
+    FiShoppingBag, FiShoppingCart, FiUsers,
+    FiArrowRight, FiRefreshCw, FiPackage,
+    FiPhone, FiClock, FiPlus, FiGrid, FiLayout,
 } from 'react-icons/fi';
-
-// API Base URL
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
-
-// Stats Card Component
-const StatCard = ({ title, value, change, trend, icon: Icon, color, bgColor, loading }: any) => (
-    <div className="bg-white rounded-md p-6 shadow-sm border border-gray-200 hover:shadow-md transition-all">
-        <div className="flex justify-between items-start mb-4">
-            <div
-                className="w-12 h-12 rounded-md flex items-center justify-center"
-                style={{ backgroundColor: bgColor }}
-            >
-                <Icon size={26} style={{ color }} />
-            </div>
-            {change && (
-                <span className={`flex items-center gap-1 text-sm font-semibold px-2 py-1 rounded-full ${trend === 'up' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'
-                    }`}>
-                    {trend === 'up' ? <FiTrendingUp size={14} /> : <FiTrendingDown size={14} />}
-                    {change}
-                </span>
-            )}
-        </div>
-        {loading ? (
-            <div className="animate-pulse">
-                <div className="h-8 bg-gray-200 rounded w-24 mb-2"></div>
-                <div className="h-4 bg-gray-200 rounded w-32"></div>
-            </div>
-        ) : (
-            <>
-                <h3 className="text-3xl font-bold text-gray-800 mb-1">{value}</h3>
-                <p className="text-sm text-gray-500 font-medium">{title}</p>
-            </>
-        )}
-    </div>
-);
-
-// Order Status Badge
-const StatusBadge = ({ status }: { status: string }) => {
-    const colors: Record<string, string> = {
-        'pending': 'bg-yellow-100 text-yellow-700 border-yellow-200',
-        'confirmed': 'bg-blue-100 text-blue-700 border-blue-200',
-        'processing': 'bg-purple-100 text-purple-700 border-purple-200',
-        'shipped': 'bg-indigo-100 text-indigo-700 border-indigo-200',
-        'delivered': 'bg-green-100 text-green-700 border-green-200',
-        'cancelled': 'bg-red-100 text-red-700 border-red-200',
-    };
-    return (
-        <span className={`px-3 py-1 rounded-md text-xs font-semibold border capitalize ${colors[status] || 'bg-gray-100 text-gray-700'}`}>
-            {status}
-        </span>
-    );
-};
-
-// Payment Status Badge
-const PaymentBadge = ({ status }: { status: string }) => {
-    const colors: Record<string, string> = {
-        'pending': 'text-yellow-600',
-        'paid': 'text-green-600',
-        'failed': 'text-red-600',
-        'refunded': 'text-purple-600',
-    };
-    const icons: Record<string, any> = {
-        'pending': FiClock,
-        'paid': FiCheckCircle,
-        'failed': FiAlertCircle,
-        'refunded': FiRefreshCw,
-    };
-    const Icon = icons[status] || FiClock;
-    return (
-        <span className={`flex items-center gap-1 text-xs font-medium ${colors[status] || ''}`}>
-            <Icon size={12} />
-            <span className="capitalize">{status}</span>
-        </span>
-    );
-};
-
 import {
     useGetDashboardSummaryQuery,
     useGetRecentOrdersQuery,
     useGetTopProductsQuery,
-    useGetMonthlyRevenueQuery,
 } from '@/redux/api/dashboardApi';
 
 const AdminDashboard: React.FC = () => {
-    const [dateRange, setDateRange] = useState('7d');
-
-    // RTK Query Hooks for real-time data
     const {
         data: summaryData,
-        isLoading: isSummaryLoading,
-        isFetching: isSummaryFetching,
+        isLoading,
         refetch: refetchSummary
-    } = useGetDashboardSummaryQuery(undefined, {
-        pollingInterval: 30000, // Poll every 30 seconds for real-time feel
-    });
+    } = useGetDashboardSummaryQuery(undefined, { pollingInterval: 30000 });
 
     const {
         data: ordersData,
-        isLoading: isOrdersLoading,
         refetch: refetchOrders
-    } = useGetRecentOrdersQuery(5);
+    } = useGetRecentOrdersQuery(8);
 
     const {
         data: productsData,
-        isLoading: isProductsLoading,
-        refetch: refetchProducts
     } = useGetTopProductsQuery(5);
 
-    const {
-        data: revenueData,
-        isLoading: isRevenueLoading,
-        refetch: refetchRevenue
-    } = useGetMonthlyRevenueQuery(undefined);
-
-    const handleRefresh = () => {
-        refetchSummary();
-        refetchOrders();
-        refetchProducts();
-        refetchRevenue();
-    };
+    const handleRefresh = () => { refetchSummary(); refetchOrders(); };
 
     const stats = summaryData?.data || null;
     const recentOrders = ordersData?.data || [];
     const topProducts = productsData?.data || [];
-    const monthlyRevenue = revenueData?.data || { labels: [], revenue: [], orders: [] };
-    const labels = monthlyRevenue.labels || [];
-    const revenue = monthlyRevenue.revenue || [];
 
-    const isLoading = isSummaryLoading || isOrdersLoading || isProductsLoading || isRevenueLoading;
+    const formatCurrency = (amount: number) => `৳${(amount || 0).toLocaleString()}`;
 
-    // Formatting helpers
-    const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('bn-BD', {
-            style: 'currency',
-            currency: 'BDT',
-            minimumFractionDigits: 0,
-        }).format(amount || 0).replace('BDT', '৳');
+    const timeAgo = (date: string) => {
+        const diff = Date.now() - new Date(date).getTime();
+        const mins = Math.floor(diff / 60000);
+        if (mins < 1) return 'Just now';
+        if (mins < 60) return `${mins}m ago`;
+        const hrs = Math.floor(mins / 60);
+        if (hrs < 24) return `${hrs}h ago`;
+        const days = Math.floor(hrs / 24);
+        return `${days}d ago`;
     };
 
-
     return (
-        <div className="space-y-8">
-            {/* Page Header */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+
+            {/* Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-800">Dashboard</h1>
-                    <p className="text-gray-500 mt-1">Welcome! Here's a summary of your business today.</p>
+                    <h1 style={{ fontSize: '18px', fontWeight: 800, color: '#111', margin: 0 }}>Dashboard</h1>
+                    <p style={{ fontSize: '12px', color: '#888', margin: '2px 0 0' }}>Overview of your store</p>
                 </div>
-                <div className="flex gap-3">
-                    <select
-                        value={dateRange}
-                        onChange={(e) => setDateRange(e.target.value)}
-                        className="px-4 py-2.5 border border-gray-200 rounded-md bg-white text-sm font-medium focus:ring-2 focus:ring-[#0B4222] focus:border-transparent outline-none"
-                    >
-                        <option value="7d">Last 7 days</option>
-                        <option value="30d">Last 30 days</option>
-                        <option value="90d">Last 3 months</option>
-                        <option value="365d">This year</option>
-                    </select>
-                    <button
-                        onClick={handleRefresh}
-                        className="px-4 py-2.5 bg-white border border-gray-200 rounded-md text-sm font-medium hover:bg-gray-50 flex items-center gap-2 transition-all"
-                    >
-                        <FiRefreshCw size={16} className={isLoading ? 'animate-spin' : ''} />
-                        Refresh
-                    </button>
-                    <button className="px-5 py-2.5 bg-gradient-to-r from-[#0B4222] to-[#093519] text-white rounded-md text-sm font-semibold hover:shadow-md transition-all">
-                        Download Report
-                    </button>
-                </div>
+                <button
+                    onClick={handleRefresh}
+                    style={{
+                        display: 'flex', alignItems: 'center', gap: '6px',
+                        padding: '7px 14px', background: '#fff', border: '1px solid #e5e7eb',
+                        borderRadius: '7px', fontSize: '12px', fontWeight: 600, color: '#555',
+                        cursor: 'pointer',
+                    }}
+                >
+                    <FiRefreshCw size={13} className={isLoading ? 'animate-spin' : ''} />
+                    Refresh
+                </button>
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                <StatCard
-                    title="Total Revenue"
-                    value={formatCurrency(stats?.totalRevenue)}
-                    change="+12.5%"
-                    trend="up"
-                    icon={FiDollarSign}
-                    color="#0B4222"
-                    bgColor="rgba(92, 175, 144, 0.15)"
-                    loading={isLoading}
-                />
-                <StatCard
-                    title="Total Orders"
-                    value={(stats?.totalOrders || 0).toLocaleString()}
-                    change="+8.2%"
-                    trend="up"
-                    icon={FiShoppingCart}
-                    color="#3B82F6"
-                    bgColor="rgba(59, 130, 246, 0.15)"
-                    loading={isLoading}
-                />
-                <StatCard
-                    title="Total Products"
-                    value={(stats?.totalProducts || 0).toLocaleString()}
-                    change="+5.1%"
-                    trend="up"
-                    icon={FiShoppingBag}
-                    color="#F59E0B"
-                    bgColor="rgba(245, 158, 11, 0.15)"
-                    loading={isLoading}
-                />
-                <StatCard
-                    title="Total Customers"
-                    value={(stats?.totalCustomers || 0).toLocaleString()}
-                    change="+15.3%"
-                    trend="up"
-                    icon={FiUsers}
-                    color="#EC4899"
-                    bgColor="rgba(236, 72, 153, 0.15)"
-                    loading={isLoading}
-                />
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+                {[
+                    { label: 'Website Orders', value: stats?.totalOrders || 0, icon: FiShoppingCart, color: '#3B82F6', bg: '#EFF6FF' },
+                    { label: 'Total Products', value: stats?.totalProducts || 0, icon: FiShoppingBag, color: '#F59E0B', bg: '#FFFBEB' },
+                    { label: 'Registered Users', value: stats?.totalCustomers || 0, icon: FiUsers, color: '#EC4899', bg: '#FDF2F8' },
+                ].map((item, i) => (
+                    <div key={i} style={{
+                        background: '#fff', border: '1px solid #eee', borderRadius: '10px',
+                        padding: '16px', display: 'flex', alignItems: 'center', gap: '12px',
+                    }}>
+                        <div style={{
+                            width: '40px', height: '40px', borderRadius: '10px',
+                            background: item.bg, display: 'flex', alignItems: 'center',
+                            justifyContent: 'center', flexShrink: 0,
+                        }}>
+                            <item.icon size={18} color={item.color} />
+                        </div>
+                        <div>
+                            {isLoading ? (
+                                <div style={{ width: '40px', height: '20px', background: '#f3f4f6', borderRadius: '4px' }} />
+                            ) : (
+                                <p style={{ fontSize: '20px', fontWeight: 800, color: '#111', margin: 0, lineHeight: 1 }}>
+                                    {item.value.toLocaleString()}
+                                </p>
+                            )}
+                            <p style={{ fontSize: '11px', color: '#888', margin: '3px 0 0', fontWeight: 500 }}>{item.label}</p>
+                        </div>
+                    </div>
+                ))}
             </div>
 
-            {/* Alert Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div className="bg-white border border-gray-200 rounded-md p-4 flex items-center gap-4 hover:shadow-md transition-all">
-                    <div className="w-12 h-12 bg-yellow-50 rounded-md flex items-center justify-center">
-                        <FiClock size={24} className="text-yellow-600" />
-                    </div>
-                    <div>
-                        <p className="text-2xl font-bold text-yellow-700">{stats?.pendingOrders || 0}</p>
-                        <p className="text-sm text-yellow-600">Pending Orders</p>
-                    </div>
-                    <Link href="/dashboard/admin/orders?status=pending" className="ml-auto text-yellow-600 hover:text-yellow-700">
-                        <FiArrowRight size={20} />
-                    </Link>
-                </div>
+            {/* Main Content — 2 Columns */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '14px' }}>
 
-                <div className="bg-white border border-gray-200 rounded-md p-4 flex items-center gap-4 hover:shadow-md transition-all">
-                    <div className="w-12 h-12 bg-red-50 rounded-md flex items-center justify-center">
-                        <FiAlertCircle size={24} className="text-red-600" />
-                    </div>
-                    <div>
-                        <p className="text-2xl font-bold text-red-700">{stats?.lowStockProducts || 0}</p>
-                        <p className="text-sm text-red-600">Low Stock Products</p>
-                    </div>
-                    <Link href="/dashboard/admin/products?stock=low" className="ml-auto text-red-600 hover:text-red-700">
-                        <FiArrowRight size={20} />
-                    </Link>
-                </div>
-
-                <div className="bg-white border border-gray-200 rounded-md p-4 flex items-center gap-4 hover:shadow-md transition-all">
-                    <div className="w-12 h-12 bg-green-50 rounded-md flex items-center justify-center">
-                        <FiCheckCircle size={24} className="text-green-600" />
-                    </div>
-                    <div>
-                        <p className="text-2xl font-bold text-green-700">98.5%</p>
-                        <p className="text-sm text-green-600">Order Success Rate</p>
-                    </div>
-                    <Link href="/dashboard/admin/analytics" className="ml-auto text-green-600 hover:text-green-700">
-                        <FiArrowRight size={20} />
-                    </Link>
-                </div>
-            </div>
-
-            {/* Charts Row */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Sales Chart */}
-                <div className="lg:col-span-2 bg-white rounded-md p-6 shadow-sm border border-gray-200">
-                    <div className="flex justify-between items-center mb-6">
-                        <div>
-                            <h2 className="text-xl font-bold text-gray-800">Revenue Overview</h2>
-                            <p className="text-sm text-gray-500">Monthly revenue statistics</p>
+                {/* LEFT — Website Orders */}
+                <div style={{
+                    background: '#fff', border: '1px solid #eee', borderRadius: '10px',
+                    overflow: 'hidden',
+                }}>
+                    <div style={{
+                        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                        padding: '14px 16px', borderBottom: '1px solid #f0f0f0',
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <h3 style={{ fontSize: '13px', fontWeight: 700, color: '#111', margin: 0 }}>Website Orders</h3>
+                            {recentOrders.length > 0 && (
+                                <span style={{
+                                    fontSize: '10px', fontWeight: 700, color: '#fff',
+                                    background: '#E4525C', padding: '2px 7px', borderRadius: '999px',
+                                }}>
+                                    {recentOrders.length}
+                                </span>
+                            )}
                         </div>
-                        <div className="flex items-center gap-4">
-                            <div className="flex items-center gap-2">
-                                <span className="w-3 h-3 rounded-full bg-[#0B4222]"></span>
-                                <span className="text-sm text-gray-500">Revenue</span>
-                            </div>
-                            <button className="p-2 hover:bg-gray-100 rounded-lg">
-                                <FiMoreVertical />
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Chart */}
-                    <div className="h-72 flex items-end justify-between gap-3 px-2">
-                        {labels.length > 0 ? (
-                            labels.map((month: string, i: number) => {
-                                const rev = revenue[i] || 0;
-                                // Calculate height relative to max revenue
-                                const maxRev = Math.max(...revenue, 1);
-                                const heightPercentage = (rev / maxRev) * 100;
-
-                                return (
-                                    <div key={month} className="flex-1 flex flex-col items-center gap-2 group">
-                                        <div className="relative w-full h-full flex items-end">
-                                            <div
-                                                className="w-full bg-gradient-to-t from-[#0B4222] to-green-400 rounded-t-sm transition-all duration-300 group-hover:from-[#093519] group-hover:to-[#0B4222] cursor-pointer"
-                                                style={{ height: `${heightPercentage}%`, minHeight: rev > 0 ? '4px' : '2px' }}
-                                            >
-                                                <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 font-bold">
-                                                    {formatCurrency(rev)}
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <span className="text-[10px] text-gray-500 font-medium truncate w-full text-center">{month}</span>
-                                    </div>
-                                );
-                            })
-                        ) : (
-                            <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                {isRevenueLoading ? 'Loading chart...' : 'No data available'}
-                            </div>
-                        )}
-                    </div>
-                </div>
-
-                {/* Order Status */}
-                <div className="bg-white rounded-md p-6 shadow-sm border border-gray-200">
-                    <div className="flex justify-between items-center mb-6">
-                        <div>
-                            <h2 className="text-xl font-bold text-gray-800">Order Status</h2>
-                            <p className="text-sm text-gray-500">Current breakdown</p>
-                        </div>
-                    </div>
-
-                    <div className="space-y-5">
-                        {[
-                            { label: 'Delivered', count: stats?.deliveredOrders || 0, color: '#22C55E', icon: FiCheckCircle },
-                            { label: 'Shipped', count: stats?.shippedOrders || 0, color: '#6366F1', icon: FiTruck },
-                            { label: 'Processing', count: stats?.processingOrders || 0, color: '#3B82F6', icon: FiPackage },
-                            { label: 'Pending', count: stats?.pendingOrders || 0, color: '#F59E0B', icon: FiClock },
-                        ].map((item, i) => {
-                            const total = (stats?.totalOrders || 0);
-                            const percentage = total > 0 ? Math.round((item.count / total) * 100) : 0;
-
-                            return (
-                                <div key={i}>
-                                    <div className="flex justify-between items-center text-sm mb-2">
-                                        <span className="flex items-center gap-2 font-medium text-gray-700">
-                                            <item.icon size={16} style={{ color: item.color }} />
-                                            {item.label}
-                                        </span>
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-gray-400 text-xs">{item.count} orders</span>
-                                            <span className="font-bold" style={{ color: item.color }}>{percentage}%</span>
-                                        </div>
-                                    </div>
-                                    <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
-                                        <div
-                                            className="h-full rounded-full transition-all duration-500"
-                                            style={{ width: `${percentage}%`, backgroundColor: item.color }}
-                                        />
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-
-                    <div className="mt-8 pt-6 border-t border-gray-100">
-                        <div className="text-center">
-                            <p className="text-4xl font-bold text-gray-800">
-                                {(stats?.totalOrders || 0).toLocaleString()}
-                            </p>
-                            <p className="text-sm text-gray-500 mt-1">Total Orders This Month</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Tables Row */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Recent Orders */}
-                <div className="bg-white rounded-md shadow-sm border border-gray-200 overflow-hidden">
-                    <div className="flex justify-between items-center p-6 border-b border-gray-100">
-                        <div>
-                            <h2 className="text-xl font-bold text-gray-800">Recent Orders</h2>
-                            <p className="text-sm text-gray-500">Latest customer orders</p>
-                        </div>
-                        <Link href="/dashboard/admin/orders" className="text-[#0B4222] text-sm font-semibold flex items-center gap-1 hover:underline">
-                            View All <FiArrowRight size={14} />
+                        <Link href="/dashboard/admin/orders" style={{
+                            fontSize: '11px', fontWeight: 600, color: '#0B4222',
+                            textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '3px',
+                        }}>
+                            View All <FiArrowRight size={11} />
                         </Link>
                     </div>
 
-                    <div className="overflow-x-auto">
-                        <table className="w-full">
-                            <thead className="bg-gray-50">
-                                <tr>
-                                    <th className="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Order</th>
-                                    <th className="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Customer</th>
-                                    <th className="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Amount</th>
-                                    <th className="text-left px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-100">
-                                {recentOrders.length > 0 ? (
-                                    recentOrders.map((order: any, i: number) => (
-                                        <tr key={order._id || i} className="hover:bg-gray-50 transition-colors">
-                                            <td className="px-6 py-4">
-                                                <p className="text-sm font-semibold text-[#0B4222]">{order.orderNumber}</p>
-                                                <PaymentBadge status={order.paymentStatus} />
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <p className="text-sm font-medium text-gray-800">
-                                                    {order.user?.firstName} {order.user?.lastName}
-                                                </p>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <p className="text-sm font-bold text-gray-800">{formatCurrency(order.total)}</p>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <StatusBadge status={order.status} />
-                                            </td>
-                                        </tr>
-                                    ))
-                                ) : (
-                                    <tr>
-                                        <td colSpan={4} className="px-6 py-10 text-center text-gray-500">
-                                            No recent orders found
-                                        </td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                {/* Top Products */}
-                <div className="bg-white rounded-md shadow-sm border border-gray-200 overflow-hidden">
-                    <div className="flex justify-between items-center p-6 border-b border-gray-100">
+                    {recentOrders.length > 0 ? (
                         <div>
-                            <h2 className="text-xl font-bold text-gray-800">Top Products</h2>
-                            <p className="text-sm text-gray-500">Best selling products</p>
-                        </div>
-                        <Link href="/dashboard/admin/products" className="text-[#0B4222] text-sm font-semibold flex items-center gap-1 hover:underline">
-                            View All <FiArrowRight size={14} />
-                        </Link>
-                    </div>
-
-                    <div className="divide-y divide-gray-100">
-                        {topProducts.length > 0 ? (
-                            topProducts.map((product: any, i: number) => (
-                                <div key={i} className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-14 h-14 rounded-md bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200">
-                                            {product.thumbnail ? (
-                                                <img src={product.thumbnail} alt={product.name} className="w-full h-full object-cover" />
-                                            ) : (
-                                                <FiShoppingBag size={24} className="text-gray-400" />
-                                            )}
+                            {recentOrders.map((order: any, i: number) => (
+                                <div key={order._id || i} style={{
+                                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                                    padding: '11px 16px',
+                                    borderBottom: i < recentOrders.length - 1 ? '1px solid #f8f8f8' : 'none',
+                                    transition: 'background 0.15s',
+                                }}
+                                    onMouseEnter={e => e.currentTarget.style.background = '#fafafa'}
+                                    onMouseLeave={e => e.currentTarget.style.background = '#fff'}
+                                >
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                        <div style={{
+                                            width: '32px', height: '32px', borderRadius: '8px',
+                                            background: order.status === 'pending' ? '#FEF3C7' : '#F0FAF4',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            flexShrink: 0,
+                                        }}>
+                                            {order.status === 'pending'
+                                                ? <FiClock size={14} color="#F59E0B" />
+                                                : <FiShoppingCart size={14} color="#0B4222" />
+                                            }
                                         </div>
                                         <div>
-                                            <p className="font-semibold text-gray-800 line-clamp-1">{product.name}</p>
-                                            <p className="text-sm text-gray-500 flex items-center gap-1">
-                                                <FiActivity size={12} />
-                                                {product.salesCount || 0} sales
+                                            <p style={{ fontSize: '12.5px', fontWeight: 700, color: '#111', margin: 0 }}>
+                                                {order.user?.firstName || order.guestInfo?.name || 'Customer'} {order.user?.lastName || ''}
                                             </p>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '1px' }}>
+                                                <span style={{ fontSize: '10.5px', color: '#aaa' }}>{order.orderNumber}</span>
+                                                <span style={{ fontSize: '10.5px', color: '#ddd' }}>•</span>
+                                                <span style={{ fontSize: '10.5px', color: '#aaa' }}>
+                                                    {order.items?.length || 0} item{(order.items?.length || 0) !== 1 ? 's' : ''}
+                                                </span>
+                                                {order.guestInfo?.phone && (
+                                                    <>
+                                                        <span style={{ fontSize: '10.5px', color: '#ddd' }}>•</span>
+                                                        <span style={{ fontSize: '10.5px', color: '#0B4222', display: 'flex', alignItems: 'center', gap: '2px' }}>
+                                                            <FiPhone size={9} /> {order.guestInfo.phone}
+                                                        </span>
+                                                    </>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
-                                    <div className="text-right">
-                                        <p className="font-bold text-gray-800">{formatCurrency(product.price)}</p>
-                                        <p className={`text-sm ${(product.quantity || 0) < 20 ? 'text-red-500' : 'text-gray-500'}`}>
-                                            {product.quantity || 0} in stock
+                                    <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                                        <p style={{ fontSize: '12.5px', fontWeight: 700, color: '#111', margin: 0 }}>
+                                            {formatCurrency(order.total)}
+                                        </p>
+                                        <p style={{ fontSize: '10px', color: '#ccc', margin: '1px 0 0' }}>
+                                            {order.createdAt ? timeAgo(order.createdAt) : ''}
                                         </p>
                                     </div>
                                 </div>
-                            ))
-                        ) : (
-                            <div className="p-10 text-center text-gray-500">
-                                No top products found
-                            </div>
-                        )}
-                    </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div style={{ padding: '40px', textAlign: 'center' }}>
+                            <FiShoppingCart size={24} color="#ddd" style={{ margin: '0 auto 8px' }} />
+                            <p style={{ fontSize: '12px', color: '#bbb', margin: 0 }}>No website orders yet</p>
+                        </div>
+                    )}
                 </div>
-            </div>
 
-            {/* Quick Actions */}
-            <div className="bg-white rounded-md p-6 shadow-sm border border-gray-200">
-                <h2 className="text-xl font-bold text-gray-800 mb-6">Quick Actions</h2>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-                    {[
-                        { label: 'Add Product', icon: FiShoppingBag, href: '/dashboard/admin/products/new', color: '#0B4222' },
-                        { label: 'View Orders', icon: FiShoppingCart, href: '/dashboard/admin/orders', color: '#3B82F6' },
-                        { label: 'Customers', icon: FiUsers, href: '/dashboard/admin/customers', color: '#EC4899' },
-                        { label: 'Analytics', icon: FiActivity, href: '/dashboard/admin/analytics', color: '#F59E0B' },
-                        { label: 'Payments', icon: FiCreditCard, href: '/dashboard/admin/payments', color: '#6366F1' },
-                        { label: 'Reviews', icon: FiStar, href: '/dashboard/admin/reviews', color: '#EF4444' },
-                    ].map((action, i) => (
-                        <Link
-                            key={i}
-                            href={action.href}
-                            className="flex flex-col items-center gap-3 p-5 rounded-md border border-gray-200 hover:border-[#0B4222] hover:shadow-md transition-all group bg-gray-50/50"
-                        >
-                            <div
-                                className="w-12 h-12 rounded-md flex items-center justify-center transition-transform group-hover:scale-110"
-                                style={{ backgroundColor: `${action.color}15` }}
-                            >
-                                <action.icon size={24} style={{ color: action.color }} />
-                            </div>
-                            <span className="text-sm font-semibold text-gray-700 group-hover:text-[#0B4222]">{action.label}</span>
-                        </Link>
-                    ))}
+                {/* RIGHT — Sidebar */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+
+                    {/* Quick Actions */}
+                    <div style={{
+                        background: '#fff', border: '1px solid #eee', borderRadius: '10px',
+                        padding: '14px',
+                    }}>
+                        <h3 style={{ fontSize: '12px', fontWeight: 700, color: '#111', margin: '0 0 10px' }}>Quick Actions</h3>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                            {[
+                                { label: 'Add Product', href: '/dashboard/admin/products/new', icon: FiPlus, color: '#0B4222' },
+                                { label: 'All Orders', href: '/dashboard/admin/orders', icon: FiShoppingCart, color: '#3B82F6' },
+                                { label: 'Categories', href: '/dashboard/admin/categories', icon: FiGrid, color: '#F59E0B' },
+                                { label: 'Site Content', href: '/dashboard/admin/site-content', icon: FiLayout, color: '#6366F1' },
+                            ].map((item, i) => (
+                                <Link key={i} href={item.href} style={{
+                                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                                    padding: '8px 10px', background: '#fafafa', borderRadius: '7px',
+                                    textDecoration: 'none', color: '#555', fontSize: '12px', fontWeight: 500,
+                                    transition: 'all 0.15s',
+                                }}
+                                    onMouseEnter={e => { e.currentTarget.style.background = '#f0faf4'; e.currentTarget.style.color = '#0B4222'; }}
+                                    onMouseLeave={e => { e.currentTarget.style.background = '#fafafa'; e.currentTarget.style.color = '#555'; }}
+                                >
+                                    <span style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
+                                        <item.icon size={13} color={item.color} />
+                                        {item.label}
+                                    </span>
+                                    <FiArrowRight size={11} color="#ccc" />
+                                </Link>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Recent Products */}
+                    <div style={{
+                        background: '#fff', border: '1px solid #eee', borderRadius: '10px',
+                        padding: '14px',
+                    }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                            <h3 style={{ fontSize: '12px', fontWeight: 700, color: '#111', margin: 0 }}>Products</h3>
+                            <Link href="/dashboard/admin/products" style={{
+                                fontSize: '10.5px', fontWeight: 600, color: '#0B4222',
+                                textDecoration: 'none',
+                            }}>View All</Link>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                            {topProducts.length > 0 ? topProducts.map((product: any, i: number) => (
+                                <div key={i} style={{
+                                    display: 'flex', alignItems: 'center', gap: '10px',
+                                    padding: '7px 8px', background: '#fafafa', borderRadius: '7px',
+                                }}>
+                                    <div style={{
+                                        width: '34px', height: '34px', borderRadius: '6px',
+                                        background: '#f0f0f0', overflow: 'hidden', flexShrink: 0,
+                                        border: '1px solid #eee',
+                                    }}>
+                                        {product.thumbnail ? (
+                                            <img src={product.thumbnail} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                        ) : (
+                                            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                <FiShoppingBag size={14} color="#ccc" />
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                        <p style={{ fontSize: '11.5px', fontWeight: 600, color: '#333', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                            {product.name}
+                                        </p>
+                                        <p style={{ fontSize: '10.5px', color: '#888', margin: 0 }}>
+                                            {formatCurrency(product.price)} · {product.quantity || 0} in stock
+                                        </p>
+                                    </div>
+                                </div>
+                            )) : (
+                                <p style={{ fontSize: '11px', color: '#bbb', textAlign: 'center', padding: '12px 0' }}>No products yet</p>
+                            )}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

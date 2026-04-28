@@ -168,6 +168,20 @@ export default function OrderDetailsPage() {
                                                     </div>
                                                     <div>
                                                         <p className="text-sm font-bold text-gray-800">{item.name}</p>
+                                                        {(item.color || item.size) && (
+                                                            <div className="flex items-center gap-2 mt-1 flex-wrap">
+                                                                {item.color && (
+                                                                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-gray-500 bg-gray-50 px-2 py-0.5 rounded border border-gray-100">
+                                                                        🎨 {item.color}
+                                                                    </span>
+                                                                )}
+                                                                {item.size && (
+                                                                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-gray-500 bg-gray-50 px-2 py-0.5 rounded border border-gray-100">
+                                                                        📏 {item.size}
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        )}
                                                         {item.variant && (
                                                             <p className="text-[10px] text-gray-400 font-bold uppercase mt-0.5">
                                                                 SKU: {item.variant.sku}
@@ -176,9 +190,9 @@ export default function OrderDetailsPage() {
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 text-sm text-gray-600">৳{item.price.toLocaleString()}</td>
+                                            <td className="px-6 py-4 text-sm text-gray-600">৳{(item.price || 0).toLocaleString()}</td>
                                             <td className="px-6 py-4 text-sm text-gray-600">x{item.quantity}</td>
-                                            <td className="px-6 py-4 text-right text-sm font-bold text-gray-800">৳{item.subtotal.toLocaleString()}</td>
+                                            <td className="px-6 py-4 text-right text-sm font-bold text-gray-800">৳{(item.subtotal || (item.price || 0) * (item.quantity || 1)).toLocaleString()}</td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -189,22 +203,22 @@ export default function OrderDetailsPage() {
                             <div className="flex flex-col gap-2 ml-auto max-w-xs">
                                 <div className="flex justify-between text-sm text-gray-500">
                                     <span>Subtotal:</span>
-                                    <span className="font-bold text-gray-800">৳{order.subtotal.toLocaleString()}</span>
+                                    <span className="font-bold text-gray-800">৳{(order.subtotal || 0).toLocaleString()}</span>
                                 </div>
                                 <div className="flex justify-between text-sm text-gray-500">
                                     <span>Shipping:</span>
-                                    <span className="font-bold text-gray-800">৳{order.shippingCost.toLocaleString()}</span>
+                                    <span className="font-bold text-gray-800">৳{(order.shippingCost || 0).toLocaleString()}</span>
                                 </div>
                                 {order.discount > 0 && (
                                     <div className="flex justify-between text-sm text-red-500">
                                         <span>Discount:</span>
-                                        <span className="font-bold">-৳{order.discount.toLocaleString()}</span>
+                                        <span className="font-bold">-৳{(order.discount || 0).toLocaleString()}</span>
                                     </div>
                                 )}
                                 <div className="h-px bg-gray-200 my-2"></div>
                                 <div className="flex justify-between text-lg font-bold text-gray-900">
                                     <span>Total:</span>
-                                    <span className="text-[#0B4222]">৳{order.total.toLocaleString()}</span>
+                                    <span className="text-[#0B4222]">৳{(order.total || 0).toLocaleString()}</span>
                                 </div>
                             </div>
                         </div>
@@ -252,10 +266,10 @@ export default function OrderDetailsPage() {
                         <div className="space-y-4">
                             <div className="flex items-center gap-4">
                                 <div className="w-10 h-10 rounded-md bg-gray-50 border border-gray-100 flex items-center justify-center font-bold text-[#0B4222]">
-                                    {order.user?.firstName[0]}{order.user?.lastName[0]}
+                                    {(order.user?.firstName || order.shippingAddress?.fullName || '?')[0]}{(order.user?.lastName || '')[0]}
                                 </div>
                                 <div>
-                                    <p className="font-bold text-gray-800">{order.user?.firstName} {order.user?.lastName}</p>
+                                    <p className="font-bold text-gray-800">{order.user?.firstName ? `${order.user.firstName} ${order.user.lastName || ''}` : order.shippingAddress?.fullName || 'Guest'}</p>
                                     <p className="text-xs text-gray-400">Customer ID: {order.user?._id?.slice(-8)}</p>
                                 </div>
                             </div>
@@ -266,7 +280,7 @@ export default function OrderDetailsPage() {
                                 </div>
                                 <div className="flex items-center gap-3 text-sm text-gray-600">
                                     <FiPhone size={14} />
-                                    <span>{order.user?.phone || order.shippingAddress.phone}</span>
+                                    <span>{order.user?.phone || order.shippingAddress?.phone || 'N/A'}</span>
                                 </div>
                             </div>
                         </div>
@@ -279,13 +293,13 @@ export default function OrderDetailsPage() {
                             <h2 className="font-bold">Shipping To</h2>
                         </div>
                         <div className="text-sm text-gray-600 leading-relaxed">
-                            <p className="font-bold text-gray-800 mb-1">{order.shippingAddress.fullName}</p>
-                            <p>{order.shippingAddress.street}</p>
-                            <p>{order.shippingAddress.city}, {order.shippingAddress.state} - {order.shippingAddress.zipCode}</p>
-                            <p>{order.shippingAddress.country}</p>
+                            <p className="font-bold text-gray-800 mb-1">{order.shippingAddress?.fullName || 'N/A'}</p>
+                            <p>{order.shippingAddress?.street || order.shippingAddress?.address || ''}</p>
+                            <p>{[order.shippingAddress?.city, order.shippingAddress?.state, order.shippingAddress?.zipCode].filter(Boolean).join(', ') || ''}</p>
+                            <p>{order.shippingAddress?.country || ''}</p>
                             <p className="mt-2 font-bold text-gray-400 flex items-center gap-1 uppercase text-[10px]">
                                 <FiTruck size={12} />
-                                {order.shippingMethod} Delivery
+                                {order.shippingMethod || 'Standard'} Delivery
                             </p>
                         </div>
                     </div>

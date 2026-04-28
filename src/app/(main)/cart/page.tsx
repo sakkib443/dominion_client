@@ -254,6 +254,7 @@ const CartPage = () => {
                     items={items.map(item => ({
                         product: item.productId || item.id,
                         quantity: item.quantity,
+                        name: item.name,
                         color: item.color || undefined,
                         size: item.size || undefined,
                         price: item.price,

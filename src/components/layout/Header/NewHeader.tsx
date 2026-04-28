@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { FiShoppingCart, FiCamera, FiChevronDown, FiSearch, FiMenu, FiX, FiUpload, FiPhone, FiUser } from 'react-icons/fi';
 import { useAppSelector, useAppDispatch } from '@/redux';
 import { useGetCategoriesQuery } from '@/redux/api/categoryApi';
+import { useGetSiteContentQuery } from '@/redux/api/siteContentApi';
 import { setImageSearching, setImageSearchResults, clearImageSearch } from '@/redux/slices/imageSearchSlice';
 
 interface Category {
@@ -393,25 +394,7 @@ const NewHeader: React.FC = () => {
                 </div>
 
                 {/* Scrolling Offer Ticker */}
-                <div className="bg-[#0B4222]/15 py-0.5 overflow-hidden">
-                    <div className="animate-marquee whitespace-nowrap">
-                        <span className="text-[#E4525C] text-sm font-normal mx-8">Supply</span>
-                        <span className="text-[#E4525C] text-sm font-normal mx-8">Solution</span>
-                        <span className="text-[#E4525C] text-sm font-normal mx-8">Satisfaction</span>
-                        <span className="text-[#E4525C] text-sm font-normal mx-8">🎉 Special Offer: Get 50% OFF on all Electronics! Limited Time Only!</span>
-                        <span className="text-[#E4525C]/50 mx-2">•</span>
-                        <span className="text-[#E4525C] text-sm font-normal mx-8">🚚 Free Shipping on orders over Tk.5000</span>
-                        <span className="text-[#E4525C]/50 mx-2">•</span>
-                        <span className="text-[#E4525C] text-sm font-normal mx-8">💳 Extra 10% Cashback with bKash Payment</span>
-                        <span className="text-[#E4525C]/50 mx-2">•</span>
-                        <span className="text-[#E4525C] text-sm font-normal mx-8">Supply</span>
-                        <span className="text-[#E4525C] text-sm font-normal mx-8">Solution</span>
-                        <span className="text-[#E4525C] text-sm font-normal mx-8">Satisfaction</span>
-                        <span className="text-[#E4525C] text-sm font-normal mx-8">🔥 Flash Sale: Up to 70% OFF on Fashion Items</span>
-                        <span className="text-[#E4525C]/50 mx-2">•</span>
-                        <span className="text-[#E4525C] text-sm font-normal mx-8">📱 Download Our App & Get Tk.100 Discount</span>
-                    </div>
-                </div>
+                <TickerBar />
             </header>
 
             {/* Image Search Modal */}
@@ -469,5 +452,26 @@ const NewHeader: React.FC = () => {
         </>
     );
 };
+
+/* ─── Dynamic Ticker Bar ─── */
+function TickerBar() {
+    const { data: res } = useGetSiteContentQuery({});
+    const ticker = (res?.data?.ticker || []).filter((t: any) => t.active);
+
+    if (ticker.length === 0) return null;
+
+    // Build the text with dots between items, duplicate for seamless scroll
+    const items = ticker.map((t: any) => t.text);
+
+    return (
+        <div className="bg-[#0B4222]/15 py-0.5 overflow-hidden">
+            <div className="animate-marquee whitespace-nowrap">
+                {[...items, ...items].map((text: string, i: number) => (
+                        <span key={i} className="text-[#E4525C] text-sm font-normal mx-8">{text}</span>
+                ))}
+            </div>
+        </div>
+    );
+}
 
 export default NewHeader;

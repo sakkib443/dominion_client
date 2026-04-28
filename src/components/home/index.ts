@@ -1,4 +1,3 @@
-export { default as Hero } from './Hero';
 export { default as HomeCategory } from './HomeCategory';
 export { default as PopularProducts } from './PopularProducts';
 export { default as LatestExclusive } from './LatestExclusive';

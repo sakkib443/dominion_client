@@ -4,9 +4,10 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
-    FiHome, FiShoppingBag, FiUsers, FiCreditCard,
+    FiHome, FiShoppingBag, FiUsers,
     FiGrid, FiLogOut, FiMenu, FiX, FiChevronDown,
     FiShoppingCart, FiMessageSquare, FiUser, FiChevronLeft,
+    FiLayout,
 } from 'react-icons/fi';
 
 interface AdminLayoutProps { children: React.ReactNode; }
@@ -25,8 +26,10 @@ const menuItems = [
     ]},
     { name: 'Orders',    href: '/dashboard/admin/orders',    icon: FiShoppingCart,  submenu: null },
     { name: 'Inquiries', href: '/dashboard/admin/inquiries', icon: FiMessageSquare, submenu: null },
-    { name: 'Payment',   href: '/dashboard/admin/payments',  icon: FiCreditCard,    submenu: null },
     { name: 'Customers', href: '/dashboard/admin/customers', icon: FiUsers,         submenu: null },
+    { name: 'Design',    href: '/dashboard/admin/site-content', icon: FiLayout,   submenu: [
+        { name: 'Site Content', href: '/dashboard/admin/site-content' },
+    ]},
     { name: 'Profile',   href: '/dashboard/admin/profile',   icon: FiUser,          submenu: null },
 ];
 

@@ -6,59 +6,16 @@ import {
     FiClock, FiMessageCircle, FiChevronRight,
 } from 'react-icons/fi';
 import { BsWhatsapp } from 'react-icons/bs';
+import { useGetSiteContentQuery } from '@/redux/api/siteContentApi';
 
 /* ─── Types ─── */
 type FormState = { name: string; email: string; phone: string; subject: string; message: string };
 
-/* ─── Data ─── */
-const CONTACT_CARDS = [
-    {
-        icon: <FiPhone size={22} />,
-        label: 'Call Us',
-        primary: '01753923093',
-        secondary: 'Sun – Thu, 9 AM – 6 PM',
-        href: 'tel:01753923093',
-        accent: '#0B4222',
-    },
-    {
-        icon: <BsWhatsapp size={22} />,
-        label: 'WhatsApp',
-        primary: '01322840808',
-        secondary: 'Quick reply within minutes',
-        href: 'https://wa.me/8801322840808',
-        accent: '#25D366',
-    },
-    {
-        icon: <FiMail size={22} />,
-        label: 'Email Us',
-        primary: 'support@dominion.com',
-        secondary: 'We reply within 24 hours',
-        href: 'mailto:support@dominion.com',
-        accent: '#4F46E5',
-    },
-    {
-        icon: <FiMapPin size={22} />,
-        label: 'Visit Us',
-        primary: 'Dhaka, Bangladesh',
-        secondary: 'Find us on the map below',
-        href: '#map',
-        accent: '#E4525C',
-    },
-];
-
-const HOURS = [
-    { day: 'Sunday – Thursday', time: '9:00 AM – 6:00 PM' },
-    { day: 'Friday', time: '2:00 PM – 6:00 PM' },
-    { day: 'Saturday', time: 'Closed' },
-];
-
-const SUBJECTS = [
-    'Order Issue', 'Product Inquiry', 'Return / Refund',
-    'Delivery Problem', 'Payment Issue', 'Other',
-];
-
 /* ─── Page ─── */
 export default function ContactPage() {
+    const { data: res, isLoading: contentLoading } = useGetSiteContentQuery({});
+    const c = res?.data?.contact;
+
     const [form, setForm] = useState<FormState>({ name: '', email: '', phone: '', subject: '', message: '' });
     const [focusField, setFocusField] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
@@ -105,6 +62,56 @@ export default function ContactPage() {
         boxSizing: 'border-box' as const,
         boxShadow: focusField === name ? '0 0 0 3px rgba(11,66,34,0.08)' : 'none',
     });
+
+    // Loading state
+    if (contentLoading || !c) {
+        return (
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+                <div style={{ width: '32px', height: '32px', border: '3px solid #e5e7eb', borderTopColor: '#0B4222', borderRadius: '50%', animation: 'preloaderSpin 0.8s linear infinite' }} />
+            </div>
+        );
+    }
+
+    /* ─── Dynamic Data ─── */
+    const CONTACT_CARDS = [
+        {
+            icon: <FiPhone size={22} />,
+            label: 'Call Us',
+            primary: c.phone || '01XXXXXXXXX',
+            secondary: 'Sun – Thu, 9 AM – 6 PM',
+            href: `tel:${c.phone || ''}`,
+            accent: '#0B4222',
+        },
+        {
+            icon: <BsWhatsapp size={22} />,
+            label: 'WhatsApp',
+            primary: c.whatsapp || '01XXXXXXXXX',
+            secondary: 'Quick reply within minutes',
+            href: `https://wa.me/88${c.whatsapp || ''}`,
+            accent: '#25D366',
+        },
+        {
+            icon: <FiMail size={22} />,
+            label: 'Email Us',
+            primary: c.email || 'support@dominion.com',
+            secondary: 'We reply within 24 hours',
+            href: `mailto:${c.email || ''}`,
+            accent: '#4F46E5',
+        },
+        {
+            icon: <FiMapPin size={22} />,
+            label: 'Visit Us',
+            primary: c.address || 'Dhaka, Bangladesh',
+            secondary: 'Come visit our office',
+            href: '#',
+            accent: '#E4525C',
+        },
+    ];
+
+    const HOURS = (c.hours || []).map((h: any) => ({ day: h.day, time: h.time }));
+    const SUBJECTS = c.subjects || [];
+    const TIPS = c.tips || [];
+    const SOCIALS = c.socials || [];
 
     return (
         <div style={{ background: '#fff', minHeight: '100vh' }}>
@@ -219,7 +226,7 @@ export default function ContactPage() {
                             </div>
                             <div>
                                 <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#1a1a1a', margin: 0 }}>Send Us a Message</h2>
-                                <p style={{ fontSize: '12px', color: '#9ca3af', margin: 0 }}>We'll get back to you within 24 hours</p>
+                                <p style={{ fontSize: '12px', color: '#9ca3af', margin: 0 }}>We&apos;ll get back to you within 24 hours</p>
                             </div>
                         </div>
 
@@ -283,7 +290,7 @@ export default function ContactPage() {
                                     onFocus={() => setFocusField('subject')}
                                     onBlur={() => setFocusField(null)}>
                                     <option value="">Select a topic...</option>
-                                    {SUBJECTS.map(s => <option key={s} value={s}>{s}</option>)}
+                                    {SUBJECTS.map((s: string) => <option key={s} value={s}>{s}</option>)}
                                 </select>
                             </div>
 
@@ -326,106 +333,81 @@ export default function ContactPage() {
                     <div style={{ flex: '0 0 280px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
                         {/* Business Hours */}
-                        <div style={{
-                            border: '1.5px solid #e5e7eb', borderRadius: '12px',
-                            overflow: 'hidden',
-                        }}>
+                        {HOURS.length > 0 && (
                             <div style={{
-                                background: '#f3f4f6', padding: '12px 18px',
-                                display: 'flex', alignItems: 'center', gap: '8px',
-                                borderBottom: '1px solid #e5e7eb',
+                                border: '1.5px solid #e5e7eb', borderRadius: '12px',
+                                overflow: 'hidden',
                             }}>
-                                <FiClock size={15} color="#6b7280" />
-                                <span style={{ fontSize: '13px', fontWeight: 700, color: '#374151' }}>Business Hours</span>
-                            </div>
-                            <div style={{ padding: '6px 0' }}>
-                                {HOURS.map((h, i) => (
-                                    <div key={i} style={{
-                                        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                                        padding: '10px 18px',
-                                        borderBottom: i < HOURS.length - 1 ? '1px solid #f3f4f6' : 'none',
-                                    }}>
-                                        <span style={{ fontSize: '12.5px', color: '#374151', fontWeight: 500 }}>{h.day}</span>
-                                        <span style={{
-                                            fontSize: '12px', fontWeight: 600,
-                                            color: h.time === 'Closed' ? '#E4525C' : '#0B4222',
-                                            background: h.time === 'Closed' ? '#fef2f2' : '#f0faf4',
-                                            padding: '2px 8px', borderRadius: '999px',
+                                <div style={{
+                                    background: '#f3f4f6', padding: '12px 18px',
+                                    display: 'flex', alignItems: 'center', gap: '8px',
+                                    borderBottom: '1px solid #e5e7eb',
+                                }}>
+                                    <FiClock size={15} color="#6b7280" />
+                                    <span style={{ fontSize: '13px', fontWeight: 700, color: '#374151' }}>Business Hours</span>
+                                </div>
+                                <div style={{ padding: '6px 0' }}>
+                                    {HOURS.map((h: any, i: number) => (
+                                        <div key={i} style={{
+                                            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                                            padding: '10px 18px',
+                                            borderBottom: i < HOURS.length - 1 ? '1px solid #f3f4f6' : 'none',
                                         }}>
-                                            {h.time}
-                                        </span>
+                                            <span style={{ fontSize: '12.5px', color: '#374151', fontWeight: 500 }}>{h.day}</span>
+                                            <span style={{
+                                                fontSize: '12px', fontWeight: 600,
+                                                color: h.time === 'Closed' ? '#E4525C' : '#0B4222',
+                                                background: h.time === 'Closed' ? '#fef2f2' : '#f0faf4',
+                                                padding: '2px 8px', borderRadius: '999px',
+                                            }}>
+                                                {h.time}
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Quick Tips */}
+                        {TIPS.length > 0 && (
+                            <div style={{
+                                background: 'linear-gradient(135deg, #f0faf4, #fafffe)',
+                                border: '1.5px solid #bbf7d0',
+                                borderRadius: '12px', padding: '16px 18px',
+                            }}>
+                                <p style={{ fontSize: '12.5px', fontWeight: 700, color: '#0B4222', margin: '0 0 10px' }}>💡 Quick Tips</p>
+                                {TIPS.map((tip: string, i: number) => (
+                                    <div key={i} style={{ display: 'flex', gap: '8px', marginBottom: i < TIPS.length - 1 ? '8px' : 0 }}>
+                                        <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#0B4222', marginTop: '6px', flexShrink: 0 }} />
+                                        <p style={{ fontSize: '12px', color: '#374151', margin: 0, lineHeight: 1.6 }}>{tip}</p>
                                     </div>
                                 ))}
                             </div>
-                        </div>
-
-                        {/* Quick Tips */}
-                        <div style={{
-                            background: 'linear-gradient(135deg, #f0faf4, #fafffe)',
-                            border: '1.5px solid #bbf7d0',
-                            borderRadius: '12px', padding: '16px 18px',
-                        }}>
-                            <p style={{ fontSize: '12.5px', fontWeight: 700, color: '#0B4222', margin: '0 0 10px' }}>💡 Quick Tips</p>
-                            {[
-                                'Have your order ID ready for faster support',
-                                'WhatsApp is the fastest way to reach us',
-                                'Attach screenshots for product issues',
-                            ].map((tip, i) => (
-                                <div key={i} style={{ display: 'flex', gap: '8px', marginBottom: i < 2 ? '8px' : 0 }}>
-                                    <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#0B4222', marginTop: '6px', flexShrink: 0 }} />
-                                    <p style={{ fontSize: '12px', color: '#374151', margin: 0, lineHeight: 1.6 }}>{tip}</p>
-                                </div>
-                            ))}
-                        </div>
+                        )}
 
                         {/* Social Quick Links */}
-                        <div style={{ border: '1.5px solid #e5e7eb', borderRadius: '12px', padding: '16px 18px' }}>
-                            <p style={{ fontSize: '12.5px', fontWeight: 700, color: '#1a1a1a', margin: '0 0 12px' }}>Follow Us</p>
-                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                                {[
-                                    { label: 'Facebook', color: '#1877F2', href: '#' },
-                                    { label: 'Instagram', color: '#E1306C', href: '#' },
-                                    { label: 'YouTube', color: '#FF0000', href: '#' },
-                                ].map((s, i) => (
-                                    <a key={i} href={s.href} style={{
-                                        padding: '6px 12px',
-                                        background: `${s.color}12`,
-                                        color: s.color,
-                                        fontSize: '11.5px', fontWeight: 600,
-                                        borderRadius: '6px', textDecoration: 'none',
-                                        transition: 'all 0.2s ease',
-                                    }}
-                                        onMouseEnter={e => { e.currentTarget.style.background = s.color; e.currentTarget.style.color = '#fff'; }}
-                                        onMouseLeave={e => { e.currentTarget.style.background = `${s.color}12`; e.currentTarget.style.color = s.color; }}
-                                    >
-                                        {s.label}
-                                    </a>
-                                ))}
+                        {SOCIALS.length > 0 && (
+                            <div style={{ border: '1.5px solid #e5e7eb', borderRadius: '12px', padding: '16px 18px' }}>
+                                <p style={{ fontSize: '12.5px', fontWeight: 700, color: '#1a1a1a', margin: '0 0 12px' }}>Follow Us</p>
+                                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                    {SOCIALS.map((s: any, i: number) => (
+                                        <a key={i} href={s.url} style={{
+                                            padding: '6px 12px',
+                                            background: `${s.color}12`,
+                                            color: s.color,
+                                            fontSize: '11.5px', fontWeight: 600,
+                                            borderRadius: '6px', textDecoration: 'none',
+                                            transition: 'all 0.2s ease',
+                                        }}
+                                            onMouseEnter={e => { e.currentTarget.style.background = s.color; e.currentTarget.style.color = '#fff'; }}
+                                            onMouseLeave={e => { e.currentTarget.style.background = `${s.color}12`; e.currentTarget.style.color = s.color; }}
+                                        >
+                                            {s.label}
+                                        </a>
+                                    ))}
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* ══════════ MAP ══════════ */}
-                <div id="map" style={{ marginBottom: '48px' }}>
-                    <div style={{
-                        display: 'flex', alignItems: 'center', gap: '8px',
-                        marginBottom: '14px',
-                    }}>
-                        <FiMapPin size={16} color="#0B4222" />
-                        <h2 style={{ fontSize: '15px', fontWeight: 700, color: '#1a1a1a', margin: 0 }}>Our Location</h2>
-                    </div>
-                    <div style={{ borderRadius: '12px', overflow: 'hidden', border: '1.5px solid #e5e7eb', height: '320px' }}>
-                        <iframe
-                            title="Dominion Location"
-                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d233668.37666741206!2d90.27923878085938!3d23.780573099999994!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755b8b087026b81%3A0x8fa563bbdd5904c2!2sDhaka!5e0!3m2!1sen!2sbd!4v1713000000000!5m2!1sen!2sbd"
-                            width="100%"
-                            height="100%"
-                            style={{ border: 0, display: 'block' }}
-                            allowFullScreen
-                            loading="lazy"
-                            referrerPolicy="no-referrer-when-downgrade"
-                        />
+                        )}
                     </div>
                 </div>
 

@@ -468,18 +468,18 @@ const ProductFormInner = () => {
                                     formData.colors.forEach((c: string, ci: number) => {
                                         formData.sizes.forEach((s: string) => {
                                             if (existing.some((v: any) => v.color === c && v.size === s)) return;
-                                            newVars.push({ color: c, colorHex: formData.colorHex[ci] || '', size: s, price: defPrice, originalPrice: defOrig, stock: 0, sku: '', images: [], note: '' });
+                                            newVars.push({ color: c, colorHex: formData.colorHex[ci] || '', size: s, description: formData.description || '', price: defPrice, originalPrice: defOrig, stock: 0, sku: '', images: [], note: '' });
                                         });
                                     });
                                 } else if (formData.colors.length > 0) {
                                     formData.colors.forEach((c: string, ci: number) => {
                                         if (existing.some((v: any) => v.color === c && !v.size)) return;
-                                        newVars.push({ color: c, colorHex: formData.colorHex[ci] || '', size: '', price: defPrice, originalPrice: defOrig, stock: 0, sku: '', images: [], note: '' });
+                                        newVars.push({ color: c, colorHex: formData.colorHex[ci] || '', size: '', description: formData.description || '', price: defPrice, originalPrice: defOrig, stock: 0, sku: '', images: [], note: '' });
                                     });
                                 } else if (formData.sizes.length > 0) {
                                     formData.sizes.forEach((s: string) => {
                                         if (existing.some((v: any) => v.size === s && !v.color)) return;
-                                        newVars.push({ color: '', colorHex: '', size: s, price: defPrice, originalPrice: defOrig, stock: 0, sku: '', images: [], note: '' });
+                                        newVars.push({ color: '', colorHex: '', size: s, description: formData.description || '', price: defPrice, originalPrice: defOrig, stock: 0, sku: '', images: [], note: '' });
                                     });
                                 }
                                 if (newVars.length > 0) setFormData((prev: any) => ({ ...prev, variants: [...(prev.variants || []), ...newVars] }));
@@ -592,6 +592,42 @@ const ProductFormInner = () => {
                                     {v.originalPrice > 0 && v.price > 0 && v.originalPrice > v.price && (
                                         <p className="text-xs text-emerald-700 font-bold bg-emerald-50 px-3 py-1.5 rounded inline-block">✅ Discount: {Math.round(((v.originalPrice - v.price) / v.originalPrice) * 100)}%</p>
                                     )}
+                                    {/* ── Variant Description ── */}
+                                    <div className="pt-3 border-t border-gray-100 space-y-2">
+                                        <div className="flex items-center justify-between">
+                                            <label className="text-[10px] font-bold text-gray-400 uppercase">Description</label>
+                                            <button type="button" onClick={() => { const vars = [...formData.variants]; vars[i] = { ...vars[i], description: formData.description || '' }; setFormData((prev: any) => ({ ...prev, variants: vars })); }} className="text-[10px] font-bold text-blue-600 hover:text-blue-800 bg-blue-50 px-2 py-0.5 rounded">
+                                                ↩ Use Main Description
+                                            </button>
+                                        </div>
+                                        <div className="product-editor-wrapper">
+                                            <ReactQuill
+                                                theme="snow"
+                                                value={v.description || ''}
+                                                onChange={(val: string) => { const vars = [...formData.variants]; vars[i] = { ...vars[i], description: val }; setFormData((prev: any) => ({ ...prev, variants: vars })); }}
+                                                placeholder="Variant-specific description..."
+                                                modules={{
+                                                    toolbar: [
+                                                        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                                                        [{ 'font': [] }],
+                                                        [{ 'size': ['small', false, 'large', 'huge'] }],
+                                                        ['bold', 'italic', 'underline', 'strike'],
+                                                        [{ 'color': [] }, { 'background': [] }],
+                                                        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                                                        [{ 'indent': '-1' }, { 'indent': '+1' }],
+                                                        [{ 'align': [] }],
+                                                        ['link', 'image', 'video'],
+                                                        ['blockquote', 'code-block'],
+                                                        ['clean'],
+                                                    ],
+                                                }}
+                                                style={{ minHeight: '200px' }}
+                                            />
+                                        </div>
+                                        {v.description && v.description !== formData.description && (
+                                            <p className="text-[10px] text-amber-600 font-medium">⚠ Custom description (different from main)</p>
+                                        )}
+                                    </div>
                                 </div>
                             </details>
                         ))}
