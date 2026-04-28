@@ -66,6 +66,7 @@ const ProductFormInner = () => {
         name: '', slug: '', sku: '', brand: '',
         description: '', tagline: '',
         priceType: 'negotiable',
+        productType: 'simple',
         // Pricing
         price: 0, originalPrice: 0, costPrice: 0, discount: 0,
         // Media
@@ -118,6 +119,7 @@ const ProductFormInner = () => {
                 material: prod.material || [],
                 variants: prod.variants || [],
                 aiLabels: prod.aiLabels || [],
+                productType: prod.productType || 'simple',
                 metaKeywords: prod.metaKeywords || [],
                 images: prod.images || [],
             });
@@ -362,12 +364,45 @@ const ProductFormInner = () => {
                         </div>
                     </div>
 
-                    {/* ── 3. Product Variations (WooCommerce-style) ─ */}
+                    {/* ── 3. Product Type & Variations ─ */}
                     <div className="bg-white p-6 rounded-md border border-gray-200 shadow-sm space-y-5">
-                        <SectionHeader icon={<FiDroplet size={20} />} title="Product Variations" color="bg-pink-50 text-pink-600" />
-                        <p className="text-xs text-gray-400 -mt-2">Color ও Size add করে <strong>Generate Variants</strong> ক্লিক করুন। প্রতিটার আলাদা price, stock, images দিতে পারবেন।</p>
+                        <SectionHeader icon={<FiDroplet size={20} />} title="Product Type & Variations" color="bg-pink-50 text-pink-600" />
 
-                        {/* ── Step 1: Colors ── */}
+                        {/* ── Product Type Selector ── */}
+                        <div className="grid grid-cols-3 gap-3">
+                            {[
+                                { value: 'simple', label: '🔲 Simple', desc: 'No color/size variant' },
+                                { value: 'variable', label: '🔄 Variable', desc: 'Color + Size combos' },
+                                { value: 'multi-color', label: '🎨 Multi Color', desc: 'Color only, no size' },
+                            ].map((t) => (
+                                <button key={t.value} type="button"
+                                    onClick={() => setFormData((prev: any) => ({ ...prev, productType: t.value }))}
+                                    className={`p-4 rounded-lg border-2 text-left transition-all ${
+                                        formData.productType === t.value
+                                            ? 'border-[#0B4222] bg-green-50 shadow-md'
+                                            : 'border-gray-200 bg-white hover:border-gray-300'
+                                    }`}
+                                >
+                                    <p className="text-sm font-bold text-gray-800">{t.label}</p>
+                                    <p className="text-[11px] text-gray-500 mt-0.5">{t.desc}</p>
+                                </button>
+                            ))}
+                        </div>
+
+                        {formData.productType === 'simple' && (
+                            <p className="text-xs text-gray-400 bg-gray-50 p-3 rounded-md">✅ Simple product — নিচে কোন variant দেওয়ার দরকার নেই। Base price ও stock ব্যবহার হবে।</p>
+                        )}
+
+                        {formData.productType === 'multi-color' && (
+                            <p className="text-xs text-blue-600 bg-blue-50 p-3 rounded-md font-medium">🎨 Multi-Color — শুধু কালার গুলো add করুন, প্রতিটা কালারের নাম ও hex দিন। সাইজ লাগবে না।</p>
+                        )}
+
+                        {formData.productType === 'variable' && (
+                            <p className="text-xs text-gray-400 -mt-2">Color ও Size add করে <strong>Generate Variants</strong> ক্লিক করুন। প্রতিটার আলাদা price, stock, images দিতে পারবেন।</p>
+                        )}
+
+                        {/* ── Step 1: Colors (variable + multi-color) ── */}
+                        {(formData.productType === 'variable' || formData.productType === 'multi-color') && (
                         <div className="space-y-3">
                             <label className="text-sm font-bold text-gray-700 flex items-center gap-2">🎨 Colors</label>
                             <div className="flex flex-wrap gap-2">
@@ -418,8 +453,10 @@ const ProductFormInner = () => {
                                 }} className="px-4 py-2.5 bg-[#0B4222] text-white rounded-md text-sm font-bold hover:bg-[#093519] shrink-0">+ Add</button>
                             </div>
                         </div>
+                        )}
 
-                        {/* ── Step 2: Sizes ── */}
+                        {/* ── Step 2: Sizes (variable only) ── */}
+                        {formData.productType === 'variable' && (
                         <div className="space-y-3">
                             <label className="text-sm font-bold text-gray-700 flex items-center gap-2">📐 Sizes</label>
                             <div className="flex flex-wrap gap-2">
@@ -456,8 +493,10 @@ const ProductFormInner = () => {
                                 }} className="px-4 py-2.5 bg-[#0B4222] text-white rounded-md text-sm font-bold hover:bg-[#093519] shrink-0">+ Add</button>
                             </div>
                         </div>
+                        )}
 
-                        {/* ── Step 3: Generate / Actions ── */}
+                        {/* ── Step 3: Generate / Actions (variable only) ── */}
+                        {formData.productType === 'variable' && (
                         <div className="flex gap-3 flex-wrap">
                             <button type="button" disabled={formData.colors.length === 0 && formData.sizes.length === 0} onClick={() => {
                                 const existing = formData.variants || [];
@@ -492,6 +531,7 @@ const ProductFormInner = () => {
                                 <button type="button" onClick={() => { if (confirm('সব variant মুছে ফেলবেন?')) setFormData((prev: any) => ({ ...prev, variants: [] })); }} className="px-4 py-2.5 bg-red-50 border border-red-200 text-red-600 rounded-md text-sm font-bold hover:bg-red-100">🗑 Clear All</button>
                             )}
                         </div>
+                        )}
 
                         {/* ── Bulk Set ── */}
                         {(formData.variants?.length || 0) > 0 && (

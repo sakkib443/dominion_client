@@ -338,7 +338,7 @@ export default function ProductDetailsPage() {
     }
     if (product.material?.length > 0) productDetails.push({ key: 'Material', value: product.material.join(', ') });
     if (product.weight > 0) productDetails.push({ key: 'Weight', value: `${product.weight}g` });
-    if (product.colors?.length > 0) productDetails.push({ key: 'Color', value: product.colors.join(', ') });
+    if (product.colors?.length > 0) productDetails.push({ key: product.productType === 'multi-color' ? 'Multi Color' : 'Color', value: product.colors.join(', ') });
     if (product.sizes?.length > 0) productDetails.push({ key: 'Size', value: product.sizes.join(', ') });
     if (product.weights?.length > 0) productDetails.push({ key: 'Weight Options', value: product.weights.join(', ') });
 
@@ -722,259 +722,259 @@ export default function ProductDetailsPage() {
                             }}>
                                 {/* Image area row */}
                                 <div style={{ display: 'flex', height: 'clamp(300px, 32vw, 480px)', overflow: 'visible' }}>
-                                <div className="pd-thumb-col" style={{
-                                    width: '82px', display: 'flex', flexDirection: 'column',
-                                    alignItems: 'center', padding: '8px 0', marginLeft: '4px',
-                                    flexShrink: 0, gap: '4px',
-                                }}>
-                                    {/* Label */}
-                                    <span style={{ fontSize: '11px', fontWeight: 400, color: '#555', textTransform: 'capitalize', letterSpacing: '0.5px' }}>Image</span>
+                                    <div className="pd-thumb-col" style={{
+                                        width: '82px', display: 'flex', flexDirection: 'column',
+                                        alignItems: 'center', padding: '8px 0', marginLeft: '4px',
+                                        flexShrink: 0, gap: '4px',
+                                    }}>
+                                        {/* Label */}
+                                        <span style={{ fontSize: '11px', fontWeight: 400, color: '#555', textTransform: 'capitalize', letterSpacing: '0.5px' }}>Image</span>
 
-                                    {/* Image Thumbnails */}
-                                    <div
-                                        ref={colorSwatchRef}
-                                        style={{
-                                            display: 'flex', flexDirection: 'column', gap: '8px',
-                                            overflow: 'hidden', maxHeight: '580px', flex: 1,
-                                        }}
-                                        className="no-scrollbar"
-                                    >
-                                        {allImages.map((img: string, idx: number) => (
-                                            <button
-                                                key={idx}
-                                                onClick={() => handleImageSelect(idx)}
-                                                style={{
-                                                    width: '75px', height: '75px', flexShrink: 0,
-                                                    border: selectedImage === idx
-                                                        ? '2px solid #0B4222'
-                                                        : '2px solid #e0e0e0',
-                                                    borderRadius: '6px',
-                                                    cursor: 'pointer',
-                                                    transition: 'all 0.2s ease',
-                                                    overflow: 'hidden',
-                                                    padding: 0, background: '#f5f5f5',
-                                                    boxShadow: selectedImage === idx ? '0 0 0 2px rgba(11,66,34,0.2)' : 'none',
-                                                }}
-                                            >
-                                                <img src={img} alt={`Product ${idx + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                            </button>
-                                        ))}
-                                    </div>
-
-                                    {/* Up & Down Arrows */}
-                                    <div style={{ display: 'flex', gap: '4px' }}>
-                                        <button onClick={() => scrollList(colorSwatchRef, 'up')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                            <FiChevronUp size={18} />
-                                        </button>
-                                        <button onClick={() => scrollList(colorSwatchRef, 'down')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                            <FiChevronDown size={18} />
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {/* Image Wrapper — fills remaining flex space */}
-                                <div className="pd-image-wrapper" style={{
-                                    position: 'relative', flex: 1,
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    padding: '8px',
-                                }}>
-                                    {/* Left Arrow — outside image, simple negative offset */}
-                                    <button
-                                        onClick={(e) => { e.stopPropagation(); if (selectedImage > 0) { setSelectedImage(prev => prev - 1); setZoomLevel(1); } }}
-                                        style={{
-                                            position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)',
-                                            background: 'rgba(255,255,255,0.95)', border: '1px solid #ddd', borderRadius: '50%',
-                                            width: '32px', height: '32px', zIndex: 5,
-                                            cursor: selectedImage === 0 ? 'not-allowed' : 'pointer',
-                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                            boxShadow: '0 2px 8px rgba(0,0,0,0.15)', transition: 'all 0.2s ease',
-                                            opacity: selectedImage === 0 ? 0.25 : 1,
-                                        }}
-                                        onMouseEnter={(e) => { if (selectedImage > 0) { e.currentTarget.style.background = '#fff'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.25)'; } }}
-                                        onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.95)'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)'; }}
-                                    >
-                                        <FiChevronLeft size={18} color="#333" />
-                                    </button>
-
-                                    {/* Right Arrow — outside image, simple positive offset */}
-                                    <button
-                                        onClick={(e) => { e.stopPropagation(); if (selectedImage < allImages.length - 1) { setSelectedImage(prev => prev + 1); setZoomLevel(1); } }}
-                                        style={{
-                                            position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)',
-                                            background: 'rgba(255,255,255,0.95)', border: '1px solid #ddd', borderRadius: '50%',
-                                            width: '32px', height: '32px', zIndex: 5,
-                                            cursor: selectedImage >= allImages.length - 1 ? 'not-allowed' : 'pointer',
-                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                            boxShadow: '0 2px 8px rgba(0,0,0,0.15)', transition: 'all 0.2s ease',
-                                            opacity: selectedImage >= allImages.length - 1 ? 0.25 : 1,
-                                        }}
-                                        onMouseEnter={(e) => { if (selectedImage < allImages.length - 1) { e.currentTarget.style.background = '#fff'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.25)'; } }}
-                                        onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.95)'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)'; }}
-                                    >
-                                        <FiChevronRight size={18} color="#333" />
-                                    </button>
-
-                                    {/* Actual image — square gray box centered */}
-                                    <div
-                                        style={{
-                                            height: '100%', aspectRatio: '1 / 1',
-                                            background: '#f5f5f5', display: 'flex',
-                                            alignItems: 'center', justifyContent: 'center',
-                                            cursor: 'pointer', position: 'relative',
-                                            overflow: 'hidden',
-                                        }}
-                                        onClick={() => setIsFullscreen(true)}
-                                    >
-                                        <img
-                                            src={allImages[selectedImage] || allImages[0]}
-                                            alt={product.name}
+                                        {/* Image Thumbnails */}
+                                        <div
+                                            ref={colorSwatchRef}
                                             style={{
-                                                width: '100%', height: '100%',
-                                                objectFit: 'cover', transition: 'transform 0.3s ease',
+                                                display: 'flex', flexDirection: 'column', gap: '8px',
+                                                overflow: 'hidden', maxHeight: '580px', flex: 1,
                                             }}
-                                            onError={(e) => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/600x600/f3f4f6/9ca3af?text=No+Image'; }}
-                                        />
-
-                                        {/* Zoom Indicator */}
-                                        <div style={{
-                                            position: 'absolute', bottom: '12px', right: '12px',
-                                            background: '#0B4222', borderRadius: '50%',
-                                            padding: '8px', color: '#fff', opacity: 0,
-                                            transition: 'opacity 0.3s ease',
-                                        }} className="zoom-indicator">
-                                            <FiZoomIn size={18} />
+                                            className="no-scrollbar"
+                                        >
+                                            {allImages.map((img: string, idx: number) => (
+                                                <button
+                                                    key={idx}
+                                                    onClick={() => handleImageSelect(idx)}
+                                                    style={{
+                                                        width: '75px', height: '75px', flexShrink: 0,
+                                                        border: selectedImage === idx
+                                                            ? '2px solid #0B4222'
+                                                            : '2px solid #e0e0e0',
+                                                        borderRadius: '6px',
+                                                        cursor: 'pointer',
+                                                        transition: 'all 0.2s ease',
+                                                        overflow: 'hidden',
+                                                        padding: 0, background: '#f5f5f5',
+                                                        boxShadow: selectedImage === idx ? '0 0 0 2px rgba(11,66,34,0.2)' : 'none',
+                                                    }}
+                                                >
+                                                    <img src={img} alt={`Product ${idx + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                </button>
+                                            ))}
                                         </div>
 
-                                        {/* Discount Badge */}
-                                        {product.discount > 0 && (
-                                            <div className="discount-badge" style={{
-                                                position: 'absolute', top: '12px', left: '12px',
-                                                background: '#0B4222', color: '#fff', fontSize: '11px',
-                                                fontWeight: 700, padding: '4px 10px', borderRadius: '9999px',
-                                                zIndex: 2, opacity: 0, transition: 'opacity 0.3s ease'
-                                            }}>
-                                                -{product.discount}% Off
-                                            </div>
-                                        )}
+                                        {/* Up & Down Arrows */}
+                                        <div style={{ display: 'flex', gap: '4px' }}>
+                                            <button onClick={() => scrollList(colorSwatchRef, 'up')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                <FiChevronUp size={18} />
+                                            </button>
+                                            <button onClick={() => scrollList(colorSwatchRef, 'down')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                <FiChevronDown size={18} />
+                                            </button>
+                                        </div>
+                                    </div>
 
-                                        {/* Low Stock Badge */}
-                                        {product.stock <= 5 && product.stock > 0 && (
+                                    {/* Image Wrapper — fills remaining flex space */}
+                                    <div className="pd-image-wrapper" style={{
+                                        position: 'relative', flex: 1,
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        padding: '8px',
+                                    }}>
+                                        {/* Left Arrow — outside image, simple negative offset */}
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); if (selectedImage > 0) { setSelectedImage(prev => prev - 1); setZoomLevel(1); } }}
+                                            style={{
+                                                position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)',
+                                                background: 'rgba(255,255,255,0.95)', border: '1px solid #ddd', borderRadius: '50%',
+                                                width: '32px', height: '32px', zIndex: 5,
+                                                cursor: selectedImage === 0 ? 'not-allowed' : 'pointer',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                boxShadow: '0 2px 8px rgba(0,0,0,0.15)', transition: 'all 0.2s ease',
+                                                opacity: selectedImage === 0 ? 0.25 : 1,
+                                            }}
+                                            onMouseEnter={(e) => { if (selectedImage > 0) { e.currentTarget.style.background = '#fff'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.25)'; } }}
+                                            onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.95)'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)'; }}
+                                        >
+                                            <FiChevronLeft size={18} color="#333" />
+                                        </button>
+
+                                        {/* Right Arrow — outside image, simple positive offset */}
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); if (selectedImage < allImages.length - 1) { setSelectedImage(prev => prev + 1); setZoomLevel(1); } }}
+                                            style={{
+                                                position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)',
+                                                background: 'rgba(255,255,255,0.95)', border: '1px solid #ddd', borderRadius: '50%',
+                                                width: '32px', height: '32px', zIndex: 5,
+                                                cursor: selectedImage >= allImages.length - 1 ? 'not-allowed' : 'pointer',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                boxShadow: '0 2px 8px rgba(0,0,0,0.15)', transition: 'all 0.2s ease',
+                                                opacity: selectedImage >= allImages.length - 1 ? 0.25 : 1,
+                                            }}
+                                            onMouseEnter={(e) => { if (selectedImage < allImages.length - 1) { e.currentTarget.style.background = '#fff'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.25)'; } }}
+                                            onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.95)'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)'; }}
+                                        >
+                                            <FiChevronRight size={18} color="#333" />
+                                        </button>
+
+                                        {/* Actual image — square gray box centered */}
+                                        <div
+                                            style={{
+                                                height: '100%', aspectRatio: '1 / 1',
+                                                background: '#f5f5f5', display: 'flex',
+                                                alignItems: 'center', justifyContent: 'center',
+                                                cursor: 'pointer', position: 'relative',
+                                                overflow: 'hidden',
+                                            }}
+                                            onClick={() => setIsFullscreen(true)}
+                                        >
+                                            <img
+                                                src={allImages[selectedImage] || allImages[0]}
+                                                alt={product.name}
+                                                style={{
+                                                    width: '100%', height: '100%',
+                                                    objectFit: 'cover', transition: 'transform 0.3s ease',
+                                                }}
+                                                onError={(e) => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/600x600/f3f4f6/9ca3af?text=No+Image'; }}
+                                            />
+
+                                            {/* Zoom Indicator */}
                                             <div style={{
-                                                position: 'absolute', top: '12px', right: '12px',
-                                                background: '#f59e0b', color: '#fff', fontSize: '11px',
-                                                fontWeight: 700, padding: '4px 10px', borderRadius: '9999px',
-                                                zIndex: 2
-                                            }} className="animate-pulse">
-                                                Only {product.stock} left!
+                                                position: 'absolute', bottom: '12px', right: '12px',
+                                                background: '#0B4222', borderRadius: '50%',
+                                                padding: '8px', color: '#fff', opacity: 0,
+                                                transition: 'opacity 0.3s ease',
+                                            }} className="zoom-indicator">
+                                                <FiZoomIn size={18} />
                                             </div>
-                                        )}
-                                    </div>
-                                </div>
 
-                                {/* Size Swatches Column (RIGHT of image) */}
-                                {sizeList.length > 0 && (
-                                <div className="pd-size-col" style={{
-                                    width: 'clamp(44px, 5vw, 56px)', display: 'flex', flexDirection: 'column',
-                                    alignItems: 'center', padding: '8px 0',
-                                    flexShrink: 0, gap: '4px',
-                                }}>
-                                    <span style={{ fontSize: '11px', fontWeight: 400, color: '#555', textTransform: 'capitalize', letterSpacing: '0.5px' }}>Size</span>
-                                    <div ref={sizeSwatchRef} style={{
-                                        display: 'flex', flexDirection: 'column', gap: '8px',
-                                        overflow: 'hidden', maxHeight: '580px', flex: 1,
-                                    }} className="no-scrollbar">
-                                        {sizeList.map((size: string, idx: number) => {
-                                            const isAvailable = availableSizesForColor.includes(size);
-                                            const isSelected = selectedSize === size;
-                                            return (
-                                            <button
-                                                key={idx}
-                                                onClick={() => isAvailable && handleSizeSelect(size)}
-                                                title={!isAvailable ? `${size} — not available` : size}
-                                                style={{
-                                                    width: 'clamp(36px, 4vw, 48px)', height: 'clamp(36px, 4vw, 48px)', flexShrink: 0,
-                                                    background: isSelected ? '#0B4222' : !isAvailable ? '#f3f4f6' : '#fff',
-                                                    color: isSelected ? '#fff' : !isAvailable ? '#ccc' : '#333',
-                                                    border: isSelected ? '2px solid #0B4222' : !isAvailable ? '2px solid #e8e8e8' : '2px solid #e0e0e0',
-                                                    borderRadius: '6px',
-                                                    cursor: !isAvailable ? 'not-allowed' : 'pointer',
-                                                    fontWeight: 700, fontSize: '12px',
-                                                    transition: 'all 0.2s ease',
-                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                    boxShadow: isSelected ? '0 0 0 2px rgba(11,66,34,0.2)' : 'none',
-                                                    opacity: !isAvailable ? 0.5 : 1,
-                                                    textDecoration: !isAvailable ? 'line-through' : 'none',
-                                                }}
-                                            >
-                                                {size}
-                                            </button>
-                                            );
-                                        })}
-                                    </div>
-                                    <div style={{ display: 'flex', gap: '4px' }}>
-                                        <button onClick={() => scrollList(sizeSwatchRef, 'up')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FiChevronUp size={18} /></button>
-                                        <button onClick={() => scrollList(sizeSwatchRef, 'down')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FiChevronDown size={18} /></button>
-                                    </div>
-                                </div>
-                                )}
+                                            {/* Discount Badge */}
+                                            {product.discount > 0 && (
+                                                <div className="discount-badge" style={{
+                                                    position: 'absolute', top: '12px', left: '12px',
+                                                    background: '#0B4222', color: '#fff', fontSize: '11px',
+                                                    fontWeight: 700, padding: '4px 10px', borderRadius: '9999px',
+                                                    zIndex: 2, opacity: 0, transition: 'opacity 0.3s ease'
+                                                }}>
+                                                    -{product.discount}% Off
+                                                </div>
+                                            )}
 
-                                {/* Color Label Column (RIGHT of image) */}
-                                {colorSwatches.length > 0 && (
-                                <div className="pd-color-col" style={{
-                                    width: 'clamp(44px, 5vw, 56px)', display: 'flex', flexDirection: 'column',
-                                    alignItems: 'center', padding: '8px 0',
-                                    flexShrink: 0, gap: '4px',
-                                }}>
-                                    <span style={{ fontSize: '11px', fontWeight: 400, color: '#555', textTransform: 'capitalize', letterSpacing: '0.5px' }}>Color</span>
-                                    <div ref={colorSwatchRef2} style={{
-                                        display: 'flex', flexDirection: 'column', gap: '8px',
-                                        overflow: 'hidden', maxHeight: '580px', flex: 1,
-                                    }} className="no-scrollbar">
-                                        {colorSwatches.map((color: any, idx: number) => {
-                                            const isAvailable = availableColorsForSize.includes(color.name);
-                                            const isSelected = selectedColor === color.name;
-                                            return (
-                                            <button
-                                                key={idx}
-                                                onClick={() => handleColorSelect(color.name)}
-                                                title={color.name}
-                                                style={{
-                                                    width: 'clamp(36px, 4vw, 48px)', height: 'clamp(36px, 4vw, 48px)', flexShrink: 0,
-                                                    background: getColorHex(color.hex || color.name),
-                                                    border: isSelected
-                                                        ? '3px solid #0B4222'
-                                                        : !isAvailable ? '2px solid #ccc' : '2px solid #e0e0e0',
-                                                    borderRadius: '6px',
-                                                    cursor: 'pointer',
-                                                    transition: 'all 0.2s ease',
-                                                    boxShadow: isSelected
-                                                        ? '0 0 0 2px rgba(11,66,34,0.2)'
-                                                        : 'none',
-                                                    opacity: !isAvailable ? 0.7 : 1,
-                                                    position: 'relative',
-                                                    overflow: 'hidden',
-                                                    padding: 0,
-                                                }}
-                                            >
-                                                {/* Diagonal cross for unavailable colors */}
-                                                {!isAvailable && (
-                                                    <div style={{
-                                                        position: 'absolute', inset: 0,
-                                                        background: 'linear-gradient(to top right, transparent calc(50% - 1px), rgba(180,180,180,0.7) calc(50% - 1px), rgba(180,180,180,0.7) calc(50% + 1px), transparent calc(50% + 1px))',
-                                                        pointerEvents: 'none',
-                                                        borderRadius: '4px',
-                                                    }} />
-                                                )}
-                                            </button>
-                                            );
-                                        })}
+                                            {/* Low Stock Badge */}
+                                            {product.stock <= 5 && product.stock > 0 && (
+                                                <div style={{
+                                                    position: 'absolute', top: '12px', right: '12px',
+                                                    background: '#f59e0b', color: '#fff', fontSize: '11px',
+                                                    fontWeight: 700, padding: '4px 10px', borderRadius: '9999px',
+                                                    zIndex: 2
+                                                }} className="animate-pulse">
+                                                    Only {product.stock} left!
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
-                                    <div style={{ display: 'flex', gap: '4px' }}>
-                                        <button onClick={() => scrollList(colorSwatchRef2, 'up')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FiChevronUp size={18} /></button>
-                                        <button onClick={() => scrollList(colorSwatchRef2, 'down')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FiChevronDown size={18} /></button>
-                                    </div>
-                                </div>
-                                )}
+
+                                    {/* Size Swatches Column (RIGHT of image) */}
+                                    {sizeList.length > 0 && (
+                                        <div className="pd-size-col" style={{
+                                            width: 'clamp(44px, 5vw, 56px)', display: 'flex', flexDirection: 'column',
+                                            alignItems: 'center', padding: '8px 0',
+                                            flexShrink: 0, gap: '4px',
+                                        }}>
+                                            <span style={{ fontSize: '11px', fontWeight: 400, color: '#555', textTransform: 'capitalize', letterSpacing: '0.5px' }}>Size</span>
+                                            <div ref={sizeSwatchRef} style={{
+                                                display: 'flex', flexDirection: 'column', gap: '8px',
+                                                overflow: 'hidden', maxHeight: '580px', flex: 1,
+                                            }} className="no-scrollbar">
+                                                {sizeList.map((size: string, idx: number) => {
+                                                    const isAvailable = availableSizesForColor.includes(size);
+                                                    const isSelected = selectedSize === size;
+                                                    return (
+                                                        <button
+                                                            key={idx}
+                                                            onClick={() => isAvailable && handleSizeSelect(size)}
+                                                            title={!isAvailable ? `${size} — not available` : size}
+                                                            style={{
+                                                                width: 'clamp(36px, 4vw, 48px)', height: 'clamp(36px, 4vw, 48px)', flexShrink: 0,
+                                                                background: isSelected ? '#0B4222' : !isAvailable ? '#f3f4f6' : '#fff',
+                                                                color: isSelected ? '#fff' : !isAvailable ? '#ccc' : '#333',
+                                                                border: isSelected ? '2px solid #0B4222' : !isAvailable ? '2px solid #e8e8e8' : '2px solid #e0e0e0',
+                                                                borderRadius: '6px',
+                                                                cursor: !isAvailable ? 'not-allowed' : 'pointer',
+                                                                fontWeight: 700, fontSize: '12px',
+                                                                transition: 'all 0.2s ease',
+                                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                                boxShadow: isSelected ? '0 0 0 2px rgba(11,66,34,0.2)' : 'none',
+                                                                opacity: !isAvailable ? 0.5 : 1,
+                                                                textDecoration: !isAvailable ? 'line-through' : 'none',
+                                                            }}
+                                                        >
+                                                            {size}
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                            <div style={{ display: 'flex', gap: '4px' }}>
+                                                <button onClick={() => scrollList(sizeSwatchRef, 'up')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FiChevronUp size={18} /></button>
+                                                <button onClick={() => scrollList(sizeSwatchRef, 'down')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FiChevronDown size={18} /></button>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Color Label Column (RIGHT of image) */}
+                                    {colorSwatches.length > 0 && (
+                                        <div className="pd-color-col" style={{
+                                            width: 'clamp(44px, 5vw, 56px)', display: 'flex', flexDirection: 'column',
+                                            alignItems: 'center', padding: '8px 0',
+                                            flexShrink: 0, gap: '4px',
+                                        }}>
+                                            <span style={{ fontSize: '11px', fontWeight: 400, color: '#555', textTransform: 'capitalize', letterSpacing: '0.5px' }}>Color</span>
+                                            <div ref={colorSwatchRef2} style={{
+                                                display: 'flex', flexDirection: 'column', gap: '8px',
+                                                overflow: 'hidden', maxHeight: '580px', flex: 1,
+                                            }} className="no-scrollbar">
+                                                {colorSwatches.map((color: any, idx: number) => {
+                                                    const isAvailable = availableColorsForSize.includes(color.name);
+                                                    const isSelected = selectedColor === color.name;
+                                                    return (
+                                                        <button
+                                                            key={idx}
+                                                            onClick={() => handleColorSelect(color.name)}
+                                                            title={color.name}
+                                                            style={{
+                                                                width: 'clamp(36px, 4vw, 48px)', height: 'clamp(36px, 4vw, 48px)', flexShrink: 0,
+                                                                background: getColorHex(color.hex || color.name),
+                                                                border: isSelected
+                                                                    ? '3px solid #0B4222'
+                                                                    : !isAvailable ? '2px solid #ccc' : '2px solid #e0e0e0',
+                                                                borderRadius: '6px',
+                                                                cursor: 'pointer',
+                                                                transition: 'all 0.2s ease',
+                                                                boxShadow: isSelected
+                                                                    ? '0 0 0 2px rgba(11,66,34,0.2)'
+                                                                    : 'none',
+                                                                opacity: !isAvailable ? 0.7 : 1,
+                                                                position: 'relative',
+                                                                overflow: 'hidden',
+                                                                padding: 0,
+                                                            }}
+                                                        >
+                                                            {/* Diagonal cross for unavailable colors */}
+                                                            {!isAvailable && (
+                                                                <div style={{
+                                                                    position: 'absolute', inset: 0,
+                                                                    background: 'linear-gradient(to top right, transparent calc(50% - 1px), rgba(180,180,180,0.7) calc(50% - 1px), rgba(180,180,180,0.7) calc(50% + 1px), transparent calc(50% + 1px))',
+                                                                    pointerEvents: 'none',
+                                                                    borderRadius: '4px',
+                                                                }} />
+                                                            )}
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                            <div style={{ display: 'flex', gap: '4px' }}>
+                                                <button onClick={() => scrollList(colorSwatchRef2, 'up')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FiChevronUp size={18} /></button>
+                                                <button onClick={() => scrollList(colorSwatchRef2, 'down')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FiChevronDown size={18} /></button>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>{/* end image area row */}
                                 {/* ═══ ACTION BAR at bottom of left section ═══ */}
                                 <div className="pd-action-bar" style={{
