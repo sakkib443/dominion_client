@@ -26,7 +26,7 @@ const menuItems = [
     ]},
     { name: 'Orders',    href: '/dashboard/admin/orders',    icon: FiShoppingCart,  submenu: null },
     { name: 'Inquiries', href: '/dashboard/admin/inquiries', icon: FiMessageSquare, submenu: null },
-    { name: 'Customers', href: '/dashboard/admin/customers', icon: FiUsers,         submenu: null },
+    { name: 'Users',     href: '/dashboard/admin/customers', icon: FiUsers,         submenu: null },
     { name: 'Design',    href: '/dashboard/admin/site-content', icon: FiLayout,   submenu: [
         { name: 'Site Content', href: '/dashboard/admin/site-content' },
     ]},
