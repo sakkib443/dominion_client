@@ -410,6 +410,7 @@ const ProductFormInner = () => {
                                     <span key={i} className="flex items-center gap-2 bg-white border border-gray-200 rounded-lg px-3 py-1.5 text-sm font-semibold">
                                         <span className="w-5 h-5 rounded" style={{ background: formData.colorHex?.[i] || '#ccc', border: '1px solid #ddd' }} />
                                         {c}
+                                        <span className="text-[10px] text-gray-400 font-mono">{formData.colorHex?.[i]?.toUpperCase() || ''}</span>
                                         <button type="button" onClick={() => {
                                             setFormData((prev: any) => ({
                                                 ...prev,
@@ -420,14 +421,30 @@ const ProductFormInner = () => {
                                     </span>
                                 ))}
                             </div>
-                            <div className="flex gap-2 items-center">
-                                <input type="color" id="varColorHex" defaultValue="#000000" className="w-10 h-10 rounded-lg border border-gray-200 cursor-pointer p-0.5 shrink-0" />
-                                <input type="text" id="varColorName" placeholder="Color নাম (e.g. Sky Blue)" className="flex-1 px-4 py-2.5 bg-white border border-gray-200 rounded-md text-sm outline-none focus:border-[#0B4222]"
+                            <div className="flex gap-2 items-center flex-wrap">
+                                <input type="color" id="varColorHex" defaultValue="#000000" className="w-10 h-10 rounded-lg border border-gray-200 cursor-pointer p-0.5 shrink-0"
+                                    onChange={(e) => {
+                                        const hexInput = document.getElementById('varColorHexText') as HTMLInputElement;
+                                        if (hexInput) hexInput.value = e.target.value.toUpperCase();
+                                    }}
+                                />
+                                <input type="text" id="varColorHexText" defaultValue="#000000" placeholder="#000000" className="w-[100px] px-3 py-2.5 bg-white border border-gray-200 rounded-md text-sm font-mono outline-none focus:border-[#0B4222] shrink-0 uppercase tracking-wide"
+                                    onChange={(e) => {
+                                        let val = e.target.value;
+                                        if (!val.startsWith('#')) val = '#' + val;
+                                        if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
+                                            const colorPicker = document.getElementById('varColorHex') as HTMLInputElement;
+                                            if (colorPicker) colorPicker.value = val;
+                                        }
+                                    }}
+                                />
+                                <input type="text" id="varColorName" placeholder="Color নাম (e.g. Sky Blue)" className="flex-1 min-w-[150px] px-4 py-2.5 bg-white border border-gray-200 rounded-md text-sm outline-none focus:border-[#0B4222]"
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter') {
                                             e.preventDefault();
                                             const nameEl = document.getElementById('varColorName') as HTMLInputElement;
                                             const hexEl = document.getElementById('varColorHex') as HTMLInputElement;
+                                            const hexTextEl = document.getElementById('varColorHexText') as HTMLInputElement;
                                             const name = nameEl.value.trim();
                                             if (!name) return;
                                             setFormData((prev: any) => ({
@@ -436,12 +453,15 @@ const ProductFormInner = () => {
                                                 colorHex: [...prev.colorHex, hexEl.value],
                                             }));
                                             nameEl.value = '';
+                                            hexEl.value = '#000000';
+                                            if (hexTextEl) hexTextEl.value = '#000000';
                                         }
                                     }}
                                 />
                                 <button type="button" onClick={() => {
                                     const nameEl = document.getElementById('varColorName') as HTMLInputElement;
                                     const hexEl = document.getElementById('varColorHex') as HTMLInputElement;
+                                    const hexTextEl = document.getElementById('varColorHexText') as HTMLInputElement;
                                     const name = nameEl.value.trim();
                                     if (!name) return;
                                     setFormData((prev: any) => ({
@@ -450,6 +470,8 @@ const ProductFormInner = () => {
                                         colorHex: [...prev.colorHex, hexEl.value],
                                     }));
                                     nameEl.value = '';
+                                    hexEl.value = '#000000';
+                                    if (hexTextEl) hexTextEl.value = '#000000';
                                 }} className="px-4 py-2.5 bg-[#0B4222] text-white rounded-md text-sm font-bold hover:bg-[#093519] shrink-0">+ Add</button>
                             </div>
                         </div>
