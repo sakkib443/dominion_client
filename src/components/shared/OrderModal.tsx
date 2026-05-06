@@ -173,7 +173,7 @@ const OrderModal: React.FC<OrderModalProps> = ({
     return (
         <div
             style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}
-            onClick={onClose}
+
         >
             <div
                 onClick={(e) => e.stopPropagation()}
