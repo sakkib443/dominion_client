@@ -925,7 +925,7 @@ export default function ProductDetailsPage() {
                                             alignItems: 'center', padding: '8px 0',
                                             flexShrink: 0, gap: '4px',
                                         }}>
-                                            <span style={{ fontSize: '11px', fontWeight: 400, color: '#555', textTransform: 'capitalize', letterSpacing: '0.5px' }}>{product.productType === 'multi-color' ? 'Multi Color' : 'Color'}</span>
+                                            <span style={{ fontSize: '10px', fontWeight: 400, color: '#555', textTransform: 'capitalize', letterSpacing: '0', whiteSpace: 'nowrap' }}>{product.productType === 'multi-color' ? 'Multicolor' : 'Color'}</span>
                                             <div ref={colorSwatchRef2} style={{
                                                 display: 'flex', flexDirection: 'column', gap: '8px',
                                                 overflow: 'hidden', maxHeight: '580px', flex: 1,
