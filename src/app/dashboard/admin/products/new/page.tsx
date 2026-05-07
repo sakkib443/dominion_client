@@ -135,6 +135,51 @@ const ProductFormInner = () => {
         }
     }, [formData.price, formData.originalPrice]);
 
+    // Auto-sync variants when colors/sizes change (works in edit mode too)
+    // Adds missing combinations automatically; never removes existing user-edited variants.
+    useEffect(() => {
+        if (formData.productType !== 'variable' && formData.productType !== 'multi-color') return;
+        setFormData((prev: any) => {
+            const existing = prev.variants || [];
+            const colors = prev.colors || [];
+            const sizes = prev.sizes || [];
+            const colorHex = prev.colorHex || [];
+            const defPrice = prev.price || 0;
+            const defOrig = prev.originalPrice || 0;
+            const defDesc = prev.description || '';
+            const newVars: any[] = [];
+
+            const make = (color: string, ci: number, size: string) => ({
+                color, colorHex: ci >= 0 ? (colorHex[ci] || '') : '', size,
+                description: defDesc, price: defPrice, originalPrice: defOrig,
+                stock: 0, sku: '', images: [], note: '',
+            });
+
+            if (prev.productType === 'variable') {
+                if (colors.length > 0 && sizes.length > 0) {
+                    colors.forEach((c: string, ci: number) => sizes.forEach((s: string) => {
+                        if (!existing.some((v: any) => v.color === c && v.size === s)) newVars.push(make(c, ci, s));
+                    }));
+                } else if (colors.length > 0) {
+                    colors.forEach((c: string, ci: number) => {
+                        if (!existing.some((v: any) => v.color === c && !v.size)) newVars.push(make(c, ci, ''));
+                    });
+                } else if (sizes.length > 0) {
+                    sizes.forEach((s: string) => {
+                        if (!existing.some((v: any) => !v.color && v.size === s)) newVars.push(make('', -1, s));
+                    });
+                }
+            } else if (prev.productType === 'multi-color' && colors.length > 0) {
+                colors.forEach((c: string, ci: number) => {
+                    if (!existing.some((v: any) => v.color === c)) newVars.push(make(c, ci, ''));
+                });
+            }
+
+            if (newVars.length === 0) return prev;
+            return { ...prev, variants: [...existing, ...newVars] };
+        });
+    }, [formData.colors, formData.sizes, formData.colorHex, formData.productType]);
+
     // Auto-generate slug
     useEffect(() => {
         if (!isEditing && formData.name) {
@@ -521,29 +566,36 @@ const ProductFormInner = () => {
                         {formData.productType === 'variable' && (
                         <div className="flex gap-3 flex-wrap">
                             <button type="button" disabled={formData.colors.length === 0 && formData.sizes.length === 0} onClick={() => {
-                                const existing = formData.variants || [];
-                                const newVars: any[] = [];
-                                const defPrice = formData.price || 0;
-                                const defOrig = formData.originalPrice || 0;
-                                if (formData.colors.length > 0 && formData.sizes.length > 0) {
-                                    formData.colors.forEach((c: string, ci: number) => {
-                                        formData.sizes.forEach((s: string) => {
-                                            if (existing.some((v: any) => v.color === c && v.size === s)) return;
-                                            newVars.push({ color: c, colorHex: formData.colorHex[ci] || '', size: s, description: formData.description || '', price: defPrice, originalPrice: defOrig, stock: 0, sku: '', images: [], note: '' });
+                                setFormData((prev: any) => {
+                                    const existing = prev.variants || [];
+                                    const colors = prev.colors || [];
+                                    const sizes = prev.sizes || [];
+                                    const colorHex = prev.colorHex || [];
+                                    const defPrice = prev.price || 0;
+                                    const defOrig = prev.originalPrice || 0;
+                                    const defDesc = prev.description || '';
+                                    const newVars: any[] = [];
+                                    const make = (c: string, ci: number, s: string) => ({
+                                        color: c, colorHex: ci >= 0 ? (colorHex[ci] || '') : '', size: s,
+                                        description: defDesc, price: defPrice, originalPrice: defOrig,
+                                        stock: 0, sku: '', images: [], note: '',
+                                    });
+                                    if (colors.length > 0 && sizes.length > 0) {
+                                        colors.forEach((c: string, ci: number) => sizes.forEach((s: string) => {
+                                            if (!existing.some((v: any) => v.color === c && v.size === s)) newVars.push(make(c, ci, s));
+                                        }));
+                                    } else if (colors.length > 0) {
+                                        colors.forEach((c: string, ci: number) => {
+                                            if (!existing.some((v: any) => v.color === c && !v.size)) newVars.push(make(c, ci, ''));
                                         });
-                                    });
-                                } else if (formData.colors.length > 0) {
-                                    formData.colors.forEach((c: string, ci: number) => {
-                                        if (existing.some((v: any) => v.color === c && !v.size)) return;
-                                        newVars.push({ color: c, colorHex: formData.colorHex[ci] || '', size: '', description: formData.description || '', price: defPrice, originalPrice: defOrig, stock: 0, sku: '', images: [], note: '' });
-                                    });
-                                } else if (formData.sizes.length > 0) {
-                                    formData.sizes.forEach((s: string) => {
-                                        if (existing.some((v: any) => v.size === s && !v.color)) return;
-                                        newVars.push({ color: '', colorHex: '', size: s, description: formData.description || '', price: defPrice, originalPrice: defOrig, stock: 0, sku: '', images: [], note: '' });
-                                    });
-                                }
-                                if (newVars.length > 0) setFormData((prev: any) => ({ ...prev, variants: [...(prev.variants || []), ...newVars] }));
+                                    } else if (sizes.length > 0) {
+                                        sizes.forEach((s: string) => {
+                                            if (!existing.some((v: any) => !v.color && v.size === s)) newVars.push(make('', -1, s));
+                                        });
+                                    }
+                                    if (newVars.length === 0) return prev;
+                                    return { ...prev, variants: [...existing, ...newVars] };
+                                });
                             }} className={`flex items-center gap-2 px-5 py-2.5 rounded-md text-sm font-bold transition-all ${
                                 (formData.colors.length === 0 && formData.sizes.length === 0) ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-[#0B4222] text-white hover:bg-[#093519] shadow-md'
                             }`}>
