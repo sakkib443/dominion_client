@@ -10,6 +10,7 @@ interface Product {
     slug: string;
     name: string;
     price: number;
+    originalPrice?: number;
     discount: number;
     thumbnail: string;
     images: string[];
@@ -183,7 +184,7 @@ export default function ImageSearchPage() {
                                         alt={product.name}
                                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                     />
-                                    {product.originalPrice > product.price && (
+                                    {product.originalPrice && product.originalPrice > product.price && (
                                         <div className="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-0.5 rounded-full font-bold">
                                             -{Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100 * 10) / 10}%
                                         </div>
