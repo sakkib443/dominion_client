@@ -88,12 +88,8 @@ const ProductFormInner = () => {
         specifications: [], highlights: [],
         // Physical
         weight: 0,
-        dimensions: { length: 0, width: 0, height: 0 },
         // Content Tabs
         deliveryInfo: '', paymentInfo: '', termsInfo: '',
-        // Shipping & Warranty
-        shippingConfig: { freeShipping: false, shippingCost: 0, estimatedDays: 3 },
-        warranty: { hasWarranty: false, duration: 0, durationUnit: 'months', type: 'manufacturer' },
         // SEO
         metaTitle: '', metaDescription: '', metaKeywords: [],
     });
@@ -107,9 +103,6 @@ const ProductFormInner = () => {
                 ...prod,
                 category: prod.category?._id || prod.category || '',
                 subcategory: prod.subcategory?._id || prod.subcategory || '',
-                warranty: prod.warranty || formData.warranty,
-                shippingConfig: prod.shippingConfig || formData.shippingConfig,
-                dimensions: prod.dimensions || formData.dimensions,
                 specifications: prod.specifications || [],
                 highlights: prod.highlights || [],
                 tags: prod.tags || [],
@@ -889,61 +882,6 @@ const ProductFormInner = () => {
                         </div>
                     </div>
 
-                    {/* ── Shipping & Warranty ───────────────────────── */}
-                    <div className="bg-white p-6 rounded-md border border-gray-200 shadow-sm space-y-4">
-                        <h3 className="font-bold text-gray-800 flex items-center gap-2"><FiShield className="text-emerald-500" /> Shipping & Warranty</h3>
-
-                        <div className="space-y-3 p-4 bg-gray-50 rounded-md border border-gray-100">
-                            <label className="flex items-center gap-3 cursor-pointer">
-                                <input type="checkbox" name="shippingConfig.freeShipping" className="w-4 h-4 accent-emerald-500" checked={formData.shippingConfig.freeShipping} onChange={handleChange} />
-                                <span className="text-sm font-bold text-gray-700">Free Shipping</span>
-                            </label>
-                            {!formData.shippingConfig.freeShipping && (
-                                <div className="grid grid-cols-2 gap-3 pt-1">
-                                    <div className="space-y-1">
-                                        <label className="text-[10px] font-bold text-gray-400">Shipping Cost (৳)</label>
-                                        <input type="number" name="shippingConfig.shippingCost" placeholder="0" className="w-full px-3 py-2 bg-white border border-gray-200 rounded-md text-sm outline-none focus:border-emerald-300" value={formData.shippingConfig.shippingCost} onChange={handleChange} />
-                                    </div>
-                                    <div className="space-y-1">
-                                        <label className="text-[10px] font-bold text-gray-400">Est. Days</label>
-                                        <input type="number" name="shippingConfig.estimatedDays" placeholder="3" className="w-full px-3 py-2 bg-white border border-gray-200 rounded-md text-sm outline-none focus:border-emerald-300" value={formData.shippingConfig.estimatedDays} onChange={handleChange} />
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-
-                        <div className="space-y-3 p-4 bg-gray-50 rounded-md border border-gray-100">
-                            <label className="flex items-center gap-3 cursor-pointer">
-                                <input type="checkbox" name="warranty.hasWarranty" className="w-4 h-4 accent-[#0B4222]" checked={formData.warranty.hasWarranty} onChange={handleChange} />
-                                <span className="text-sm font-bold text-gray-700">Has Warranty</span>
-                            </label>
-                            {formData.warranty.hasWarranty && (
-                                <div className="grid grid-cols-3 gap-2 pt-1">
-                                    <input type="number" name="warranty.duration" placeholder="12" className="px-3 py-2 bg-white border border-gray-200 rounded-md text-sm outline-none focus:border-blue-300" value={formData.warranty.duration} onChange={handleChange} />
-                                    <select name="warranty.durationUnit" className="px-3 py-2 bg-white border border-gray-200 rounded-md text-sm outline-none focus:border-blue-300" value={formData.warranty.durationUnit} onChange={handleChange}>
-                                        <option value="days">Days</option>
-                                        <option value="months">Months</option>
-                                        <option value="years">Years</option>
-                                    </select>
-                                    <select name="warranty.type" className="px-3 py-2 bg-white border border-gray-200 rounded-md text-sm outline-none focus:border-blue-300" value={formData.warranty.type} onChange={handleChange}>
-                                        <option value="manufacturer">Manufacturer</option>
-                                        <option value="seller">Seller</option>
-                                        <option value="brand">Brand</option>
-                                    </select>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Dimensions */}
-                        <div className="space-y-2 pt-2">
-                            <label className="text-xs font-bold text-gray-400 uppercase">Dimensions (cm)</label>
-                            <div className="grid grid-cols-3 gap-2">
-                                <input type="number" name="dimensions.length" placeholder="L" className="px-3 py-2 bg-white border border-gray-200 rounded-md text-sm outline-none focus:border-[#0B4222]" value={formData.dimensions.length} onChange={handleChange} />
-                                <input type="number" name="dimensions.width" placeholder="W" className="px-3 py-2 bg-white border border-gray-200 rounded-md text-sm outline-none focus:border-[#0B4222]" value={formData.dimensions.width} onChange={handleChange} />
-                                <input type="number" name="dimensions.height" placeholder="H" className="px-3 py-2 bg-white border border-gray-200 rounded-md text-sm outline-none focus:border-[#0B4222]" value={formData.dimensions.height} onChange={handleChange} />
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
