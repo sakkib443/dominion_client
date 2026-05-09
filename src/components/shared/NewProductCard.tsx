@@ -153,7 +153,7 @@ const NewProductCard: React.FC<NewProductCardProps> = ({ product }) => {
 
     const currentPrice = product.price;
     const oldPrice = product.mrp || product.originalPrice;
-    const discountPercent = oldPrice ? Math.round(((oldPrice - currentPrice) / oldPrice) * 100) : 0;
+    const discountPercent = oldPrice && oldPrice > currentPrice ? Math.round(((oldPrice - currentPrice) / oldPrice) * 100 * 10) / 10 : 0;
     const priceType = product.priceType || 'negotiable';
     const soldCount = product.sold || product.soldCount || product.totalSold || 0;
 

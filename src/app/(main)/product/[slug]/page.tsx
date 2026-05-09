@@ -326,6 +326,15 @@ export default function ProductDetailsPage() {
     // Display stock
     const displayStock = activeVariant ? activeVariant.stock : product.stock;
 
+    // Accurate discount % (with decimals, no .0 trailing)
+    const discountPercent = (() => {
+        const orig = activeVariant?.originalPrice || product.originalPrice || 0;
+        const price = activeVariant?.price ?? product.price ?? 0;
+        if (orig <= 0 || orig <= price) return 0;
+        const d = ((orig - price) / orig) * 100;
+        return Math.round(d * 10) / 10; // 1 decimal
+    })();
+
     // Build product details key-value pairs from product data
     const productDetails: { key: string; value: string }[] = [];
 
@@ -853,7 +862,7 @@ export default function ProductDetailsPage() {
                                                     fontWeight: 700, padding: '4px 10px', borderRadius: '9999px',
                                                     zIndex: 2, opacity: 0, transition: 'opacity 0.3s ease'
                                                 }}>
-                                                    -{product.discount}% Off
+                                                    -{discountPercent}% Off
                                                 </div>
                                             )}
 
@@ -1142,7 +1151,7 @@ export default function ProductDetailsPage() {
                                                     <span style={{
                                                         fontSize: '20px', fontWeight: 700, color: '#1a1a1a'
                                                     }}>
-                                                        {product.discount}% Off
+                                                        {discountPercent}% Off
                                                     </span>
                                                 )}
                                                 {product.priceType === 'fixed' && (
@@ -1171,7 +1180,7 @@ export default function ProductDetailsPage() {
 
                                         {product.description && (
                                             <div
-                                                style={{ fontSize: '13px', color: '#444', lineHeight: 1.7, textAlign: 'justify' }}
+                                                style={{ fontSize: '13px', color: '#444', lineHeight: 1.7, textAlign: 'left' }}
                                                 dangerouslySetInnerHTML={{ __html: product.description }}
                                             />
                                         )}
