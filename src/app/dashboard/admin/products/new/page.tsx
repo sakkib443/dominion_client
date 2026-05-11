@@ -4,8 +4,10 @@ import React, { useState, useEffect, Suspense, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 
-const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false, loading: () => <div className="h-[300px] bg-gray-50 border border-gray-200 rounded-md animate-pulse" /> });
-import 'react-quill-new/dist/quill.snow.css';
+const TipTapEditor = dynamic(
+    () => import('@/components/ui/TipTapEditor').then(m => ({ default: m.TipTapEditor })),
+    { ssr: false, loading: () => <div className="h-[300px] bg-gray-50 border border-gray-200 rounded-md animate-pulse" /> }
+);
 import Link from 'next/link';
 import { SingleImageUploader, MultipleImageUploader } from '@/components/ui/ImageUploader';
 import {
@@ -325,27 +327,11 @@ const ProductFormInner = () => {
                         <div className="space-y-2">
                             <label className="text-sm font-semibold text-gray-700">Product Description</label>
                             <div className="product-editor-wrapper">
-                                <ReactQuill
-                                    theme="snow"
+                                <TipTapEditor
                                     value={formData.description}
                                     onChange={(value: string) => setFormData((prev: any) => ({ ...prev, description: value }))}
                                     placeholder="Write detailed product description..."
-                                    modules={{
-                                        toolbar: [
-                                            [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-                                            [{ 'font': [] }],
-                                            [{ 'size': ['small', false, 'large', 'huge'] }],
-                                            ['bold', 'italic', 'underline', 'strike'],
-                                            [{ 'color': [] }, { 'background': [] }],
-                                            [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-                                            [{ 'indent': '-1' }, { 'indent': '+1' }],
-                                            [{ 'align': [] }],
-                                            ['link', 'image', 'video'],
-                                            ['blockquote', 'code-block'],
-                                            ['clean'],
-                                        ],
-                                    }}
-                                    style={{ minHeight: '300px' }}
+                                    minHeight={300}
                                 />
                             </div>
                         </div>
@@ -708,28 +694,12 @@ const ProductFormInner = () => {
                                             </button>
                                         </div>
                                         <div className="product-editor-wrapper">
-                                            <ReactQuill
-                                                theme="snow"
-                                                value={v.description || ''}
-                                                onChange={(val: string) => { const vars = [...formData.variants]; vars[i] = { ...vars[i], description: val }; setFormData((prev: any) => ({ ...prev, variants: vars })); }}
-                                                placeholder="Variant-specific description..."
-                                                modules={{
-                                                    toolbar: [
-                                                        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-                                                        [{ 'font': [] }],
-                                                        [{ 'size': ['small', false, 'large', 'huge'] }],
-                                                        ['bold', 'italic', 'underline', 'strike'],
-                                                        [{ 'color': [] }, { 'background': [] }],
-                                                        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-                                                        [{ 'indent': '-1' }, { 'indent': '+1' }],
-                                                        [{ 'align': [] }],
-                                                        ['link', 'image', 'video'],
-                                                        ['blockquote', 'code-block'],
-                                                        ['clean'],
-                                                    ],
-                                                }}
-                                                style={{ minHeight: '200px' }}
-                                            />
+                                        <TipTapEditor
+                                            value={v.description || ''}
+                                            onChange={(val: string) => { const vars = [...formData.variants]; vars[i] = { ...vars[i], description: val }; setFormData((prev: any) => ({ ...prev, variants: vars })); }}
+                                            placeholder="Variant-specific description..."
+                                            minHeight={200}
+                                        />
                                         </div>
                                         {v.description && v.description !== formData.description && (
                                             <p className="text-[10px] text-amber-600 font-medium">⚠ Custom description (different from main)</p>
@@ -780,19 +750,19 @@ const ProductFormInner = () => {
                             <div className="space-y-2">
                                 <label className="text-sm font-semibold text-gray-700 flex items-center gap-2"><FiTruck size={14} /> Delivery Information</label>
                                 <div className="product-editor-wrapper">
-                                    <ReactQuill theme="snow" value={formData.deliveryInfo} onChange={(v: string) => setFormData((prev: any) => ({ ...prev, deliveryInfo: v }))} placeholder="Enter delivery info..." modules={{ toolbar: [['bold', 'italic', 'underline'], [{ 'list': 'ordered' }, { 'list': 'bullet' }], ['link'], ['clean']] }} style={{ minHeight: '120px' }} />
+                                    <TipTapEditor value={formData.deliveryInfo} onChange={(v: string) => setFormData((prev: any) => ({ ...prev, deliveryInfo: v }))} placeholder="Enter delivery info..." minHeight={120} simple />
                                 </div>
                             </div>
                             <div className="space-y-2">
                                 <label className="text-sm font-semibold text-gray-700 flex items-center gap-2"><FiDollarSign size={14} /> Payment Methods</label>
                                 <div className="product-editor-wrapper">
-                                    <ReactQuill theme="snow" value={formData.paymentInfo} onChange={(v: string) => setFormData((prev: any) => ({ ...prev, paymentInfo: v }))} placeholder="Enter payment methods..." modules={{ toolbar: [['bold', 'italic', 'underline'], [{ 'list': 'ordered' }, { 'list': 'bullet' }], ['link'], ['clean']] }} style={{ minHeight: '120px' }} />
+                                    <TipTapEditor value={formData.paymentInfo} onChange={(v: string) => setFormData((prev: any) => ({ ...prev, paymentInfo: v }))} placeholder="Enter payment methods..." minHeight={120} simple />
                                 </div>
                             </div>
                             <div className="space-y-2">
                                 <label className="text-sm font-semibold text-gray-700 flex items-center gap-2"><FiShield size={14} /> Terms & Conditions</label>
                                 <div className="product-editor-wrapper">
-                                    <ReactQuill theme="snow" value={formData.termsInfo} onChange={(v: string) => setFormData((prev: any) => ({ ...prev, termsInfo: v }))} placeholder="Enter terms and conditions..." modules={{ toolbar: [['bold', 'italic', 'underline'], [{ 'list': 'ordered' }, { 'list': 'bullet' }], ['link'], ['clean']] }} style={{ minHeight: '120px' }} />
+                                    <TipTapEditor value={formData.termsInfo} onChange={(v: string) => setFormData((prev: any) => ({ ...prev, termsInfo: v }))} placeholder="Enter terms and conditions..." minHeight={120} simple />
                                 </div>
                             </div>
                         </div>
