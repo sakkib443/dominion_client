@@ -10,7 +10,7 @@ import TextAlign from '@tiptap/extension-text-align';
 import { TextStyle } from '@tiptap/extension-text-style';
 import { Color } from '@tiptap/extension-color';
 import { Highlight } from '@tiptap/extension-highlight';
-import { Table } from '@tiptap/extension-table';
+import { Table, TableView } from '@tiptap/extension-table';
 import { TableRow } from '@tiptap/extension-table-row';
 import { TableCell } from '@tiptap/extension-table-cell';
 import { TableHeader } from '@tiptap/extension-table-header';
@@ -89,6 +89,10 @@ export function TipTapEditor({
             attributes: {
                 style: `min-height:${minHeight}px; padding:14px 16px; outline:none; font-size:14px; color:#1a1a1a; line-height:1.7;`,
             },
+        },
+        // @ts-ignore - TableView needed for resizable columns
+        nodeViews: {
+            table: (node: any, view: any, getPos: any) => new TableView(node, 24),
         },
     });
 
@@ -184,18 +188,30 @@ export function TipTapEditor({
                     <Sep />
                 </>)}
 
-                {/* ── TABLE (only in full mode) ── */}
+                {/* ══ TABLE (only in full mode) ══ */}
                 {!simple && (<>
-                    <Btn onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()} title="Insert Table">⊞ Table</Btn>
-                    {editor.isActive('table') && (<>
+                    <Btn onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()} title="Insert Table (3×3)">⊞ Table</Btn>
+                    {editor.can().addColumnBefore() && (
                         <Btn onClick={() => editor.chain().focus().addColumnBefore().run()} title="Add Column Before">+Col←</Btn>
+                    )}
+                    {editor.can().addColumnAfter() && (
                         <Btn onClick={() => editor.chain().focus().addColumnAfter().run()} title="Add Column After">+Col→</Btn>
+                    )}
+                    {editor.can().deleteColumn() && (
                         <Btn onClick={() => editor.chain().focus().deleteColumn().run()} title="Delete Column">-Col</Btn>
+                    )}
+                    {editor.can().addRowBefore() && (
                         <Btn onClick={() => editor.chain().focus().addRowBefore().run()} title="Add Row Before">+Row↑</Btn>
+                    )}
+                    {editor.can().addRowAfter() && (
                         <Btn onClick={() => editor.chain().focus().addRowAfter().run()} title="Add Row After">+Row↓</Btn>
+                    )}
+                    {editor.can().deleteRow() && (
                         <Btn onClick={() => editor.chain().focus().deleteRow().run()} title="Delete Row">-Row</Btn>
+                    )}
+                    {editor.can().deleteTable() && (
                         <Btn onClick={() => editor.chain().focus().deleteTable().run()} title="Delete Table">🗑 Table</Btn>
-                    </>)}
+                    )}
                     <Sep />
                 </>)}
 

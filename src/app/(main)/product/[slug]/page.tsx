@@ -1202,6 +1202,7 @@ export default function ProductDetailsPage() {
 
                                         {product.description && (
                                             <div
+                                                className="product-desc"
                                                 style={{ fontSize: '13px', color: '#444', lineHeight: 1.7, textAlign: 'left' }}
                                                 dangerouslySetInnerHTML={{ __html: product.description }}
                                             />
@@ -1413,6 +1414,40 @@ export default function ProductDetailsPage() {
                 div:hover > .discount-badge {
                     opacity: 1 !important;
                 }
+
+                /* ═══ PRODUCT DESCRIPTION HTML CONTENT STYLES ═══ */
+                .product-desc table {
+                    border-collapse: collapse;
+                    width: 100%;
+                    margin: 12px 0;
+                    font-size: 13px;
+                }
+                .product-desc th,
+                .product-desc td {
+                    border: 1px solid #d1d5db;
+                    padding: 8px 12px;
+                    min-width: 80px;
+                    text-align: left;
+                    vertical-align: top;
+                }
+                .product-desc th {
+                    background: #f3f4f6;
+                    font-weight: 700;
+                }
+                .product-desc tr:nth-child(even) td {
+                    background: #fafafa;
+                }
+                .product-desc h1 { font-size: 20px; font-weight: 700; margin: 10px 0 6px; }
+                .product-desc h2 { font-size: 17px; font-weight: 700; margin: 9px 0 5px; }
+                .product-desc h3 { font-size: 14px; font-weight: 700; margin: 8px 0 4px; }
+                .product-desc p  { margin: 0 0 6px 0; }
+                .product-desc ul { padding-left: 20px; margin: 4px 0; }
+                .product-desc ol { padding-left: 20px; margin: 4px 0; }
+                .product-desc li { margin-bottom: 2px; }
+                .product-desc blockquote { border-left: 3px solid #0B4222; padding-left: 12px; color: #555; margin: 10px 0; }
+                .product-desc a { color: #0B4222; text-decoration: underline; }
+                .product-desc img { max-width: 100%; border-radius: 6px; }
+                .product-desc pre { background: #1e1e1e; color: #d4d4d4; padding: 12px 16px; border-radius: 6px; font-size: 12px; overflow-x: auto; }
 
                 /* ═══ MOBILE RESPONSIVE ═══ */
                 @media (max-width: 767px) {
