@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useRef, useState } from 'react';
-import { FiUploadCloud, FiX, FiImage } from 'react-icons/fi';
-import { useUploadImageMutation, useUploadImagesMutation } from '@/redux/api/uploadApi';
+import { FiUploadCloud, FiX, FiImage, FiFile } from 'react-icons/fi';
+import { useUploadImageMutation, useUploadImagesMutation, useUploadFileMutation } from '@/redux/api/uploadApi';
 
 /* ════════════════════════════════════════════
    SINGLE IMAGE UPLOADER
@@ -189,6 +189,107 @@ export function MultipleImageUploader({
 
             {error && <p style={{ fontSize: '11.5px', color: '#ef4444', margin: '4px 0 0', fontWeight: 500 }}>{error}</p>}
             <input ref={ref} type="file" accept="image/*" multiple style={{ display: 'none' }} onChange={e => { if (e.target.files) handleFiles(e.target.files); e.target.value = ''; }} />
+        </div>
+    );
+}
+
+
+/* ════════════════════════════════════════════
+   SINGLE FILE UPLOADER (image or PDF)
+   Usage:
+     <SingleFileUploader value={url} fileType={type} onChange={(url, type) => ...} label="Datasheet" />
+════════════════════════════════════════════ */
+export function SingleFileUploader({
+    label,
+    value,
+    fileType,
+    onChange,
+}: {
+    label: string;
+    value: string;
+    fileType?: 'image' | 'pdf';
+    onChange: (url: string, type: 'image' | 'pdf') => void;
+}) {
+    const [uploadFile, { isLoading }] = useUploadFileMutation();
+    const [error, setError] = useState('');
+    const ref = useRef<HTMLInputElement>(null);
+
+    const handleFile = async (file: File) => {
+        if (!file) return;
+        if (file.size > 20 * 1024 * 1024) { setError('File must be under 20MB'); return; }
+        setError('');
+        const fd = new FormData();
+        fd.append('file', file);
+        try {
+            const res = await uploadFile(fd).unwrap();
+            onChange(res.data.url, res.data.type);
+        } catch {
+            setError('Upload failed. Try again.');
+        }
+    };
+
+    const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        const file = e.dataTransfer.files?.[0];
+        if (file) handleFile(file);
+    };
+
+    const isPdf = fileType === 'pdf';
+
+    return (
+        <div>
+            <label style={{ fontSize: '12px', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '6px' }}>
+                {label}
+            </label>
+
+            <div
+                onClick={() => !isLoading && ref.current?.click()}
+                onDrop={handleDrop}
+                onDragOver={e => e.preventDefault()}
+                style={{
+                    border: `2px dashed ${error ? '#fca5a5' : value ? '#86efac' : '#d1d5db'}`,
+                    borderRadius: '10px', padding: '16px', textAlign: 'center',
+                    cursor: isLoading ? 'wait' : 'pointer',
+                    background: value ? '#f0faf4' : '#fafafa',
+                    transition: 'all 0.2s ease',
+                    minHeight: '90px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}
+            >
+                {isLoading ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
+                        <div style={{ width: '24px', height: '24px', border: '3px solid #e5e7eb', borderTopColor: '#0B4222', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+                        <span style={{ fontSize: '12px', color: '#6b7280' }}>Uploading...</span>
+                    </div>
+                ) : value ? (
+                    <div style={{ position: 'relative', display: 'inline-block', textAlign: 'center' }}>
+                        {isPdf ? (
+                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
+                                <FiFile size={32} color="#0B4222" />
+                                <span style={{ fontSize: '11px', color: '#0B4222', fontWeight: 600 }}>PDF Uploaded ✓</span>
+                                <a href={value} target="_blank" rel="noreferrer" onClick={e => e.stopPropagation()} style={{ fontSize: '11px', color: '#6b7280', textDecoration: 'underline' }}>View file</a>
+                            </div>
+                        ) : (
+                            <img src={value} alt="preview" style={{ maxHeight: '100px', maxWidth: '100%', borderRadius: '8px', objectFit: 'contain' }} />
+                        )}
+                        <button
+                            type="button"
+                            onClick={e => { e.stopPropagation(); onChange('', 'image'); }}
+                            style={{ position: 'absolute', top: '-8px', right: '-8px', width: '22px', height: '22px', borderRadius: '50%', background: '#ef4444', border: 'none', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                        >
+                            <FiX size={12} />
+                        </button>
+                    </div>
+                ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
+                        <FiUploadCloud size={26} color="#9ca3af" />
+                        <span style={{ fontSize: '12.5px', color: '#6b7280', fontWeight: 500 }}>Click or drag file here</span>
+                        <span style={{ fontSize: '11px', color: '#9ca3af' }}>Image or PDF — max 20MB</span>
+                    </div>
+                )}
+            </div>
+
+            {error && <p style={{ fontSize: '11.5px', color: '#ef4444', margin: '4px 0 0', fontWeight: 500 }}>{error}</p>}
+            <input ref={ref} type="file" accept="image/*,application/pdf" style={{ display: 'none' }} onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f); e.target.value = ''; }} />
         </div>
     );
 }

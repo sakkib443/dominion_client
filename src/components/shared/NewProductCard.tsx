@@ -34,7 +34,7 @@ interface Product {
     reviews?: number;
     categoryName?: string;
     warranty?: string;
-    priceType?: 'negotiable' | 'fixed';
+    priceType?: 'negotiable' | 'fixed' | 'none';
     sold?: number;
     soldCount?: number;
     totalSold?: number;
@@ -230,9 +230,11 @@ const NewProductCard: React.FC<NewProductCardProps> = ({ product }) => {
                             {discountPercent > 0 && (
                                 <span className='text-gray-900 font-medium'>{discountPercent}% Off</span>
                             )}
-                            <span className='text-gray-400 text-[11px]'>
-                                ({priceType === 'negotiable' ? 'price negotiable' : 'price fixed'})
-                            </span>
+                            {priceType !== 'none' && (
+                                <span className='text-gray-400 text-[11px]'>
+                                    ({priceType === 'negotiable' ? 'price negotiable' : 'price fixed'})
+                                </span>
+                            )}
                         </div>
                     </div>
 

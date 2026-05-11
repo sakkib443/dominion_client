@@ -330,7 +330,7 @@ const NewHomePage: React.FC = () => {
                                 reviews: product.reviewCount,
                                 warranty: product.tagline || product.brand || 'Lower price than others but quality higher',
                                 categoryName: product.category?.name || '',
-                                priceType: product.priceType || 'negotiable',
+                                priceType: product.priceType || 'none',
                                 sold: product.totalSold || 0,
                                 likeCount: product.likeCount || 0,
                                 commentCount: product.commentCount || 0,

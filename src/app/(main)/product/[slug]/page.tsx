@@ -606,7 +606,7 @@ export default function ProductDetailsPage() {
                                     animationDelay: delay,
                                     position: 'absolute', top: 0, left: 0, width: '100%',
                                 });
-                                const text = product.shortDescription || 'Warranty: Service Warranty Available';
+                                const text = product.tagline || product.shortDescription || product.brand || 'Lower price than others but quality higher';
                                 return (
                                     <div style={{
                                         height: '18px', overflow: 'hidden', position: 'relative',
@@ -709,6 +709,28 @@ export default function ProductDetailsPage() {
                                     <FiDownload size={15} style={{ color: '#666' }} />
                                     <span style={{ fontWeight: 400 }}>Image Download</span>
                                 </button>
+
+                                {/* Attached Files Download */}
+                                {product.attachedFiles && product.attachedFiles.length > 0 && product.attachedFiles.map((af: { name: string; url: string; fileType?: string }, idx: number) => (
+                                    <a
+                                        key={idx}
+                                        href={af.url}
+                                        download
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        style={{
+                                            display: 'flex', alignItems: 'center', gap: '6px',
+                                            color: '#666', fontSize: '14px', textDecoration: 'none',
+                                            background: 'none', border: 'none', cursor: 'pointer',
+                                        }}
+                                    >
+                                        {af.fileType === 'pdf'
+                                            ? <span style={{ fontSize: '15px' }}>📄</span>
+                                            : <FiDownload size={15} style={{ color: '#666' }} />
+                                        }
+                                        <span style={{ fontWeight: 400 }}>{af.name}</span>
+                                    </a>
+                                ))}
                             </div>
                         </div>
                     </div>
@@ -1154,12 +1176,12 @@ export default function ProductDetailsPage() {
                                                         {discountPercent}% Off
                                                     </span>
                                                 )}
-                                                {product.priceType === 'fixed' && (
+                                                {product.priceType !== 'none' && (
                                                     <span style={{
                                                         fontSize: '11px', color: '#666',
                                                         fontWeight: 500
                                                     }}>
-                                                        (price fixed)
+                                                        {product.priceType === 'fixed' ? '(price fixed)' : '(price negotiable)'}
                                                     </span>
                                                 )}
                                             </div>

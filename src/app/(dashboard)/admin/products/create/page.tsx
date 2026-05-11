@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { FiPlus, FiTrash2, FiArrowLeft, FiCheckCircle, FiAlertCircle, FiImage, FiTag, FiPackage } from 'react-icons/fi';
 import { useCreateProductMutation } from '@/redux/api/productApi';
 import { useGetCategoriesQuery } from '@/redux/api/categoryApi';
+import { SingleFileUploader } from '@/components/ui/ImageUploader';
 
 /* ─── Types ─── */
 type Variant = {
@@ -73,7 +74,7 @@ export default function CreateProductPage() {
 
     /* Form State */
     const [form, setForm] = useState({
-        name: '', description: '', tagline: '', priceType: 'negotiable',
+        name: '', description: '', tagline: '', priceType: 'none',
         price: '', originalPrice: '',
         thumbnail: '', images: '',
         category: '', status: 'active', visibility: 'visible', stock: '0',
@@ -85,6 +86,7 @@ export default function CreateProductPage() {
     const [sizes, setSizes] = useState<string[]>([]);
     const [variants, setVariants] = useState<Variant[]>([]);
     const [toast, setToast] = useState<{ type: 'success' | 'error'; msg: string } | null>(null);
+    const [attachedFiles, setAttachedFiles] = useState<{ name: string; url: string; fileType: 'image' | 'pdf' }[]>([]);
 
     const setF = (k: string, v: string) => setForm(p => ({ ...p, [k]: v }));
 
@@ -133,6 +135,7 @@ export default function CreateProductPage() {
             deliveryInfo: form.deliveryInfo || '',
             paymentInfo:  form.paymentInfo || '',
             termsInfo:    form.termsInfo || '',
+            attachedFiles: attachedFiles.filter(f => f.name && f.url),
             variants: variants.map(v => ({
                 color:         v.color,
                 colorHex:      v.colorHex,
@@ -211,6 +214,7 @@ export default function CreateProductPage() {
                                     <div style={col('0 0 160px')}>
                                         <label style={lbl}>Price Type</label>
                                         <select value={form.priceType} onChange={e => setF('priceType', e.target.value)} style={{ ...inp, cursor: 'pointer' }}>
+                                            <option value="none">None</option>
                                             <option value="negotiable">Negotiable</option>
                                             <option value="fixed">Fixed</option>
                                         </select>
@@ -337,7 +341,38 @@ export default function CreateProductPage() {
                             </button>
                         </Section>
 
-                        {/* 5. Content Tabs */}
+                        {/* 5. Attached Files */}
+                        <Section icon={<span style={{ fontSize: '14px' }}>📎</span>} title="Attached Files (Optional)">
+                            <p style={{ fontSize: '12px', color: '#6b7280', margin: '0 0 14px 0', lineHeight: 1.6 }}>
+                                Image বা PDF file attach করুন। Admin-এর দেওয়া নামটা product page-এ menu হিসেবে দেখাবে।
+                            </p>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                {attachedFiles.map((af, i) => (
+                                    <div key={i} style={{ border: '1px solid #e5e7eb', borderRadius: '10px', padding: '14px', background: '#fafafa', position: 'relative' }}>
+                                        <button type="button" onClick={() => setAttachedFiles(p => p.filter((_, j) => j !== i))} style={{ position: 'absolute', top: '10px', right: '10px', background: '#fef2f2', border: '1px solid #fecaca', color: '#dc2626', borderRadius: '6px', padding: '3px 8px', cursor: 'pointer', fontSize: '11px', fontWeight: 600 }}>× Remove</button>
+                                        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                                            <div style={{ flex: '1 1 180px' }}>
+                                                <label style={lbl}>File Name (menu-তে দেখাবে)</label>
+                                                <input value={af.name} onChange={e => setAttachedFiles(p => p.map((x, j) => j === i ? { ...x, name: e.target.value } : x))} placeholder="e.g. Technical Datasheet" style={inp} onFocus={e => e.target.style.borderColor = '#0B4222'} onBlur={e => e.target.style.borderColor = '#e5e7eb'} />
+                                            </div>
+                                            <div style={{ flex: '1 1 200px' }}>
+                                                <SingleFileUploader
+                                                    label="File (Image or PDF)"
+                                                    value={af.url}
+                                                    fileType={af.fileType}
+                                                    onChange={(url, type) => setAttachedFiles(p => p.map((x, j) => j === i ? { ...x, url, fileType: type } : x))}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                                <button type="button" onClick={() => setAttachedFiles(p => [...p, { name: '', url: '', fileType: 'image' }])} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '10px', background: '#fff', border: '1px dashed #d1d5db', color: '#6b7280', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: 500, width: '100%' }}>
+                                    + Add Attached File
+                                </button>
+                            </div>
+                        </Section>
+
+                        {/* 6. Content Tabs */}
                         <Section icon={<span style={{ fontSize: '14px' }}>📄</span>} title="Content Tabs (Optional)">
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                                 {[

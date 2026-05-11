@@ -8,7 +8,6 @@ export const uploadApi = baseApi.injectEndpoints({
                 url: '/upload/image',
                 method: 'POST',
                 body: formData,
-                // Don't set Content-Type — browser auto-sets multipart/form-data
                 formData: true,
             }),
         }),
@@ -22,10 +21,21 @@ export const uploadApi = baseApi.injectEndpoints({
                 formData: true,
             }),
         }),
+
+        // Upload single file (image or PDF) — POST /api/upload/file
+        uploadFile: builder.mutation<{ data: { url: string; type: 'image' | 'pdf' } }, FormData>({
+            query: (formData) => ({
+                url: '/upload/file',
+                method: 'POST',
+                body: formData,
+                formData: true,
+            }),
+        }),
     }),
 });
 
 export const {
     useUploadImageMutation,
     useUploadImagesMutation,
+    useUploadFileMutation,
 } = uploadApi;
