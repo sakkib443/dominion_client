@@ -1452,104 +1452,205 @@ export default function ProductDetailsPage() {
                 /* ═══ MOBILE RESPONSIVE ═══ */
                 @media (max-width: 767px) {
 
-                    /* Main flex → column */
-                    .pd-main-flex { flex-direction: column !important; }
-
-                    /* Left section → full width, wrap so inner cols reorder */
-                    .pd-left-section {
-                        flex: 0 0 100% !important; max-width: 100% !important;
-                        min-width: unset !important; height: auto !important;
-                        padding-right: 0 !important;
-                        flex-wrap: wrap !important; align-content: flex-start !important;
+                    /* ── Main wrapper: remove fixed height, go column ── */
+                    .pd-main-flex {
+                        flex-direction: column !important;
+                        height: auto !important;
+                        min-height: unset !important;
                     }
 
-                    /* ── Image wrapper → full width, ORDER 1 ── */
+                    /* ── Left section: full width, auto height, column layout ── */
+                    .pd-left-section {
+                        flex: 0 0 100% !important;
+                        max-width: 100% !important;
+                        min-width: unset !important;
+                        height: auto !important;
+                        padding-right: 0 !important;
+                        display: flex !important;
+                        flex-direction: column !important;
+                        overflow: visible !important;
+                    }
+
+                    /* Image area row inside left section — remove fixed height */
+                    .pd-left-section > div:first-child {
+                        height: auto !important;
+                        flex-direction: column !important;
+                        overflow: visible !important;
+                    }
+
+                    /* ── ORDER 1: Main image — full width square ── */
                     .pd-image-wrapper {
-                        width: 100% !important; flex: unset !important;
-                        order: 1 !important; padding: 4px !important;
+                        width: 100% !important;
+                        flex: unset !important;
+                        order: 1 !important;
+                        padding: 4px 0 !important;
                     }
                     .pd-image-wrapper > div {
-                        width: 100% !important; height: auto !important;
+                        width: 100% !important;
+                        height: auto !important;
                         aspect-ratio: 1 / 1 !important;
+                        max-height: unset !important;
                     }
 
-                    /* ── Thumbnail column → horizontal strip, ORDER 2 ── */
+                    /* ── ORDER 2: Thumbnail strip — horizontal scrollable ── */
                     .pd-thumb-col {
-                        width: 100% !important; order: 2 !important;
-                        flex-direction: row !important; flex-wrap: nowrap !important;
-                        overflow-x: auto !important; overflow-y: hidden !important;
-                        gap: 6px !important; padding: 6px 0 !important;
-                        margin-left: 0 !important; align-items: center !important;
+                        width: 100% !important;
+                        order: 2 !important;
+                        flex-direction: row !important;
+                        flex-wrap: nowrap !important;
+                        overflow-x: auto !important;
+                        overflow-y: hidden !important;
+                        gap: 6px !important;
+                        padding: 6px 4px !important;
+                        margin-left: 0 !important;
+                        align-items: center !important;
+                        -webkit-overflow-scrolling: touch !important;
                     }
+                    /* Hide "Image" label */
                     .pd-thumb-col > span { display: none !important; }
+                    /* Hide up/down arrow buttons */
                     .pd-thumb-col > div:last-child { display: none !important; }
+                    /* Inner scrollable container → horizontal row */
                     .pd-thumb-col > div:first-of-type {
-                        flex-direction: row !important; flex-wrap: nowrap !important;
-                        max-height: unset !important; overflow: visible !important; gap: 6px !important;
+                        flex-direction: row !important;
+                        flex-wrap: nowrap !important;
+                        max-height: unset !important;
+                        overflow: visible !important;
+                        gap: 6px !important;
                     }
-                    .pd-thumb-col button { width: 56px !important; height: 56px !important; }
+                    /* Thumbnail buttons — slightly smaller on mobile */
+                    .pd-thumb-col button {
+                        width: 60px !important;
+                        height: 60px !important;
+                        flex-shrink: 0 !important;
+                    }
 
-                    /* ── Size → horizontal row, ORDER 3 ── */
+                    /* ── ORDER 3: Size swatches — horizontal wrap row ── */
                     .pd-size-col {
-                        width: 100% !important; order: 3 !important;
-                        flex-direction: row !important; flex-wrap: wrap !important;
-                        align-items: center !important; gap: 8px !important; padding: 6px 0 !important;
+                        width: 100% !important;
+                        order: 3 !important;
+                        flex-direction: row !important;
+                        flex-wrap: wrap !important;
+                        align-items: center !important;
+                        gap: 8px !important;
+                        padding: 8px 0 !important;
                     }
+                    /* Inner swatch container → horizontal wrap */
                     .pd-size-col > div:first-of-type {
-                        flex-direction: row !important; flex-wrap: wrap !important;
-                        max-height: unset !important; overflow: visible !important; gap: 6px !important;
+                        flex-direction: row !important;
+                        flex-wrap: wrap !important;
+                        max-height: unset !important;
+                        overflow: visible !important;
+                        gap: 6px !important;
                     }
+                    /* Hide up/down arrows */
                     .pd-size-col > div:last-child { display: none !important; }
-                    .pd-size-col button { width: 40px !important; height: 40px !important; font-size: 11px !important; }
+                    .pd-size-col button {
+                        width: 42px !important;
+                        height: 42px !important;
+                        font-size: 11px !important;
+                    }
 
-                    /* ── Color → horizontal row, ORDER 4 ── */
+                    /* ── ORDER 4: Color swatches — horizontal wrap row ── */
                     .pd-color-col {
-                        width: 100% !important; order: 4 !important;
-                        flex-direction: row !important; flex-wrap: wrap !important;
-                        align-items: center !important; gap: 8px !important; padding: 6px 0 !important;
+                        width: 100% !important;
+                        order: 4 !important;
+                        flex-direction: row !important;
+                        flex-wrap: wrap !important;
+                        align-items: center !important;
+                        gap: 8px !important;
+                        padding: 8px 0 !important;
                     }
+                    /* Inner swatch container → horizontal wrap */
                     .pd-color-col > div:first-of-type {
-                        flex-direction: row !important; flex-wrap: wrap !important;
-                        max-height: unset !important; overflow: visible !important; gap: 6px !important;
+                        flex-direction: row !important;
+                        flex-wrap: wrap !important;
+                        max-height: unset !important;
+                        overflow: visible !important;
+                        gap: 6px !important;
                     }
+                    /* Hide up/down arrows */
                     .pd-color-col > div:last-child { display: none !important; }
-                    .pd-color-col button { width: 36px !important; height: 36px !important; }
-
-                    /* Right section → full width, auto height, LAST on mobile */
-                    .pd-right-section {
-                        flex: 0 0 100% !important; max-width: 100% !important;
-                        height: auto !important; border-left: none !important;
-                        border-top: 1px solid #e5e7eb !important; padding-left: 0 !important;
-                        order: 10 !important;
+                    .pd-color-col button {
+                        width: 38px !important;
+                        height: 38px !important;
                     }
-                    .pd-right-scroll { overflow-y: visible !important; flex: unset !important; padding: 8px 0 !important; }
+
+                    /* ── ORDER 5: Right section (price + details) — full width, auto height ── */
+                    .pd-right-section {
+                        flex: 0 0 100% !important;
+                        max-width: 100% !important;
+                        height: auto !important;
+                        min-height: unset !important;
+                        border-left: none !important;
+                        border-top: 1px solid #e5e7eb !important;
+                        padding-left: 0 !important;
+                        order: 5 !important;
+                        position: static !important;
+                        overflow: visible !important;
+                    }
+                    /* Remove fixed scroll on right panel content */
+                    .pd-right-scroll {
+                        overflow-y: visible !important;
+                        flex: unset !important;
+                        padding: 8px 0 !important;
+                        max-height: unset !important;
+                    }
+                    /* Disable sticky price header — just flow normally */
+                    .pd-right-section [style*="sticky"] {
+                        position: static !important;
+                    }
+                    /* Hide up/down scroll arrows */
                     .pd-scroll-arrow { display: none !important; }
 
-                    /* Action bar → full width, BEFORE description */
+                    /* ── ORDER 6: Action bar — ADD TO CART + BUY NOW side by side, INQUIRY full width ── */
                     .pd-action-bar {
-                        flex: 0 0 100% !important; max-width: 100% !important;
-                        flex-wrap: wrap !important; gap: 8px !important;
-                        height: auto !important; padding-right: 0 !important; margin-top: 16px !important;
+                        flex-wrap: wrap !important;
+                        gap: 8px !important;
+                        height: auto !important;
+                        padding-right: 0 !important;
+                        margin-top: 12px !important;
                         order: 6 !important;
                     }
-                    .pd-action-bar > div, .pd-action-bar > button {
-                        flex: 1 1 auto !important; min-width: 100px !important; height: 42px !important;
+                    /* ADD TO CART + BUY NOW → each 50% minus gap */
+                    .pd-action-bar > div {
+                        flex: 1 1 calc(50% - 4px) !important;
+                        min-width: 0 !important;
+                        height: 44px !important;
+                    }
+                    /* SEND INQUIRY → full width */
+                    .pd-action-bar > button {
+                        flex: 0 0 100% !important;
+                        height: 44px !important;
                     }
 
-                    /* Info bar → full width, BEFORE description */
+                    /* ── ORDER 7: Info bar (Delivery/Payment/Terms) ── */
                     .pd-info-bar {
-                        flex: 0 0 100% !important; max-width: 100% !important;
-                        height: auto !important; flex-wrap: wrap !important;
-                        margin-left: 0 !important; padding: 8px 0 0 0 !important; gap: 12px !important;
+                        height: auto !important;
+                        flex-wrap: wrap !important;
+                        padding: 10px 0 0 0 !important;
+                        gap: 12px !important;
+                        margin-left: 0 !important;
                         order: 7 !important;
                     }
 
-                    .pd-stats-row { gap: 12px !important; flex-wrap: wrap !important; }
-                    .pd-related-grid { grid-template-columns: repeat(2, 1fr) !important; }
+                    /* ── Stats row — tighter gap, wraps properly ── */
+                    .pd-stats-row {
+                        gap: 10px !important;
+                        flex-wrap: wrap !important;
+                        margin-top: 8px !important;
+                    }
+
+                    /* ── Related products — 2-column grid on mobile ── */
+                    .pd-related-grid {
+                        grid-template-columns: repeat(2, 1fr) !important;
+                    }
+
+                    /* ── Title font size — slightly smaller ── */
                     .pd-title { font-size: 16px !important; }
                     .pd-price { font-size: 17px !important; }
 
-                    /* Hide zoom modal sidebar thumbnails on mobile */
+                    /* ── Hide zoom modal sidebar thumbnails on mobile ── */
                     .pd-zoom-thumbs { display: none !important; }
                 }
             `}</style>
