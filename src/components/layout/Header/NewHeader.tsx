@@ -162,9 +162,9 @@ const NewHeader: React.FC = () => {
                 }}
             >
                 {/* Main Header */}
-                <div className="bg-[#0B4222]">
-                    <div className="container mx-auto px-4">
-                        <div className="flex items-center justify-between py-2 gap-3 lg:gap-5">
+                <div className="bg-[#0B4222] overflow-hidden">
+                    <div className="container mx-auto px-3 md:px-4">
+                        <div className="flex items-center justify-between py-2 gap-2 lg:gap-5">
 
                             {/* Mobile Menu Button */}
                             <button
@@ -234,7 +234,7 @@ const NewHeader: React.FC = () => {
 
                             {/* Company Logo */}
                             <Link href="/" className="flex items-center gap-2 shrink-0" onClick={handleGoHome}>
-                                <Image src="/logo.svg" alt="Logo" width={200} height={55} style={{ width: '200px', height: 'auto' }} />
+                                <Image src="/logo.svg" alt="Logo" width={200} height={55} className="w-[130px] md:w-[200px]" style={{ height: 'auto' }} />
                             </Link>
 
 
@@ -310,7 +310,7 @@ const NewHeader: React.FC = () => {
                             {/* Create Account */}
                             <Link href="/login" className="relative flex flex-col items-center gap-0.5 text-white hover:text-white/80 transition-colors shrink-0 px-2">
                                 <FiUser size={22} />
-                                <span className="text-[11px] leading-tight whitespace-nowrap uppercase font-bold">Create Account</span>
+                                <span className="hidden md:block text-[11px] leading-tight whitespace-nowrap uppercase font-bold">Create Account</span>
                             </Link>
 
 

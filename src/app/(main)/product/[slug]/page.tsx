@@ -1269,7 +1269,7 @@ export default function ProductDetailsPage() {
                                         </Link>
                                     )}
                                 </div>
-                                <div className="pd-related-grid grid grid-cols-4 gap-2 overflow-hidden">
+                                <div className="pd-related-grid grid grid-cols-2 md:grid-cols-4 gap-2 overflow-hidden w-full">
                                     {relatedProducts.slice(0, 4).map((item: any) => (
                                         <NewProductCard
                                             key={item._id}
