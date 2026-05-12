@@ -2001,7 +2001,7 @@ export default function ProductDetailsPage() {
                 <div
                     className="pd-mobile-info-popup"
                     style={{
-                        position: 'fixed', inset: 0, zIndex: 9997,
+                        position: 'fixed', inset: 0, zIndex: 10000,
                         flexDirection: 'column', justifyContent: 'flex-end',
                         background: 'rgba(0,0,0,0.55)',
                         display: 'none', // overridden to flex on mobile via CSS
