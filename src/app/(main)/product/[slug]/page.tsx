@@ -1080,7 +1080,7 @@ export default function ProductDetailsPage() {
                                         background: '#fff', overflowY: 'auto',
                                         padding: '16px 20px',
                                         animation: 'fadeIn 0.2s ease-out',
-                                    }} className="no-scrollbar">
+                                    }} className="no-scrollbar pd-desktop-info-panel">
                                         {/* Close Button */}
                                         <button
                                             onClick={() => setActiveInfoPanel(null)}
@@ -1641,9 +1641,9 @@ export default function ProductDetailsPage() {
                         margin-top: 8px !important;
                     }
 
-                    /* ── Related products — 2-column grid on mobile ── */
+                    /* ── Related products — 1-column on mobile ── */
                     .pd-related-grid {
-                        grid-template-columns: repeat(2, 1fr) !important;
+                        grid-template-columns: repeat(1, 1fr) !important;
                     }
 
                     /* ── Title font size — slightly smaller ── */
@@ -1652,6 +1652,10 @@ export default function ProductDetailsPage() {
 
                     /* ── Hide zoom modal sidebar thumbnails on mobile ── */
                     .pd-zoom-thumbs { display: none !important; }
+
+                    /* ── Info panel: hide desktop overlay, show mobile popup ── */
+                    .pd-desktop-info-panel { display: none !important; }
+                    .pd-mobile-info-popup { display: flex !important; }
                 }
             `}</style>
 
@@ -1989,6 +1993,80 @@ export default function ProductDetailsPage() {
                     totalPrice={discountedPrice * buyNowQty}
                     clearCartOnSuccess={false}
                 />
+            )}
+
+            {/* ── Mobile Info Bottom Sheet (Delivery / Payment / Terms) ── */}
+            {/* Desktop: hidden via CSS. Mobile: shown as bottom sheet popup. */}
+            {activeInfoPanel && (
+                <div
+                    className="pd-mobile-info-popup"
+                    style={{
+                        position: 'fixed', inset: 0, zIndex: 9997,
+                        flexDirection: 'column', justifyContent: 'flex-end',
+                        background: 'rgba(0,0,0,0.55)',
+                        display: 'none', // overridden to flex on mobile via CSS
+                    }}
+                    onClick={() => setActiveInfoPanel(null)}
+                >
+                    <div
+                        onClick={(e) => e.stopPropagation()}
+                        style={{
+                            background: '#fff',
+                            borderRadius: '20px 20px 0 0',
+                            padding: '12px 20px 28px 20px',
+                            maxHeight: '75vh',
+                            overflowY: 'auto',
+                            animation: 'mobileSheetUp 0.28s cubic-bezier(0.32,0.72,0,1)',
+                        }}
+                        className="no-scrollbar"
+                    >
+                        {/* Handle bar */}
+                        <div style={{ width: '40px', height: '4px', background: '#e0e0e0', borderRadius: '2px', margin: '0 auto 16px auto' }} />
+
+                        {/* Header */}
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+                            <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#1a1a1a', margin: 0 }}>
+                                {activeInfoPanel === 'delivery' ? 'Delivery Information'
+                                    : activeInfoPanel === 'payment' ? 'Payment Methods'
+                                    : 'Terms & Conditions'}
+                            </h3>
+                            <button
+                                onClick={() => setActiveInfoPanel(null)}
+                                style={{
+                                    width: '32px', height: '32px', borderRadius: '50%',
+                                    background: '#f3f4f6', border: 'none', cursor: 'pointer',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    color: '#333', flexShrink: 0,
+                                }}
+                            >
+                                <FiX size={16} />
+                            </button>
+                        </div>
+
+                        {/* Content */}
+                        {activeInfoPanel === 'delivery' && (
+                            product.deliveryInfo
+                                ? <div style={{ fontSize: '13px', color: '#444', lineHeight: 1.75 }} dangerouslySetInnerHTML={{ __html: product.deliveryInfo }} />
+                                : <p style={{ fontSize: '13px', color: '#888' }}>No delivery information available.</p>
+                        )}
+                        {activeInfoPanel === 'payment' && (
+                            product.paymentInfo
+                                ? <div style={{ fontSize: '13px', color: '#444', lineHeight: 1.75 }} dangerouslySetInnerHTML={{ __html: product.paymentInfo }} />
+                                : <p style={{ fontSize: '13px', color: '#888' }}>No payment information available.</p>
+                        )}
+                        {activeInfoPanel === 'terms' && (
+                            product.termsInfo
+                                ? <div style={{ fontSize: '13px', color: '#444', lineHeight: 1.75 }} dangerouslySetInnerHTML={{ __html: product.termsInfo }} />
+                                : <p style={{ fontSize: '13px', color: '#888' }}>No terms &amp; conditions available.</p>
+                        )}
+                    </div>
+                    <style>{`
+                        @keyframes mobileSheetUp {
+                            from { transform: translateY(100%); }
+                            to   { transform: translateY(0); }
+                        }
+                    `}</style>
+                </div>
             )}
         </>
     );
