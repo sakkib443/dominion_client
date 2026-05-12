@@ -1269,7 +1269,7 @@ export default function ProductDetailsPage() {
                                         </Link>
                                     )}
                                 </div>
-                                <div className="pd-related-grid grid grid-cols-1 md:grid-cols-4 gap-2 overflow-hidden w-full">
+                                <div className="pd-related-grid grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-2 w-full">
                                     {relatedProducts.slice(0, 4).map((item: any) => (
                                         <NewProductCard
                                             key={item._id}
@@ -1639,11 +1639,6 @@ export default function ProductDetailsPage() {
                         gap: 10px !important;
                         flex-wrap: wrap !important;
                         margin-top: 8px !important;
-                    }
-
-                    /* ── Related products — 1-column on mobile ── */
-                    .pd-related-grid {
-                        grid-template-columns: repeat(1, 1fr) !important;
                     }
 
                     /* ── Title font size — slightly smaller ── */
