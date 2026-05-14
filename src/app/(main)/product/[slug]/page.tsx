@@ -1154,7 +1154,7 @@ export default function ProductDetailsPage() {
                                         paddingRight: '24px',
                                     }}>
                                         {/* Price Section */}
-                                        <div style={{ marginBottom: '10px' }}>
+                                        <div className="pd-price-wrapper" style={{ marginBottom: '10px' }}>
                                             <div className="pd-price-row" style={{ display: 'flex', alignItems: 'baseline', gap: '10px', flexWrap: 'wrap' }}>
                                                 <span style={{
                                                     fontSize: '20px', fontWeight: 800, color: '#1a1a1a'
@@ -1647,8 +1647,12 @@ export default function ProductDetailsPage() {
 
                     /* ── Price row: tighten gap so negotiable/fixed label sits close ── */
                     .pd-price-row {
-                        gap: 6px 8px !important;
-                        row-gap: 2px !important;
+                        column-gap: 8px !important;
+                        row-gap: 0px !important;
+                        align-items: center !important;
+                    }
+                    .pd-price-wrapper {
+                        margin-bottom: 4px !important;
                     }
 
                     /* ── Hide zoom modal sidebar thumbnails on mobile ── */
