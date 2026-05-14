@@ -1655,7 +1655,7 @@ export default function ProductDetailsPage() {
                     .pd-price-type {
                         width: 100% !important;
                         display: block !important;
-                        margin-top: 1px !important;
+                        margin-top: -5px !important;
                         line-height: 1 !important;
                     }
                     .pd-price-wrapper {
