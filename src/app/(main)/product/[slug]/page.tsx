@@ -1659,7 +1659,7 @@ export default function ProductDetailsPage() {
                         line-height: 1 !important;
                     }
                     .pd-price-wrapper {
-                        margin-bottom: 4px !important;
+                        margin-bottom: 10px !important;
                     }
 
                     /* ── Hide zoom modal sidebar thumbnails on mobile ── */
