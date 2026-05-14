@@ -1177,7 +1177,7 @@ export default function ProductDetailsPage() {
                                                     </span>
                                                 )}
                                                 {product.priceType !== 'none' && (
-                                                    <span style={{
+                                                    <span className="pd-price-type" style={{
                                                         fontSize: '11px', color: '#666',
                                                         fontWeight: 500
                                                     }}>
@@ -1649,7 +1649,14 @@ export default function ProductDetailsPage() {
                     .pd-price-row {
                         column-gap: 8px !important;
                         row-gap: 0px !important;
-                        align-items: center !important;
+                        align-items: baseline !important;
+                    }
+                    /* Force price type label onto its own line, right below price */
+                    .pd-price-type {
+                        width: 100% !important;
+                        display: block !important;
+                        margin-top: 1px !important;
+                        line-height: 1 !important;
                     }
                     .pd-price-wrapper {
                         margin-bottom: 4px !important;
