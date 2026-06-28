@@ -162,7 +162,7 @@ const NewHeader: React.FC = () => {
                 }}
             >
                 {/* Main Header */}
-                <div className="bg-[#0B4222] overflow-hidden">
+                <div className="bg-[#0B4222]">
                     <div className="container mx-auto px-3 md:px-4">
                         <div className="flex items-center justify-between py-2 gap-2 lg:gap-5">
 
